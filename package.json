@@ -1,4 +1,6 @@
 {
+  "name": "RedditLattice",
+  "description": "A reddit viewer for image based subreddits. Lays out the images in a tight lattice.",
   "private": true,
   "scripts": {
     "build": "nuxt build",

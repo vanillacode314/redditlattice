@@ -21,6 +21,7 @@ export default defineNuxtConfig({
           rel: "icon",
           href: "/favicon.png",
         },
+        { rel: "manifest", href: "/manifest.json" },
       ],
     },
   },
