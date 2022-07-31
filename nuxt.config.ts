@@ -14,4 +14,14 @@ export default defineNuxtConfig({
       "process.env.DEBUG": false,
     },
   },
+  app: {
+    head: {
+      link: [
+        {
+          rel: "icon",
+          href: "/favicon.png",
+        },
+      ],
+    },
+  },
 });
