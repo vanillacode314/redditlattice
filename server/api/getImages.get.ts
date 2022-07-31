@@ -7,11 +7,16 @@ function getKeys(obj: Object, keys: string[]): Object {
 }
 
 export default defineEventHandler(async (event) => {
-  let { subreddit, sort, after } = useQuery(event);
+  let { subreddit, sort, after, q } = useQuery(event);
   if (!sort) sort = "new";
   if (!after) after = "";
 
-  const url = `https://www.reddit.com/r/${subreddit}/${sort}.json?after=${after}`;
+  let url: string;
+  if (q) {
+    url = `https://www.reddit.com/r/${subreddit}/search.json?q=${q}&sort=${sort}&after=${after}`;
+  } else {
+    url = `https://www.reddit.com/r/${subreddit}/${sort}.json?after=${after}`;
+  }
   const res = await fetch(url);
 
   if (res.ok) {

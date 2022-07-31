@@ -3,7 +3,12 @@ const subreddit = ref<string>(null);
 
 async function onSubmit() {
   if (!subreddit.value) return;
-  await navigateTo(`/r/${subreddit.value}`);
+  if (subreddit.value.includes("?")) {
+    const [sr, q] = subreddit.value.split("?");
+    await navigateTo(`/r/${sr}?q=${q}`);
+  } else {
+    await navigateTo(`/r/${subreddit.value}`);
+  }
 }
 </script>
 

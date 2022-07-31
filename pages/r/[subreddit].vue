@@ -7,19 +7,23 @@ export interface Post {
 
 const route = useRoute();
 useHead({
-  title: `r/${route.params.subreddit} - RedditLattice`,
+  titleTemplate: () =>
+    route.query.q
+      ? `${route.query.q} - r/${route.params.subreddit} - RedditLattice`
+      : `r/${route.params.subreddit} - RedditLattice`,
 });
 
+console.log(route.query.q);
 let images = ref<Post[]>([]);
 
 async function onInfinite($state) {
   const lastImage = images.value.at(-1);
-  let url: string;
-  if (lastImage) {
-    url = `/api/getImages?subreddit=${route.params.subreddit}&after=${lastImage.name}`;
-  } else {
-    url = `/api/getImages?subreddit=${route.params.subreddit}`;
-  }
+  const searchParams = new URLSearchParams({
+    subreddit: route.params.subreddit as string,
+  });
+  if (route.query.q) searchParams.append("q", route.query.q as string);
+  if (lastImage) searchParams.append("after", lastImage.name);
+  const url = `/api/getImages?${searchParams.toString()}`;
   try {
     const newImages = await $fetch<Post[]>(url);
     images.value = [...images.value, ...newImages];
