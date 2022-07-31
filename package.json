@@ -7,6 +7,17 @@
     "preview": "nuxt preview"
   },
   "devDependencies": {
+    "@vueuse/core": "^9.0.2",
+    "@vueuse/nuxt": "^9.0.2",
     "nuxt": "3.0.0-rc.6"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.3.1",
+    "@yeger/vue-masonry-wall": "^3.0.43",
+    "mdi": "^2.2.43",
+    "pinia": "^2.0.17",
+    "sass": "^1.54.0",
+    "v3-infinite-loading": "^1.2.1",
+    "vuetify": "3.0.0-beta.6"
   }
 }
