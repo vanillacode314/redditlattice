@@ -8,14 +8,23 @@ function getKeys(obj: Object, keys: string[]): Object {
 
 export default defineEventHandler(async (event) => {
   let { subreddit, sort, after, q } = useQuery(event);
-  if (!sort) sort = "new";
-  if (!after) after = "";
+  if (!sort) sort = "top";
 
   let url: string;
+  const searchParams = new URLSearchParams({
+    nsfw: "1",
+    include_over_18: "on",
+    restrict_sr: "true",
+    t: "all",
+  });
   if (q) {
-    url = `https://www.reddit.com/r/${subreddit}/search.json?q=${q}&sort=${sort}&after=${after}`;
+    searchParams.append("q", q);
+    searchParams.append("sort", sort);
+    if (after) searchParams.append("after", after);
+    url = `https://www.reddit.com/r/${subreddit}/search.json?${searchParams.toString()}`;
   } else {
-    url = `https://www.reddit.com/r/${subreddit}/${sort}.json?after=${after}`;
+    if (after) searchParams.append("after", after);
+    url = `https://www.reddit.com/r/${subreddit}/${sort}.json?${searchParams.toString()}`;
   }
   const res = await fetch(url);
 
