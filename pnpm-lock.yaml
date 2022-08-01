@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@appnest/masonry-layout': ^2.0.8
   '@pinia/nuxt': ^0.3.1
   '@vueuse/core': ^9.0.2
   '@vueuse/nuxt': ^9.0.2
@@ -13,6 +14,7 @@ specifiers:
   vuetify: 3.0.0-beta.6
 
 dependencies:
+  '@appnest/masonry-layout': 2.0.8
   '@pinia/nuxt': 0.3.1
   '@yeger/vue-masonry-wall': 3.0.43
   mdi: 2.2.43
@@ -34,6 +36,10 @@ packages:
     dependencies:
       '@jridgewell/gen-mapping': 0.1.1
       '@jridgewell/trace-mapping': 0.3.14
+
+  /@appnest/masonry-layout/2.0.8:
+    resolution: {integrity: sha512-kpUh19QrwpADbyRQdXqG3MPMYSdtLmaq45v4JSbmjGa+VU4ZMC11w7kZx18iSzPeQHAdBF+p4CVsCTgtZNll/A==}
+    dev: false
 
   /@babel/code-frame/7.18.6:
     resolution: {integrity: sha512-TDCmlK5eOvH+eH7cdAFlNXeVJqWIQ7gW9tY1GJIpUtFb6CmjVyq2VM3u71bOyR8CRihcCgMUYoDNyLXao3+70Q==}

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import "@appnest/masonry-layout";
 export interface Post {
   name: string;
   url: string;
@@ -13,8 +14,8 @@ useHead({
       : `r/${route.params.subreddit} - RedditLattice`,
 });
 
-console.log(route.query.q);
-let images = ref<Post[]>([]);
+const images = ref<Post[]>([]);
+const masonry = ref(null);
 
 async function onInfinite($state) {
   const lastImage = images.value.at(-1);
@@ -27,7 +28,10 @@ async function onInfinite($state) {
   try {
     const newImages = await $fetch<Post[]>(url);
     images.value = [...images.value, ...newImages];
-    $state.loaded();
+    requestAnimationFrame(() => {
+      masonry.value.layout();
+      $state.loaded();
+    });
   } catch (e) {
     $state.error();
   }
@@ -36,15 +40,13 @@ async function onInfinite($state) {
 
 <template>
   <div>
-    <masonry-wall :items="images" :column-width="300" :gap="0">
-      <template #default="{ item: image }">
-        <ImageCard :image="image" />
-      </template>
-    </masonry-wall>
+    <masonry-layout gap="0" ref="masonry">
+      <ImageCard :image="image" v-for="image of images" />
+    </masonry-layout>
     <infinite-loading
       @infinite="onInfinite"
+      :identifier="`${route.query.q}-${route.params.subreddit}`"
       :distance="100"
-      :identifier="images"
     >
       <template #spinner>
         <div class="d-flex pa-6 justify-center">
@@ -61,10 +63,6 @@ async function onInfinite($state) {
 </template>
 
 <style scoped>
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-}
 img {
   display: block;
   width: 100%;
