@@ -27,6 +27,18 @@ async function onInfinite($state) {
   const url = `/api/getImages?${searchParams.toString()}`;
   try {
     const newImages = await $fetch<Post[]>(url);
+    if (newImages.error) {
+      requestAnimationFrame(() => {
+        $state.error();
+      });
+      return;
+    }
+    if (newImages.length === 0) {
+      requestAnimationFrame(() => {
+        $state.completed();
+      });
+      return;
+    }
     images.value = [...images.value, ...newImages];
     requestAnimationFrame(() => {
       $state.loaded();

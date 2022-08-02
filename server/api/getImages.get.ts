@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     if (after) searchParams.append("after", after);
     url = `https://www.reddit.com/r/${subreddit}/${sort}.json?${searchParams.toString()}`;
   }
-  const res = await fetch(url);
+  const res = await fetch(url, { redirect: "error" });
 
   if (res.ok) {
     const { data } = await res.json();
@@ -58,5 +58,9 @@ export default defineEventHandler(async (event) => {
       getKeys(c, ["name", "url", "title", "", "thumbnail"])
     );
     return items;
+  } else {
+    return {
+      error: res.statusText,
+    };
   }
 });
