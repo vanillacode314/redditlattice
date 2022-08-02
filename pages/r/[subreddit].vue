@@ -29,7 +29,6 @@ async function onInfinite($state) {
     const newImages = await $fetch<Post[]>(url);
     images.value = [...images.value, ...newImages];
     requestAnimationFrame(() => {
-      masonry.value.layout();
       $state.loaded();
     });
   } catch (e) {
@@ -41,7 +40,11 @@ async function onInfinite($state) {
 <template>
   <div>
     <masonry-layout gap="0" ref="masonry">
-      <ImageCard :image="image" v-for="image of images" />
+      <ImageCard
+        :image="image"
+        v-for="image of images"
+        @load="masonry.scheduleLayout()"
+      />
     </masonry-layout>
     <infinite-loading
       @infinite="onInfinite"
