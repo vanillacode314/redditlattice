@@ -44,6 +44,8 @@ function setSearch(search: string) {
       style="gap: 1rem"
     >
       <v-text-field
+        hint="subreddit?query (query is optional)"
+        prefix="/r/"
         v-model="query"
         label="Subreddit"
         required

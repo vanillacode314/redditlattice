@@ -10,6 +10,7 @@ const { drawer } = storeToRefs(store);
       <v-list-item
         title="RedditLattice"
         subtitle="Made by VanillaCode"
+        href="https://vanillacode.netlify.app/"
       ></v-list-item>
     </v-list>
     <v-divider></v-divider>

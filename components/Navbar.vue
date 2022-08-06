@@ -45,8 +45,12 @@ onUnmounted(() => {
         <template v-slot:prepend>
           <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
         </template>
-
         <v-app-bar-title>RedditLattice</v-app-bar-title>
+
+        <v-spacer></v-spacer>
+        <v-btn v-if="$route.path.startsWith('/r/')" icon>
+          <v-icon>mdi-magnify</v-icon>
+        </v-btn>
       </v-app-bar>
     </div>
   </Transition>
