@@ -26,38 +26,47 @@ useHead({
   ],
 });
 
-onMounted(() => {
-  let _startY;
+watch(
+  loading,
+  () => {
+    if (loading.value) return;
+    requestAnimationFrame(() => {
+      let _startY;
 
-  main.value.addEventListener(
-    "touchstart",
-    (e) => {
-      _startY = e.touches[0].pageY;
-    },
-    { passive: true }
-  );
+      main.value.addEventListener(
+        "touchstart",
+        (e) => {
+          _startY = e.touches[0].pageY;
+        },
+        { passive: true }
+      );
 
-  main.value.addEventListener(
-    "touchmove",
-    (e) => {
-      const y = e.touches[0].pageY;
-      // Activate custom pull-to-refresh effects when at the top of the container
-      // and user is scrolling up.
-      if (
-        document.scrollingElement.scrollTop === 0 &&
-        y > _startY &&
-        !main.value.classList.contains("refreshing")
-      ) {
-        // refresh inbox.
-        refreshing.value = true;
-        if (route.path === "/") {
-          refreshing.value = false;
-        }
-      }
-    },
-    { passive: true }
-  );
-});
+      main.value.addEventListener(
+        "touchmove",
+        (e) => {
+          const y = e.touches[0].pageY;
+          // Activate custom pull-to-refresh effects when at the top of the container
+          // and user is scrolling up.
+          if (
+            document.scrollingElement.scrollTop === 0 &&
+            y > _startY &&
+            !main.value.classList.contains("refreshing")
+          ) {
+            // refresh inbox.
+            refreshing.value = true;
+            if (route.path === "/") {
+              setTimeout(() => {
+                refreshing.value = false;
+              }, 800);
+            }
+          }
+        },
+        { passive: true }
+      );
+    });
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -75,7 +84,7 @@ onMounted(() => {
           <NuxtPage />
           <div class="overlay"></div>
           <transition name="slide-fade">
-            <div class="refresher">
+            <div class="refresher" v-if="refreshing">
               <v-btn variant="flat" icon="mdi-refresh" color="primary"></v-btn>
             </div>
           </transition>
@@ -96,10 +105,10 @@ html {
 <style scoped lang="scss">
 @keyframes spin {
   from {
-    transform: translateX(-50%) rotate(0deg);
+    transform: translateY(0%) translateX(-50%) rotate(0deg);
   }
   to {
-    transform: translateX(-50%) rotate(360deg);
+    transform: translateY(0%) translateX(-50%) rotate(360deg);
   }
 }
 .main {
@@ -117,21 +126,28 @@ html {
       backdrop-filter: blur(1px);
       inset: 0;
     }
-    .refresher {
-      transform: translateX(-50%);
-      opacity: 1;
-      animation: spin 1s ease infinite;
-      animation-delay: 0.1s;
-    }
   }
   .refresher {
-    transition: opacity 0.3s ease-out, transform 0.1s ease-out;
-    opacity: 0;
-    z-index: 10;
-    position: absolute;
-    top: 1rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(-100%);
+    animation: spin 1s infinite;
   }
+}
+.refresher {
+  z-index: 10;
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(0%);
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.2s ease;
+  animation: none !important;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(-50%) translateY(-100%);
+  opacity: 0;
 }
 </style>

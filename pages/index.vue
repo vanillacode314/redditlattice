@@ -43,7 +43,6 @@ function setSearch(search: string) {
 onMounted(() => {
   const listItems = document.querySelectorAll(".v-list-item");
   for (const item of listItems) {
-    console.log(item);
     item.addEventListener("focus", (event) => {
       event.preventDefault();
       // @ts-ignore
