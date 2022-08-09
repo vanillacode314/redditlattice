@@ -60,23 +60,17 @@ async function onInfinite($state) {
     const newImages = await $fetch<Post[]>(url);
     if (newImages.error) {
       $state.error();
-      requestAnimationFrame(() => {
-        refreshing.value = false;
-      });
+      refreshing.value = false;
       return;
     }
     if (newImages.length === 0) {
       $state.completed();
-      requestAnimationFrame(() => {
-        refreshing.value = false;
-      });
+      refreshing.value = false;
       return;
     }
     images.value = [...images.value, ...newImages];
     $state.loaded();
-    requestAnimationFrame(() => {
-      refreshing.value = false;
-    });
+    refreshing.value = false;
   } catch (e) {
     $state.error();
     refreshing.value = false;
@@ -92,6 +86,7 @@ watch(refreshing, () => {
   images.value = [];
   id.value = !id.value;
 });
+
 onMounted(() => {
   images.value = [];
 });

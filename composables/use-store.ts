@@ -8,6 +8,7 @@ export enum SortType {
 
 export default defineStore("main", () => {
   const drawer = ref<boolean>(false);
+  const navVisible = ref<boolean>(true);
   const refreshing = ref<boolean>(false);
   const subreddits = useLocalStorage<string[]>("subreddits", []);
   const searches = useLocalStorage<string[]>("searches", []);
@@ -25,5 +26,13 @@ export default defineStore("main", () => {
     searches.value = [...new Set(searches.value)].sort();
   }
 
-  return { drawer, subreddits, searches, addQuery, sort, refreshing };
+  return {
+    drawer,
+    subreddits,
+    searches,
+    addQuery,
+    sort,
+    refreshing,
+    navVisible,
+  };
 });

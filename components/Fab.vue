@@ -17,7 +17,7 @@ const hidden = ref<boolean>(false);
 let last_known_scroll_position = 0;
 let ticking = false;
 const threshold = 50; // in pixels
-const duration = 100;
+const transitionDuration = 100;
 
 function onBeforeEnter(el) {
   const index = Number(el.dataset.index);
@@ -32,8 +32,8 @@ function onEnter(el: HTMLElement, done) {
     { transform: "translateY(0rem)", opacity: 1 },
   ];
   const anim = el.animate(fadeUp, {
-    delay: (props.actions.length - index - 1) * duration,
-    duration: duration,
+    delay: (props.actions.length - index - 1) * transitionDuration,
+    duration: transitionDuration,
     easing: "ease",
     fill: "forwards",
   });
@@ -47,8 +47,8 @@ function onLeave(el: HTMLElement, done) {
     { transform: `translateY(${index + 1}rem)`, opacity: 0 },
   ];
   const anim = el.animate(fadeDown, {
-    delay: index * duration,
-    duration: duration,
+    delay: index * transitionDuration,
+    duration: transitionDuration,
     easing: "ease",
     fill: "forwards",
   });
@@ -93,45 +93,47 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="wrapper" v-if="!hidden">
-    <div class="actions">
-      <TransitionGroup
-        :css="false"
-        @before-enter="onBeforeEnter"
-        @enter="onEnter"
-        @leave="onLeave"
-      >
-        <span
-          :data-index="index"
-          v-for="(action, index) in selected ? actions : []"
-          :key="action.id"
+  <transition name="fade">
+    <div class="wrapper" v-if="!hidden">
+      <div class="actions">
+        <TransitionGroup
+          :css="false"
+          @before-enter="onBeforeEnter"
+          @enter="onEnter"
+          @leave="onLeave"
         >
+          <span
+            :data-index="index"
+            v-for="(action, index) in selected ? actions : []"
+            :key="action.id"
+          >
+            <v-btn
+              :icon="action.icon"
+              v-if="selected"
+              :color="active === action.id ? 'primary' : ''"
+              @click="
+                () => {
+                  action.callback();
+                  close();
+                }
+              "
+            />
+          </span>
+        </TransitionGroup>
+      </div>
+      <div class="fab" :class="{ active: selected }">
+        <slot>
           <v-btn
-            :icon="action.icon"
-            v-if="selected"
-            :color="active === action.id ? 'primary' : ''"
-            @click="
-              () => {
-                action.callback();
-                close();
-              }
-            "
-          />
-        </span>
-      </TransitionGroup>
+            size="large"
+            @click="toggleActive()"
+            :variant="selected ? 'flat' : 'elevated'"
+            :icon="selected ? 'mdi-close' : icon"
+          >
+          </v-btn>
+        </slot>
+      </div>
     </div>
-    <div class="fab" :class="{ active: selected }">
-      <slot>
-        <v-btn
-          size="large"
-          @click="toggleActive()"
-          :variant="selected ? 'flat' : 'elevated'"
-          :icon="selected ? 'mdi-close' : icon"
-        >
-        </v-btn>
-      </slot>
-    </div>
-  </div>
+  </transition>
 </template>
 
 <style scoped>
@@ -140,26 +142,29 @@ onUnmounted(() => {
   bottom: 1rem;
   right: 1rem;
 }
+
 .actions {
   padding: 0.5rem 0;
   display: grid;
   justify-content: center;
   gap: 0.5rem;
 }
+
 .fab {
   transition: transform 0.1s ease-in;
 }
+
 .fab.active {
   transform: rotate(90deg);
 }
+
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease-out, transform 0.3s ease-out;
+  transition: transform 0.2s ease-out;
 }
 
 .fade-enter-from,
 .fade-leave-to {
-  opacity: 0;
-  transform: translateY(1rem);
+  transform: translateX(100%) !important;
 }
 </style>

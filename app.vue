@@ -5,13 +5,15 @@ const route = useRoute();
 const router = useRouter();
 const loading = ref<boolean>(false);
 const store = useStore();
-const { refreshing } = storeToRefs(store);
+const { refreshing, navVisible } = storeToRefs(store);
 router.beforeEach(() => {
   loading.value = true;
 });
 router.afterEach(() => {
   loading.value = false;
 });
+
+let showRefresh = ref<boolean>(false);
 
 const main = ref<HTMLElement>();
 
@@ -26,17 +28,35 @@ useHead({
   ],
 });
 
+watch(refreshing, () => {
+  if (refreshing.value) return;
+  showRefresh.value = false;
+});
 watch(
   loading,
   () => {
     if (loading.value) return;
     requestAnimationFrame(() => {
-      let _startY;
+      let _startY: number;
+      let doRefresh: boolean = false;
 
       main.value.addEventListener(
         "touchstart",
         (e) => {
           _startY = e.touches[0].pageY;
+        },
+        { passive: true }
+      );
+
+      main.value.addEventListener(
+        "touchend",
+        () => {
+          if (!doRefresh) return;
+          doRefresh = false;
+          refreshing.value = true;
+          if (route.path === "/") {
+            refreshing.value = false;
+          }
         },
         { passive: true }
       );
@@ -52,13 +72,13 @@ watch(
             y > _startY &&
             !main.value.classList.contains("refreshing")
           ) {
+            if (!navVisible.value) return;
             // refresh inbox.
-            refreshing.value = true;
-            if (route.path === "/") {
-              setTimeout(() => {
-                refreshing.value = false;
-              }, 800);
-            }
+            showRefresh.value = true;
+            doRefresh = true;
+          } else {
+            showRefresh.value = false;
+            doRefresh = false;
           }
         },
         { passive: true }
@@ -82,9 +102,9 @@ watch(
       <template v-else>
         <div class="main" :class="{ refreshing: refreshing }" ref="main">
           <NuxtPage />
-          <div class="overlay"></div>
+          <!-- <div class="overlay"></div> -->
           <transition name="slide-fade">
-            <div class="refresher" v-if="refreshing">
+            <div class="refresher" v-if="showRefresh">
               <v-btn variant="flat" icon="mdi-refresh" color="primary"></v-btn>
             </div>
           </transition>
@@ -126,9 +146,9 @@ html {
       backdrop-filter: blur(1px);
       inset: 0;
     }
-  }
-  .refresher {
-    animation: spin 1s infinite;
+    .refresher {
+      animation: spin 1s infinite;
+    }
   }
 }
 .refresher {
@@ -139,15 +159,18 @@ html {
   transform: translateX(-50%) translateY(0%);
 }
 
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: all 0.2s ease;
+.slide-fade-enter-active {
+  transition: all 0.4s ease-out;
   animation: none !important;
 }
 
+.slide-fade-leave-active {
+  transition: all 0.2s ease-in;
+  animation: none !important;
+}
 .slide-fade-enter-from,
 .slide-fade-leave-to {
   transform: translateX(-50%) translateY(-100%);
-  opacity: 0;
+  /* opacity: 0; */
 }
 </style>

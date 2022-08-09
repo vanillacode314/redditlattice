@@ -2,10 +2,9 @@
 import { storeToRefs } from "pinia";
 
 const store = useStore();
-const { drawer } = storeToRefs(store);
+const { navVisible, drawer } = storeToRefs(store);
 
 const isMobile = useMediaQuery("(max-width: 720px)");
-const hidden = ref<boolean>(false);
 
 let last_known_scroll_position = 0;
 let ticking = false;
@@ -14,14 +13,19 @@ const threshold = 50; // in pixels
 const onScroll = () => {
   const dy = window.scrollY - last_known_scroll_position;
   last_known_scroll_position = window.scrollY;
+  const reached_top = window.scrollY < 1;
 
   if (!ticking) {
-    window.requestAnimationFrame(function () {
-      if (Math.abs(dy) > threshold) {
+    window.requestAnimationFrame(() => {
+      if (reached_top) {
+        if (dy < 0) {
+          navVisible.value = true;
+        }
+      } else if (Math.abs(dy) > threshold) {
         if (dy > 0) {
-          hidden.value = true;
+          navVisible.value = false;
         } else {
-          hidden.value = false;
+          navVisible.value = true;
         }
       }
       ticking = false;
@@ -39,31 +43,34 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Transition name="fade">
-    <div v-if="!hidden" style="max-height: 10000px">
-      <v-app-bar :density="isMobile ? 'default' : 'compact'" app flat>
-        <template v-slot:prepend>
-          <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-        </template>
-        <v-app-bar-title>RedditLattice</v-app-bar-title>
+  <Transition name="slide">
+    <v-app-bar
+      v-if="navVisible"
+      :density="isMobile ? 'default' : 'compact'"
+      app
+      flat
+    >
+      <template v-slot:prepend>
+        <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+      </template>
+      <v-app-bar-title>RedditLattice</v-app-bar-title>
 
-        <v-spacer></v-spacer>
-        <v-btn v-if="$route.path.startsWith('/r/')" icon>
-          <v-icon>mdi-magnify</v-icon>
-        </v-btn>
-      </v-app-bar>
-    </div>
+      <v-spacer></v-spacer>
+      <v-btn v-if="$route.path.startsWith('/r/')" icon>
+        <v-icon>mdi-magnify</v-icon>
+      </v-btn>
+    </v-app-bar>
   </Transition>
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s cubic-bezier(0.86, 0, 0.07, 1);
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateY(-100%) !important;
 }
 </style>
