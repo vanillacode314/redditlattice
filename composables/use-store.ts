@@ -1,9 +1,16 @@
 import { defineStore } from "pinia";
 
+export enum SortType {
+  Hot = "hot",
+  New = "new",
+  Top = "top",
+}
+
 export default defineStore("main", () => {
   const drawer = ref<boolean>(false);
   const subreddits = useLocalStorage<string[]>("subreddits", []);
   const searches = useLocalStorage<string[]>("searches", []);
+  const sort = useLocalStorage<SortType>("sort", SortType.Top);
 
   function addQuery(query: string) {
     if (query.includes("?")) {
@@ -17,5 +24,5 @@ export default defineStore("main", () => {
     searches.value = [...new Set(searches.value)].sort();
   }
 
-  return { drawer, subreddits, searches, addQuery };
+  return { drawer, subreddits, searches, addQuery, sort };
 });

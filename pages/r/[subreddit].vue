@@ -1,15 +1,39 @@
 <script setup lang="ts">
-import "@appnest/masonry-layout";
-enum SortType {
-  Hot = "hot",
-  New = "new",
-  Top = "top",
-}
 export interface Post {
   name: string;
   url: string;
   title: string;
 }
+import { storeToRefs } from "pinia";
+import { Action } from "~~/components/Fab.vue";
+import "@appnest/masonry-layout";
+import { SortType } from "~~/composables/use-store";
+
+const store = useStore();
+const { sort } = storeToRefs(store);
+const fabActions = ref<Action[]>([
+  {
+    id: SortType.Top,
+    icon: "mdi-arrow-up-bold",
+    callback() {
+      sort.value = SortType.Top;
+    },
+  },
+  {
+    id: SortType.Hot,
+    icon: "mdi-fire",
+    callback() {
+      sort.value = SortType.Hot;
+    },
+  },
+  {
+    id: SortType.New,
+    icon: "mdi-new-box",
+    callback() {
+      sort.value = SortType.New;
+    },
+  },
+]);
 
 const route = useRoute();
 useHead({
@@ -19,7 +43,6 @@ useHead({
       : `r/${route.params.subreddit} - RedditLattice`,
 });
 
-const sort = ref<SortType>(SortType.Top);
 const images = ref<Post[]>([]);
 const masonry = ref(null);
 
@@ -88,37 +111,7 @@ onMounted(() => {
         </div>
       </template>
     </infinite-loading>
-    <Fab icon="mdi-sort">
-      <template #actions="{ close }">
-        <v-btn
-          icon="mdi-arrow-up-bold"
-          @click="
-            () => {
-              sort = SortType.Top;
-              close();
-            }
-          "
-        ></v-btn>
-        <v-btn
-          icon="mdi-fire"
-          @click="
-            () => {
-              sort = SortType.Hot;
-              close();
-            }
-          "
-        ></v-btn>
-        <v-btn
-          icon="mdi-new-box"
-          @click="
-            () => {
-              sort = SortType.New;
-              close();
-            }
-          "
-        ></v-btn>
-      </template>
-    </Fab>
+    <Fab icon="mdi-sort" :actions="fabActions" :active="sort"> </Fab>
   </div>
 </template>
 

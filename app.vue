@@ -36,3 +36,10 @@ useHead({
     </v-main>
   </v-app>
 </template>
+
+<style>
+body,
+html {
+  overscroll-behavior-y: none;
+}
+</style>
