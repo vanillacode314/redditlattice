@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import "@appnest/masonry-layout";
+enum SortType {
+  Hot = "hot",
+  New = "new",
+  Top = "top",
+}
 export interface Post {
   name: string;
   url: string;
@@ -14,6 +19,7 @@ useHead({
       : `r/${route.params.subreddit} - RedditLattice`,
 });
 
+const sort = ref<SortType>(SortType.Top);
 const images = ref<Post[]>([]);
 const masonry = ref(null);
 
@@ -24,6 +30,7 @@ async function onInfinite($state) {
   });
   if (route.query.q) searchParams.append("q", route.query.q as string);
   if (lastImage) searchParams.append("after", lastImage.name);
+  searchParams.append("sort", sort.value);
   const url = `/api/getImages?${searchParams.toString()}`;
   try {
     const newImages = await $fetch<Post[]>(url);
@@ -47,6 +54,13 @@ async function onInfinite($state) {
     $state.error();
   }
 }
+
+watch(sort, () => {
+  images.value = [];
+});
+onMounted(() => {
+  images.value = [];
+});
 </script>
 
 <template>
@@ -60,7 +74,7 @@ async function onInfinite($state) {
     </masonry-layout>
     <infinite-loading
       @infinite="onInfinite"
-      :identifier="`${route.query.q}-${route.params.subreddit}`"
+      :identifier="`${route.query.q}-${route.params.subreddit}-${sort}`"
       :distance="100"
     >
       <template #spinner>
@@ -74,6 +88,37 @@ async function onInfinite($state) {
         </div>
       </template>
     </infinite-loading>
+    <Fab icon="mdi-sort">
+      <template #actions="{ close }">
+        <v-btn
+          icon="mdi-arrow-up-bold"
+          @click="
+            () => {
+              sort = SortType.Top;
+              close();
+            }
+          "
+        ></v-btn>
+        <v-btn
+          icon="mdi-fire"
+          @click="
+            () => {
+              sort = SortType.Hot;
+              close();
+            }
+          "
+        ></v-btn>
+        <v-btn
+          icon="mdi-new-box"
+          @click="
+            () => {
+              sort = SortType.New;
+              close();
+            }
+          "
+        ></v-btn>
+      </template>
+    </Fab>
   </div>
 </template>
 
