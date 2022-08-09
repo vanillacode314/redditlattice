@@ -19,8 +19,6 @@ async function onSubmit() {
 }
 
 function setSubreddit(sr: string) {
-  const inp = srInput.value.querySelector("input");
-  if (inp) inp.focus();
   if (query.value.includes("?")) {
     const [_, search] = query.value.split("?");
     query.value = `${sr}?${search}`;
@@ -30,8 +28,6 @@ function setSubreddit(sr: string) {
 }
 
 function setSearch(search: string) {
-  const inp = srInput.value.querySelector("input");
-  if (inp) inp.focus();
   if (query.value.includes("?")) {
     const [sr, _] = query.value.split("?");
     query.value = `${sr}?${search}`;
