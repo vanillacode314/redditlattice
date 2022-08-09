@@ -1,4 +1,12 @@
-<script setup>
+<script lang="ts" setup>
+const router = useRouter();
+const loading = ref<boolean>(false);
+router.beforeEach(() => {
+  loading.value = true;
+});
+router.afterEach(() => {
+  loading.value = false;
+});
 useHead({
   title: "RedditLattice",
   meta: [
@@ -16,7 +24,14 @@ useHead({
     <Drawer />
     <Navbar />
     <v-main>
-      <NuxtPage />
+      <template v-if="loading">
+        <div class="d-flex pa-6 justify-center">
+          <v-progress-circular indeterminate></v-progress-circular>
+        </div>
+      </template>
+      <template v-else>
+        <NuxtPage />
+      </template>
       <!-- <Notifications /> -->
     </v-main>
   </v-app>
