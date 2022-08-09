@@ -57,6 +57,7 @@ onUnmounted(() => {
       <div class="fab" :class="{ active: active }">
         <slot>
           <v-btn
+            size="large"
             @click="toggleActive()"
             :variant="active ? 'flat' : 'elevated'"
             :icon="active ? 'mdi-close' : icon"
