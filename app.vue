@@ -28,10 +28,11 @@ useHead({
   ],
 });
 
-watch(refreshing, () => {
+watchEffect(() => {
   if (refreshing.value) return;
   showRefresh.value = false;
 });
+
 watch(
   loading,
   () => {
