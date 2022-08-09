@@ -9,8 +9,9 @@ import { Action } from "~~/components/Fab.vue";
 import "@appnest/masonry-layout";
 import { SortType } from "~~/composables/use-store";
 
+const id = ref<boolean>(true);
 const store = useStore();
-const { sort } = storeToRefs(store);
+const { refreshing, sort } = storeToRefs(store);
 const fabActions = ref<Action[]>([
   {
     id: SortType.Top,
@@ -76,10 +77,16 @@ async function onInfinite($state) {
   } catch (e) {
     $state.error();
   }
+  refreshing.value = false;
 }
 
 watch(sort, () => {
   images.value = [];
+});
+
+watch(refreshing, () => {
+  images.value = [];
+  id.value = !id.value;
 });
 onMounted(() => {
   images.value = [];
@@ -97,7 +104,7 @@ onMounted(() => {
     </masonry-layout>
     <infinite-loading
       @infinite="onInfinite"
-      :identifier="`${route.query.q}-${route.params.subreddit}-${sort}`"
+      :identifier="`${route.query.q}-${route.params.subreddit}-${sort}-${id}`"
       :distance="100"
     >
       <template #spinner>
