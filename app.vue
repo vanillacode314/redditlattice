@@ -14,6 +14,8 @@ router.afterEach(() => {
 });
 
 let showRefresh = ref<boolean>(false);
+const angle = ref<number>(0);
+const my_y = ref<number>(-200);
 
 const main = ref<HTMLElement>();
 
@@ -39,6 +41,7 @@ watch(
     if (loading.value) return;
     requestAnimationFrame(() => {
       let _startY: number;
+      let _lastY: number;
       let doRefresh: boolean = false;
 
       main.value.addEventListener(
@@ -51,12 +54,24 @@ watch(
 
       main.value.addEventListener(
         "touchend",
-        () => {
-          if (!doRefresh) return;
-          doRefresh = false;
-          refreshing.value = true;
-          if (route.path === "/") {
-            refreshing.value = false;
+        async () => {
+          if (doRefresh) {
+            doRefresh = false;
+            refreshing.value = true;
+            if (route.path === "/") {
+              refreshing.value = false;
+            }
+          } else {
+            let x = Math.min((_lastY - _startY) / 500, 1);
+            while (x > 0.00001) {
+              x *= 0.95;
+              angle.value = Math.sin((x * Math.PI) / 2) * 180;
+              my_y.value = Math.sin((x * Math.PI) / 2) * 200 - 200;
+              await new Promise((resolve) => setTimeout(resolve, 10));
+            }
+            angle.value = 0;
+            my_y.value = -200;
+            showRefresh.value = true;
           }
         },
         { passive: true }
@@ -66,8 +81,10 @@ watch(
         "touchmove",
         (e) => {
           const y = e.touches[0].pageY;
-          // Activate custom pull-to-refresh effects when at the top of the container
-          // and user is scrolling up.
+          _lastY = y;
+          const x = Math.min((y - _startY) / 500, 1);
+          angle.value = Math.sin((x * Math.PI) / 2) * 180;
+          my_y.value = Math.sin((x * Math.PI) / 2) * 100 - 100;
           if (
             document.scrollingElement.scrollTop === 0 &&
             y > _startY &&
@@ -78,7 +95,6 @@ watch(
             showRefresh.value = true;
             doRefresh = true;
           } else {
-            showRefresh.value = false;
             doRefresh = false;
           }
         },
@@ -105,7 +121,14 @@ watch(
           <NuxtPage />
           <!-- <div class="overlay"></div> -->
           <transition name="slide-fade">
-            <div class="refresher" v-if="showRefresh">
+            <div
+              class="refresher"
+              v-if="showRefresh"
+              :style="{
+                '--angle': `${angle}deg`,
+                '--y': `${my_y}%`,
+              }"
+            >
               <v-btn variant="flat" icon="mdi-refresh" color="primary"></v-btn>
             </div>
           </transition>
@@ -157,21 +180,6 @@ html {
   position: absolute;
   top: 1rem;
   left: 50%;
-  transform: translateX(-50%) translateY(0%);
-}
-
-.slide-fade-enter-active {
-  transition: all 0.4s ease-out;
-  animation: none !important;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.2s ease-in;
-  animation: none !important;
-}
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(-50%) translateY(-100%);
-  /* opacity: 0; */
+  transform: translateX(-50%) translateY(var(--y)) rotate(var(--angle));
 }
 </style>
