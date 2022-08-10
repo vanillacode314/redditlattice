@@ -4,12 +4,13 @@ defineProps<{
   image: Post;
 }>();
 const emit = defineEmits(["load"]);
-const img = ref<HTMLImageElement>(null);
+const imgElement = ref<HTMLImageElement>(null);
+const isOnTop = ref<boolean>(false);
 
 function onImageLoad() {
-  if (!img.value) return;
-  if (img.value.naturalHeight) {
-    img.value.style.aspectRatio = "auto";
+  if (!imgElement.value) return;
+  if (imgElement.value.naturalHeight) {
+    imgElement.value.style.aspectRatio = "auto";
     emit("load");
     return;
   }
@@ -19,15 +20,80 @@ function onImageLoad() {
 onMounted(() => {
   onImageLoad();
 });
+
+function test() {
+  isOnTop.value = true;
+}
 </script>
 
 <template>
   <img
-    ref="img"
+    v-longpress="test"
+    ref="imgElement"
     :src="image.url"
     :key="image.name"
     :alt="image.title"
     loading="lazy"
     style="aspect-ratio: 1"
   />
+  <div :class="{ isOnTop: isOnTop }" @click.self="isOnTop = false">
+    <transition name="scale">
+      <div v-if="isOnTop" class="overlay">
+        <img :src="image.url" :key="image.name" :alt="image.title" />
+        <span class="text" @click.stop="isOnTop = false">
+          <v-sheet>{{ image.title }}</v-sheet>
+        </span>
+      </div>
+    </transition>
+  </div>
 </template>
+
+<style scoped>
+img {
+  width: 100%;
+  object-fit: contain;
+}
+.isOnTop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  backdrop-filter: blur(25px) brightness(50%);
+}
+.overlay {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  /* border: 2px solid white; */
+  transform-origin: bottom;
+  display: grid;
+}
+.overlay .text {
+  display: block;
+}
+.overlay .text > * {
+  font-size: 1rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  padding: 1rem;
+}
+.scale-enter-active {
+  position: fixed;
+  top: 50%;
+  transform-origin: bottom;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scale-leave-active {
+  position: fixed;
+  top: 50%;
+  transform-origin: bottom;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scale-enter-to,
+.scale-leave-from {
+  transform: translateY(-50%) scale(100%);
+}
+.scale-enter-from,
+.scale-leave-to {
+  transform: translateY(-100%) scale(0%);
+}
+</style>

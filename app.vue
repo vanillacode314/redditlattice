@@ -145,7 +145,8 @@ watch(
               stiffness: 300,
             });
           });
-          document.documentElement.style.overflow = "hidden";
+          if (document.documentElement.style.overflow !== "hidden")
+            document.documentElement.style.overflow = "hidden";
         },
         { passive: true }
       );
