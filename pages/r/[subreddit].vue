@@ -48,6 +48,7 @@ const images = ref<Post[]>([]);
 const masonry = ref(null);
 
 async function onInfinite($state) {
+  requestAnimationFrame(() => (refreshing.value = false));
   const lastImage = images.value.at(-1);
   const searchParams = new URLSearchParams({
     subreddit: route.params.subreddit as string,
@@ -60,20 +61,16 @@ async function onInfinite($state) {
     const newImages = await $fetch<Post[]>(url);
     if (newImages.error) {
       $state.error();
-      refreshing.value = false;
       return;
     }
     if (newImages.length === 0) {
       $state.completed();
-      refreshing.value = false;
       return;
     }
     images.value = [...images.value, ...newImages];
     $state.loaded();
-    refreshing.value = false;
   } catch (e) {
     $state.error();
-    refreshing.value = false;
   }
 }
 
@@ -81,7 +78,7 @@ watch(sort, () => {
   images.value = [];
 });
 
-watch(refreshing, () => {
+watchEffect(() => {
   if (!refreshing.value) return;
   images.value = [];
   id.value = !id.value;
