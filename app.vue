@@ -30,13 +30,31 @@ useHead({
   ],
 });
 
-watch(
-  refreshing,
-  async () => {
-    if (refreshing.value) return;
-    let displacement = 400;
-    function moveBack() {
-      displacement *= 0.9;
+let animHandler: number;
+watch(refreshing, () => {
+  let displacement = 400;
+  if (refreshing.value) {
+    cancelAnimationFrame(animHandler);
+    animHandler = undefined;
+    return;
+  } else {
+    displacement = 400;
+    moveBack();
+  }
+  async function moveBack() {
+    displacement -= 50;
+    refreshIconOffset.value =
+      reach(displacement, 300, {
+        stiffness: 200,
+      }) - 200;
+    refreshIconAngle.value = reach(displacement, 360, {
+      stiffness: 300,
+    });
+    if (displacement > 0) {
+      animHandler = requestAnimationFrame(moveBack);
+      await sleep(0.01);
+    } else {
+      displacement = 0;
       refreshIconOffset.value =
         reach(displacement, 300, {
           stiffness: 200,
@@ -45,15 +63,8 @@ watch(
         stiffness: 300,
       });
     }
-    while (displacement > 0.00001) {
-      requestAnimationFrame(moveBack);
-      await sleep(10);
-    }
-    displacement = 0;
-    requestAnimationFrame(moveBack);
-  },
-  { immediate: true }
-);
+  }
+});
 
 watch(
   main,
@@ -86,8 +97,8 @@ watch(
               requestAnimationFrame(() => (refreshing.value = false));
             }
           } else {
-            function moveBack() {
-              displacement *= 0.9;
+            async function moveBack() {
+              displacement -= 50;
               refreshIconOffset.value =
                 reach(displacement, 300, {
                   stiffness: 200,
@@ -95,13 +106,21 @@ watch(
               refreshIconAngle.value = reach(displacement, 360, {
                 stiffness: 300,
               });
+              if (displacement > 0) {
+                animHandler = requestAnimationFrame(moveBack);
+                await sleep(0.01);
+              } else {
+                displacement = 0;
+                refreshIconOffset.value =
+                  reach(displacement, 300, {
+                    stiffness: 200,
+                  }) - 200;
+                refreshIconAngle.value = reach(displacement, 360, {
+                  stiffness: 300,
+                });
+              }
             }
-            while (displacement > 0.00001) {
-              requestAnimationFrame(moveBack);
-              await sleep(10);
-            }
-            displacement = 0;
-            requestAnimationFrame(moveBack);
+            moveBack();
           }
         },
         { passive: true }

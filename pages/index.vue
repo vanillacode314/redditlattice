@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 
+/// STATE ///
 const store = useStore();
 const { searches, subreddits } = storeToRefs(store);
 const { addQuery } = store;
 const query = ref<string>("");
 const srInput = ref<HTMLElement>();
 
+/// METHODS ///
 async function onSubmit() {
   if (!query.value) return;
   addQuery(query.value);
@@ -36,6 +38,7 @@ function setSearch(search: string) {
   }
 }
 
+/// LIFECYCLE HOOKS ///
 onMounted(() => {
   const listItems = document.querySelectorAll(".v-list-item");
   for (const item of listItems) {
@@ -58,6 +61,7 @@ onMounted(() => {
 
 <template>
   <v-container fluid>
+    <clearable-list></clearable-list>
     <v-form
       ref="form"
       @submit.prevent="onSubmit()"
