@@ -29,5 +29,6 @@ defineProps<{
 .subheader {
   display: block;
   padding: 0 0.75rem;
+  padding-top: 0.75rem;
 }
 </style>
