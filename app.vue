@@ -132,7 +132,7 @@ watch(
         (e) => {
           if (refreshing.value) return;
           const displacement = _lastY - _startY;
-          if (document.scrollingElement.scrollTop !== 0 && displacement < 30)
+          if (document.scrollingElement.scrollTop !== 0 && displacement < 70)
             return;
           _lastY = e.touches[0].pageY;
           requestAnimationFrame(() => {
