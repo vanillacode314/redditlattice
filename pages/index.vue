@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
+import { Item } from "~~/components/ClearableList.vue";
 
 /// STATE ///
 const store = useStore();
@@ -20,7 +21,7 @@ async function onSubmit() {
   }
 }
 
-function setSubreddit(sr: string) {
+function setSubreddit({ title: sr }: Item) {
   if (query.value.includes("?")) {
     const [_, search] = query.value.split("?");
     query.value = `${sr}?${search}`;
@@ -29,7 +30,8 @@ function setSubreddit(sr: string) {
   }
 }
 
-function setSearch(search: string) {
+function setSearch({ title: search }: Item) {
+  if (!query.value) return;
   if (query.value.includes("?")) {
     const [sr, _] = query.value.split("?");
     query.value = `${sr}?${search}`;
@@ -57,11 +59,24 @@ onMounted(() => {
     });
   }
 });
+
+const subredditItems = computed(() =>
+  subreddits.value.map((sr) => ({ id: sr, title: sr }))
+);
+const searchesItems = computed(() =>
+  searches.value.map((s) => ({ id: s, title: s }))
+);
+
+function removeSubreddit({ title }: Item) {
+  subreddits.value = subreddits.value.filter((sr) => sr !== title);
+}
+function removeSearch({ title }: Item) {
+  searches.value = searches.value.filter((s) => s !== title);
+}
 </script>
 
 <template>
   <v-container fluid>
-    <clearable-list></clearable-list>
     <v-form
       ref="form"
       @submit.prevent="onSubmit()"
@@ -81,24 +96,37 @@ onMounted(() => {
       </span>
       <v-btn type="submit" class="flex gap-5" icon="mdi-magnify"></v-btn>
     </v-form>
-    <v-list>
-      <v-list-subheader>SUBREDDIT</v-list-subheader>
-      <v-list-item
-        v-for="subreddit of subreddits"
-        :key="subreddit"
-        :title="subreddit"
-        :value="subreddit"
-        @click="setSubreddit(subreddit)"
-      ></v-list-item>
-      <v-divider></v-divider>
-      <v-list-subheader>SEARCHES</v-list-subheader>
-      <v-list-item
-        v-for="search of searches"
-        :key="search"
-        :title="search"
-        :value="search"
-        @click="setSearch(search)"
-      ></v-list-item>
-    </v-list>
+    <clearable-list
+      :onclick="setSubreddit"
+      :onremove="removeSubreddit"
+      :items="subredditItems"
+      title="SUBREDDIT"
+    ></clearable-list>
+    <v-divider></v-divider>
+    <clearable-list
+      :onclick="setSearch"
+      :onremove="removeSearch"
+      :items="searchesItems"
+      title="SEARCHES"
+    ></clearable-list>
+    <!-- <v-list> -->
+    <!--   <v-list-subheader>SUBREDDIT</v-list-subheader> -->
+    <!--   <v-list-item -->
+    <!--     v-for="subreddit of subreddits" -->
+    <!--     :key="subreddit" -->
+    <!--     :title="subreddit" -->
+    <!--     :value="subreddit" -->
+    <!--     @click="setSubreddit(subreddit)" -->
+    <!--   ></v-list-item> -->
+    <!--   <v-divider></v-divider> -->
+    <!--   <v-list-subheader>SEARCHES</v-list-subheader> -->
+    <!--   <v-list-item -->
+    <!--     v-for="search of searches" -->
+    <!--     :key="search" -->
+    <!--     :title="search" -->
+    <!--     :value="search" -->
+    <!--     @click="setSearch(search)" -->
+    <!--   ></v-list-item> -->
+    <!-- </v-list> -->
   </v-container>
 </template>
