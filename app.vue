@@ -6,7 +6,7 @@ const router = useRouter();
 const loading = ref<boolean>(false);
 const store = useStore();
 const { reach, sleep } = useUtils();
-const { refreshing, navVisible } = storeToRefs(store);
+const { refreshing } = storeToRefs(store);
 router.beforeEach(() => {
   loading.value = true;
 });
@@ -30,26 +30,30 @@ useHead({
   ],
 });
 
-watchEffect(async () => {
-  if (refreshing.value) return;
-  let displacement = 400;
-  function moveBack() {
-    displacement *= 0.9;
-    refreshIconOffset.value =
-      reach(displacement, 300, {
-        stiffness: 200,
-      }) - 200;
-    refreshIconAngle.value = reach(displacement, 360, {
-      stiffness: 300,
-    });
-  }
-  while (displacement > 0.00001) {
+watch(
+  refreshing,
+  async () => {
+    if (refreshing.value) return;
+    let displacement = 400;
+    function moveBack() {
+      displacement *= 0.9;
+      refreshIconOffset.value =
+        reach(displacement, 300, {
+          stiffness: 200,
+        }) - 200;
+      refreshIconAngle.value = reach(displacement, 360, {
+        stiffness: 300,
+      });
+    }
+    while (displacement > 0.00001) {
+      requestAnimationFrame(moveBack);
+      await sleep(10);
+    }
+    displacement = 0;
     requestAnimationFrame(moveBack);
-    await sleep(10);
-  }
-  displacement = 0;
-  requestAnimationFrame(moveBack);
-});
+  },
+  { immediate: true }
+);
 
 watch(
   main,
@@ -79,10 +83,7 @@ watch(
           if (shouldRefresh) {
             refreshing.value = true;
             if (route.path === "/") {
-              // console.log("before");
-              // await sleep(100);
-              // console.log("after");
-              refreshing.value = false;
+              requestAnimationFrame(() => (refreshing.value = false));
             }
           } else {
             function moveBack() {

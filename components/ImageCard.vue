@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import type { Post } from "@/pages/r/[subreddit].vue";
-const props = defineProps<{
+defineProps<{
   image: Post;
 }>();
-
 const emit = defineEmits(["load"]);
 const img = ref<HTMLImageElement>(null);
 

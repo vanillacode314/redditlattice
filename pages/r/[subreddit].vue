@@ -1,14 +1,18 @@
 <script setup lang="ts">
+/// TYPES ///
 export interface Post {
   name: string;
   url: string;
   title: string;
 }
-import { storeToRefs } from "pinia";
-import { Action } from "~~/components/Fab.vue";
-import "@appnest/masonry-layout";
 import { SortType } from "~~/composables/use-store";
+import { Action } from "~~/components/Fab.vue";
 
+/// COMPONENTS ///
+import "@appnest/masonry-layout";
+
+/// STATE ///
+import { storeToRefs } from "pinia";
 const id = ref<boolean>(true);
 const store = useStore();
 const { refreshing, sort } = storeToRefs(store);
@@ -35,18 +39,28 @@ const fabActions = ref<Action[]>([
     },
   },
 ]);
-
 const route = useRoute();
-useHead({
-  titleTemplate: () =>
-    route.query.q
-      ? `${route.query.q} - r/${route.params.subreddit} - RedditLattice`
-      : `r/${route.params.subreddit} - RedditLattice`,
-});
-
 const images = ref<Post[]>([]);
 const masonry = ref(null);
 
+watch(sort, () => {
+  images.value = [];
+});
+
+watchEffect(() => {
+  if (!refreshing.value) return;
+  images.value = [];
+  id.value = !id.value;
+});
+
+/// HEAD ///
+useHead({
+  title: route.query.q
+    ? `${route.query.q} - r/${route.params.subreddit} - RedditLattice`
+    : `r/${route.params.subreddit} - RedditLattice`,
+});
+
+/// METHODS ///
 async function onInfinite($state) {
   requestAnimationFrame(() => (refreshing.value = false));
   const lastImage = images.value.at(-1);
@@ -74,18 +88,10 @@ async function onInfinite($state) {
   }
 }
 
-watch(sort, () => {
-  images.value = [];
-});
-
-watchEffect(() => {
-  if (!refreshing.value) return;
-  images.value = [];
-  id.value = !id.value;
-});
-
+/// LIFECYCLE HOOKS ///
 onMounted(() => {
   images.value = [];
+  id.value = !id.value;
 });
 </script>
 
