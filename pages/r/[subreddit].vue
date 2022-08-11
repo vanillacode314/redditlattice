@@ -49,7 +49,9 @@ watch(sort, () => {
 });
 
 watchEffect(() => {
-  title.value = `${route.query.q} - /r/${route.params.subreddit}`;
+  title.value = route.query.q
+    ? `${route.query.q} - /r/${route.params.subreddit}`
+    : `/r/${route.params.subreddit}`;
 });
 
 query.value = route.query.q as string;
