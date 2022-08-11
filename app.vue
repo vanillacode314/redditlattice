@@ -189,6 +189,9 @@ watch(
 body,
 html {
   overscroll-behavior-y: none;
+}
+.noscroll {
+  overscroll-behavior-y: none;
   overflow: hidden;
 }
 </style>

@@ -4,10 +4,11 @@ import { Item } from "~~/components/ClearableList.vue";
 
 /// STATE ///
 const store = useStore();
-const { query, searches, subreddits } = storeToRefs(store);
+const { title, searches, subreddits } = storeToRefs(store);
 const { addQuery } = store;
 const searchTerm = ref<string>("");
 const srInput = ref<HTMLElement>();
+title.value = `RedditLattice`;
 
 /// METHODS ///
 async function onSubmit() {

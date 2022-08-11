@@ -21,14 +21,21 @@ onMounted(() => {
   onImageLoad();
 });
 
-function test() {
+function popupImage() {
   isOnTop.value = true;
+  document.documentElement.classList.add("noscroll");
+}
+
+function removePopupImage() {
+  isOnTop.value = false;
+  document.documentElement.classList.remove("noscroll");
 }
 </script>
 
 <template>
   <img
-    v-longpress="test"
+    v-longpress="popupImage"
+    @click="popupImage"
     ref="imgElement"
     :src="image.url"
     :key="image.name"
@@ -36,11 +43,11 @@ function test() {
     loading="lazy"
     style="aspect-ratio: 1"
   />
-  <div :class="{ isOnTop: isOnTop }" @click.self="isOnTop = false">
+  <div :class="{ isOnTop: isOnTop }" @click.self="removePopupImage">
     <transition name="scale">
       <div v-if="isOnTop" class="overlay">
         <img :src="image.url" :key="image.name" :alt="image.title" />
-        <span class="text" @click.stop="isOnTop = false">
+        <span class="text" @click.stop="removePopupImage">
           <v-sheet>{{ image.title }}</v-sheet>
         </span>
       </div>
