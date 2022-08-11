@@ -3,7 +3,12 @@ import { defineNuxtConfig } from "nuxt";
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
   css: ["vuetify/lib/styles/main.sass", "mdi/css/materialdesignicons.min.css"],
-  modules: ["@pinia/nuxt", "@vueuse/nuxt"],
+  modules: ["@pinia/nuxt", "@vueuse/nuxt", "@unocss/nuxt"],
+  unocss: {
+    uno: false,
+    icons: true,
+    attributify: false,
+  },
   ssr: false,
   build: {
     transpile: ["vuetify"],

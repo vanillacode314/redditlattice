@@ -95,7 +95,9 @@ function removeSearch({ title }: Item) {
           hide-details
         ></v-text-field>
       </span>
-      <v-btn type="submit" class="flex gap-5" icon="mdi-magnify"></v-btn>
+      <v-btn type="submit" class="flex gap-5" icon>
+        <icon name="i-mdi-magnify"></icon>
+      </v-btn>
     </v-form>
     <clearable-list
       :onclick="setSubreddit"
@@ -110,24 +112,5 @@ function removeSearch({ title }: Item) {
       :items="searchesItems"
       title="SEARCHES"
     ></clearable-list>
-    <!-- <v-list> -->
-    <!--   <v-list-subheader>SUBREDDIT</v-list-subheader> -->
-    <!--   <v-list-item -->
-    <!--     v-for="subreddit of subreddits" -->
-    <!--     :key="subreddit" -->
-    <!--     :title="subreddit" -->
-    <!--     :value="subreddit" -->
-    <!--     @click="setSubreddit(subreddit)" -->
-    <!--   ></v-list-item> -->
-    <!--   <v-divider></v-divider> -->
-    <!--   <v-list-subheader>SEARCHES</v-list-subheader> -->
-    <!--   <v-list-item -->
-    <!--     v-for="search of searches" -->
-    <!--     :key="search" -->
-    <!--     :title="search" -->
-    <!--     :value="search" -->
-    <!--     @click="setSearch(search)" -->
-    <!--   ></v-list-item> -->
-    <!-- </v-list> -->
   </v-container>
 </template>

@@ -6,9 +6,7 @@ const emit = defineEmits(["click", "remove"]);
   <v-sheet v-ripple class="mx-auto" @click="emit('click')">
     <div class="item">
       <span><slot /></span>
-      <v-icon size="small" @click.stop="emit('remove')"
-        >mdi-close-circle</v-icon
-      >
+      <icon name="i-mdi-close-circle" size="small"></icon>
     </div>
   </v-sheet>
 </template>

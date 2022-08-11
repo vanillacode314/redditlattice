@@ -16,7 +16,9 @@
   },
   "dependencies": {
     "@appnest/masonry-layout": "^2.0.8",
+    "@iconify-json/mdi": "^1.1.30",
     "@pinia/nuxt": "^0.3.1",
+    "@unocss/nuxt": "^0.45.6",
     "@yeger/vue-masonry-wall": "^3.0.43",
     "mdi": "^2.2.43",
     "pinia": "^2.0.17",

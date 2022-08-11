@@ -91,12 +91,14 @@ function search() {
         <div class="wrap-btns">
           <transition name="fade">
             <template v-if="!searching">
-              <v-app-bar-nav-icon
-                @click="drawer = !drawer"
-              ></v-app-bar-nav-icon>
+              <v-btn @click="drawer = !drawer" icon>
+                <icon name="i-mdi-menu"></icon>
+              </v-btn>
             </template>
             <template v-else>
-              <v-btn icon="mdi-arrow-left" @click="cancelSearch()"></v-btn>
+              <v-btn @click="cancelSearch()" icon>
+                <icon name="i-mdi-arrow-left"></icon>
+              </v-btn>
             </template>
           </transition>
         </div>
@@ -118,22 +120,20 @@ function search() {
 
       <v-spacer></v-spacer>
       <div class="wrap-btns">
-        <transition name="fade">
-          <template v-if="!searching">
-            <v-btn
-              v-if="$route.path.startsWith('/r/')"
-              icon="mdi-magnify"
-              @click="onSearch()"
-            />
-          </template>
-          <template v-else>
-            <v-btn
-              v-if="$route.path.startsWith('/r/')"
-              icon="mdi-close-circle"
-              @click="clearSearch()"
-            />
-          </template>
-        </transition>
+        <template v-if="$route.path.startsWith('/r/')">
+          <transition name="fade">
+            <template v-if="!searching">
+              <v-btn @click="onSearch()" icon>
+                <icon name="i-mdi-magnify"></icon>
+              </v-btn>
+            </template>
+            <template v-else>
+              <v-btn @click="clearSearch()" icon>
+                <icon name="i-mdi-close-circle"></icon>
+              </v-btn>
+            </template>
+          </transition>
+        </template>
       </div>
     </v-app-bar>
   </Transition>
