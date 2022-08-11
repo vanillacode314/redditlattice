@@ -15,6 +15,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      script: [{ src: "/registerSW.js" }],
       link: [
         {
           rel: "icon",
