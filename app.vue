@@ -1,6 +1,14 @@
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
 
+onMounted(() => {
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    });
+  }
+});
+
 const route = useRoute();
 const router = useRouter();
 const loading = ref<boolean>(false);

@@ -3,7 +3,7 @@
   "description": "A reddit viewer for image based subreddits. Lays out the images in a tight lattice.",
   "private": true,
   "scripts": {
-    "build": "nuxt build",
+    "build": "nuxt build && workbox generateSW workbox-config.js",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview"
@@ -11,7 +11,8 @@
   "devDependencies": {
     "@vueuse/core": "^9.0.2",
     "@vueuse/nuxt": "^9.0.2",
-    "nuxt": "3.0.0-rc.6"
+    "nuxt": "3.0.0-rc.6",
+    "workbox-cli": "^6.5.4"
   },
   "dependencies": {
     "@appnest/masonry-layout": "^2.0.8",
