@@ -15,7 +15,7 @@ import "@appnest/masonry-layout";
 import { storeToRefs } from "pinia";
 const id = ref<boolean>(true);
 const store = useStore();
-const { refreshing, sort } = storeToRefs(store);
+const { title, query, refreshing, sort } = storeToRefs(store);
 const fabActions = ref<Action[]>([
   {
     id: SortType.Top,
@@ -40,11 +40,26 @@ const fabActions = ref<Action[]>([
   },
 ]);
 const route = useRoute();
+const router = useRouter();
 const images = ref<Post[]>([]);
 const masonry = ref(null);
 
 watch(sort, () => {
   images.value = [];
+});
+
+watchEffect(() => {
+  title.value = `${route.query.q} - /r/${route.params.subreddit}`;
+});
+
+query.value = route.query.q as string;
+watch(query, () => {
+  images.value = [];
+  router.push({
+    path: `/r/${route.params.subreddit}`,
+    query: { q: query.value },
+  });
+  id.value = !id.value;
 });
 
 watchEffect(() => {

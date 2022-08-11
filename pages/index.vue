@@ -4,39 +4,39 @@ import { Item } from "~~/components/ClearableList.vue";
 
 /// STATE ///
 const store = useStore();
-const { searches, subreddits } = storeToRefs(store);
+const { query, searches, subreddits } = storeToRefs(store);
 const { addQuery } = store;
-const query = ref<string>("");
+const searchTerm = ref<string>("");
 const srInput = ref<HTMLElement>();
 
 /// METHODS ///
 async function onSubmit() {
-  if (!query.value) return;
-  addQuery(query.value);
-  if (query.value.includes("?")) {
-    const [sr, q] = query.value.split("?");
+  if (!searchTerm.value) return;
+  addQuery(searchTerm.value);
+  if (searchTerm.value.includes("?")) {
+    const [sr, q] = searchTerm.value.split("?");
     await navigateTo(`/r/${sr}?q=${q}`);
   } else {
-    await navigateTo(`/r/${query.value}`);
+    await navigateTo(`/r/${searchTerm.value}`);
   }
 }
 
 function setSubreddit({ title: sr }: Item) {
-  if (query.value.includes("?")) {
-    const [_, search] = query.value.split("?");
-    query.value = `${sr}?${search}`;
+  if (searchTerm.value.includes("?")) {
+    const [_, search] = searchTerm.value.split("?");
+    searchTerm.value = `${sr}?${search}`;
   } else {
-    query.value = sr;
+    searchTerm.value = sr;
   }
 }
 
 function setSearch({ title: search }: Item) {
-  if (!query.value) return;
-  if (query.value.includes("?")) {
-    const [sr, _] = query.value.split("?");
-    query.value = `${sr}?${search}`;
+  if (!searchTerm.value) return;
+  if (searchTerm.value.includes("?")) {
+    const [sr, _] = searchTerm.value.split("?");
+    searchTerm.value = `${sr}?${search}`;
   } else {
-    query.value = `${query.value}?${search}`;
+    searchTerm.value = `${searchTerm.value}?${search}`;
   }
 }
 
@@ -87,7 +87,7 @@ function removeSearch({ title }: Item) {
         <v-text-field
           hint="subreddit?query (query is optional)"
           prefix="/r/"
-          v-model="query"
+          v-model="searchTerm"
           label="Subreddit"
           required
           clearable
