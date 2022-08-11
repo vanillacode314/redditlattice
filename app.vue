@@ -27,6 +27,10 @@ useHead({
       content:
         "A reddit viewer for image based subreddits. Lays out the images in a tight lattice.",
     },
+    {
+      name: "theme-color",
+      content: "#000000",
+    },
   ],
 });
 
