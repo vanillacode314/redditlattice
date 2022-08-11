@@ -2,7 +2,8 @@
 import { storeToRefs } from "pinia";
 
 const store = useStore();
-const { title, query, navVisible, searching, drawer } = storeToRefs(store);
+const { searches, title, query, navVisible, searching, drawer } =
+  storeToRefs(store);
 let searchTerm = ref<string>("");
 
 const isMobile = useMediaQuery("(max-width: 720px)");
@@ -72,6 +73,7 @@ function clearSearch() {
 
 function search() {
   query.value = searchTerm.value;
+  searches.value = [...new Set([...searches.value, query.value])].sort();
   searching.value = false;
   searchTerm.value = "";
 }
