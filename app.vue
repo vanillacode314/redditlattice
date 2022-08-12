@@ -5,6 +5,7 @@ const route = useRoute();
 const router = useRouter();
 const online = useOnline();
 const loading = ref<boolean>(false);
+const pullToRefreshIcon = ref<HTMLElement>();
 const store = useStore();
 const { reach, sleep } = useUtils();
 const { refreshing } = storeToRefs(store);
@@ -14,10 +15,6 @@ router.beforeEach(() => {
 router.afterEach(() => {
   loading.value = false;
 });
-
-const refreshIconAngle = ref<number>(0);
-const refreshIconOffset = ref<number>(-200);
-
 const main = ref<HTMLElement>();
 
 useHead({
@@ -35,6 +32,25 @@ useHead({
   ],
 });
 
+function updatePullToRefresh(displacement: number) {
+  return requestAnimationFrame(() => {
+    pullToRefreshIcon.value.style.setProperty(
+      "--angle",
+      `${reach(displacement, 360, {
+        stiffness: 300,
+      })}deg`
+    );
+    pullToRefreshIcon.value.style.setProperty(
+      "--y",
+      `${
+        reach(displacement, 300, {
+          stiffness: 200,
+        }) - 200
+      }px`
+    );
+  });
+}
+updatePullToRefresh(0);
 let animHandler: number;
 watch(refreshing, () => {
   let displacement = 400;
@@ -47,26 +63,13 @@ watch(refreshing, () => {
     moveBack();
   }
   async function moveBack() {
-    displacement -= 50;
-    refreshIconOffset.value =
-      reach(displacement, 300, {
-        stiffness: 200,
-      }) - 200;
-    refreshIconAngle.value = reach(displacement, 360, {
-      stiffness: 300,
-    });
+    displacement -= 10;
+    animHandler = updatePullToRefresh(displacement);
     if (displacement > 0) {
-      animHandler = requestAnimationFrame(moveBack);
-      await sleep(0.01);
+      await sleep(1);
+      moveBack();
     } else {
-      displacement = 0;
-      refreshIconOffset.value =
-        reach(displacement, 300, {
-          stiffness: 200,
-        }) - 200;
-      refreshIconAngle.value = reach(displacement, 360, {
-        stiffness: 300,
-      });
+      updatePullToRefresh(0);
     }
   }
 });
@@ -89,10 +92,30 @@ watch(
         { passive: true }
       );
 
+      // TouchMove
+      main.value.addEventListener(
+        "touchmove",
+        (e) => {
+          if (refreshing.value) return;
+          _lastY = e.touches[0].pageY;
+          const displacement = _lastY - _startY;
+          const threshold = 100;
+          if (
+            document.scrollingElement.scrollTop !== 0 ||
+            displacement < threshold
+          )
+            return;
+          updatePullToRefresh(displacement);
+          document.documentElement.classList.add("noscroll");
+        },
+        { passive: true }
+      );
+
       // TouchEnd
       main.value.addEventListener(
         "touchend",
         async () => {
+          document.documentElement.classList.remove("noscroll");
           let displacement = _lastY - _startY;
           document.documentElement.style.overflow = "auto";
           const shouldRefresh = displacement > 250;
@@ -104,54 +127,16 @@ watch(
           } else {
             async function moveBack() {
               displacement -= 50;
-              refreshIconOffset.value =
-                reach(displacement, 300, {
-                  stiffness: 200,
-                }) - 200;
-              refreshIconAngle.value = reach(displacement, 360, {
-                stiffness: 300,
-              });
+              animHandler = updatePullToRefresh(displacement);
               if (displacement > 0) {
-                animHandler = requestAnimationFrame(moveBack);
+                moveBack();
                 await sleep(0.01);
               } else {
-                displacement = 0;
-                refreshIconOffset.value =
-                  reach(displacement, 300, {
-                    stiffness: 200,
-                  }) - 200;
-                refreshIconAngle.value = reach(displacement, 360, {
-                  stiffness: 300,
-                });
+                updatePullToRefresh(0);
               }
             }
             moveBack();
           }
-        },
-        { passive: true }
-      );
-
-      // TouchMove
-      main.value.addEventListener(
-        "touchmove",
-        (e) => {
-          if (refreshing.value) return;
-          const displacement = _lastY - _startY;
-          _lastY = e.touches[0].pageY;
-          if (document.scrollingElement.scrollTop !== 0 && displacement < 70)
-            return;
-          requestAnimationFrame(() => {
-            const displacement = _lastY - _startY;
-            refreshIconOffset.value =
-              reach(displacement, 300, {
-                stiffness: 200,
-              }) - 200;
-            refreshIconAngle.value = reach(displacement, 360, {
-              stiffness: 300,
-            });
-          });
-          if (document.documentElement.style.overflow !== "hidden")
-            document.documentElement.style.overflow = "hidden";
         },
         { passive: true }
       );
@@ -177,13 +162,7 @@ watch(
       <template v-else>
         <div class="main" :class="{ refreshing: refreshing }" ref="main">
           <NuxtPage />
-          <div
-            class="refresher"
-            :style="{
-              '--angle': `${refreshIconAngle}deg`,
-              '--y': `${refreshIconOffset}%`,
-            }"
-          >
+          <div ref="pullToRefreshIcon" class="refresher">
             <v-btn variant="flat" icon="mdi-refresh" color="primary"></v-btn>
           </div>
         </div>
