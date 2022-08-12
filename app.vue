@@ -164,7 +164,9 @@ watch(
         <div class="main" :class="{ refreshing: refreshing }" ref="main">
           <NuxtPage />
           <div ref="pullToRefreshIcon" class="refresher">
-            <v-btn variant="flat" icon="mdi-refresh" color="primary"></v-btn>
+            <v-btn variant="flat" color="primary" icon>
+              <icon name="i-mdi-refresh"></icon>
+            </v-btn>
           </div>
         </div>
       </template>
