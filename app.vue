@@ -3,6 +3,7 @@ import { storeToRefs } from "pinia";
 
 const route = useRoute();
 const router = useRouter();
+const online = useOnline();
 const loading = ref<boolean>(false);
 const store = useStore();
 const { reach, sleep } = useUtils();
@@ -161,6 +162,9 @@ watch(
 </script>
 
 <template>
+  <transition name="slide">
+    <div v-if="!online" class="online-notif">Not Online</div>
+  </transition>
   <v-app theme="myDarkTheme">
     <Drawer />
     <Navbar />
@@ -209,6 +213,20 @@ html {
     transform: translateX(-50%) translateY(var(--y)) rotate(360deg);
   }
 }
+.online-notif {
+  background-color: #222;
+  padding: 0.5rem;
+  display: grid;
+  place-content: center;
+  z-index: 10000;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  font-size: small;
+  text-transform: uppercase;
+  font-weight: bold;
+  right: 0;
+}
 .main {
   height: 100%;
   position: relative;
@@ -225,5 +243,16 @@ html {
   top: 1rem;
   left: 50%;
   transform: translateX(-50%) translateY(var(--y)) rotate(var(--angle));
+}
+
+.slide-enter-active {
+  transition: transform 0.3s ease-in;
+}
+.slide-leave-active {
+  transition: transform 0.3s ease-out;
+}
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateY(100%);
 }
 </style>
