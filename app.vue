@@ -117,6 +117,7 @@ watch(
         async () => {
           document.documentElement.classList.remove("noscroll");
           let displacement = _lastY - _startY;
+          _startY = 100000;
           document.documentElement.style.overflow = "auto";
           const shouldRefresh = displacement > 250;
           if (shouldRefresh) {
