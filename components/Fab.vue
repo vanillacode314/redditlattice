@@ -108,7 +108,7 @@ onUnmounted(() => {
             :key="action.id"
           >
             <v-btn
-              :icon="action.icon"
+              icon
               v-if="selected"
               :color="active === action.id ? 'primary' : ''"
               @click="
@@ -117,7 +117,9 @@ onUnmounted(() => {
                   close();
                 }
               "
-            />
+            >
+              <icon :name="action.icon" />
+            </v-btn>
           </span>
         </TransitionGroup>
       </div>
@@ -127,8 +129,9 @@ onUnmounted(() => {
             size="large"
             @click="toggleActive()"
             :variant="selected ? 'flat' : 'elevated'"
-            :icon="selected ? 'mdi-close' : icon"
+            icon
           >
+            <icon :name="selected ? 'i-mdi-close' : icon"></icon>
           </v-btn>
         </slot>
       </div>

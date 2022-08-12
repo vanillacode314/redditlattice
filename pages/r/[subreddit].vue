@@ -19,21 +19,21 @@ const { title, query, refreshing, sort } = storeToRefs(store);
 const fabActions = ref<Action[]>([
   {
     id: SortType.Top,
-    icon: "mdi-arrow-up-bold",
+    icon: "i-mdi-arrow-up-bold",
     callback() {
       sort.value = SortType.Top;
     },
   },
   {
     id: SortType.Hot,
-    icon: "mdi-fire",
+    icon: "i-mdi-fire",
     callback() {
       sort.value = SortType.Hot;
     },
   },
   {
     id: SortType.New,
-    icon: "mdi-new-box",
+    icon: "i-mdi-new-box",
     callback() {
       sort.value = SortType.New;
     },
@@ -137,7 +137,7 @@ onMounted(() => {
         </div>
       </template>
     </infinite-loading>
-    <Fab icon="mdi-sort" :actions="fabActions" :active="sort"> </Fab>
+    <Fab icon="i-mdi-sort" :actions="fabActions" :active="sort"> </Fab>
   </div>
 </template>
 
