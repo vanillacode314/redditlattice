@@ -49,13 +49,12 @@ let start: DOMHighResTimeStamp = undefined;
 let previousTimeStamp: DOMHighResTimeStamp = undefined;
 let done: boolean = false;
 watch(refreshing, () => {
-  const startAt =
-    inverseReach(
-      +pullToRefreshIcon.value.style.getPropertyValue("--y").replace("px", "") +
-        200,
-      300
-    ) * 300;
+  let startAt: number;
   if (refreshing.value) return;
+  const r = pullToRefreshIcon.value.style
+    .getPropertyValue("--y")
+    .replace("px", "");
+  startAt = inverseReach(r ? +r + 200 : 0, 300) * 300;
   function step(timestamp: DOMHighResTimeStamp) {
     if (start === undefined) {
       start = timestamp;
@@ -87,6 +86,7 @@ onMounted(() => {
     (e) => {
       if (refreshing.value) return;
       _startY = e.touches[0].pageY;
+      _lastY = e.touches[0].pageY;
     },
     { passive: true }
   );
@@ -95,8 +95,8 @@ onMounted(() => {
   document.body.addEventListener(
     "touchmove",
     (e) => {
-      if (refreshing.value) return;
       _lastY = e.touches[0].pageY;
+      if (refreshing.value) return;
       const displacement = _lastY - _startY;
       const threshold = 100;
       if (document.scrollingElement.scrollTop !== 0 || displacement < threshold)
@@ -122,13 +122,10 @@ onMounted(() => {
           requestAnimationFrame(() => (refreshing.value = false));
         }
       } else {
-        const startAt =
-          inverseReach(
-            +pullToRefreshIcon.value.style
-              .getPropertyValue("--y")
-              .replace("px", "") + 200,
-            300
-          ) * 300;
+        const r = pullToRefreshIcon.value.style
+          .getPropertyValue("--y")
+          .replace("px", "");
+        const startAt = inverseReach(r ? +r + 200 : 0, 300) * 300;
         function step(timestamp: DOMHighResTimeStamp) {
           if (start === undefined) {
             start = timestamp;

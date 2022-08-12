@@ -35,7 +35,6 @@ function removePopupImage() {
 <template>
   <img
     v-longpress="popupImage"
-    @click="popupImage"
     ref="imgElement"
     :src="image.url"
     :key="image.name"
