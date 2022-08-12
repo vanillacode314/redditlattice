@@ -7,7 +7,7 @@ const online = useOnline();
 const loading = ref<boolean>(false);
 const pullToRefreshIcon = ref<HTMLElement>();
 const store = useStore();
-const { reach, sleep } = useUtils();
+const { reach, inverseReach } = useUtils();
 const { refreshing } = storeToRefs(store);
 router.beforeEach(() => {
   loading.value = true;
@@ -33,116 +33,125 @@ useHead({
 });
 
 function updatePullToRefresh(displacement: number) {
-  return requestAnimationFrame(() => {
-    pullToRefreshIcon.value.style.setProperty(
-      "--angle",
-      `${reach(displacement, 360, {
-        stiffness: 300,
-      })}deg`
-    );
-    pullToRefreshIcon.value.style.setProperty(
-      "--y",
-      `${
-        reach(displacement, 300, {
-          stiffness: 200,
-        }) - 200
-      }px`
-    );
-  });
+  if (!pullToRefreshIcon.value) return;
+  pullToRefreshIcon.value.style.setProperty(
+    "--angle",
+    `${reach(displacement / 300, 360)}deg`
+  );
+  pullToRefreshIcon.value.style.setProperty(
+    "--y",
+    `${reach(displacement / 300, 300) - 200}px`
+  );
 }
-updatePullToRefresh(0);
-let animHandler: number;
+
+let duration: number = 300;
+let start: DOMHighResTimeStamp = undefined;
+let previousTimeStamp: DOMHighResTimeStamp = undefined;
+let done: boolean = false;
 watch(refreshing, () => {
-  let displacement = 400;
-  if (refreshing.value) {
-    cancelAnimationFrame(animHandler);
-    animHandler = undefined;
-    return;
-  } else {
-    moveBack();
-  }
-  async function moveBack() {
-    displacement -= 10;
-    animHandler = updatePullToRefresh(displacement);
-    if (displacement > 0) {
-      await sleep(1);
-      moveBack();
-    } else {
-      animHandler = updatePullToRefresh(0);
+  const startAt =
+    inverseReach(
+      +pullToRefreshIcon.value.style.getPropertyValue("--y").replace("px", "") +
+        200,
+      300
+    ) * 300;
+  if (refreshing.value) return;
+  function step(timestamp: DOMHighResTimeStamp) {
+    if (start === undefined) {
+      start = timestamp;
     }
+    const elapsed = timestamp - start;
+    if (previousTimeStamp !== timestamp) {
+      const displacement = Math.max(0, (1 - elapsed / duration) * startAt);
+      updatePullToRefresh(displacement);
+      done = displacement === 0;
+    }
+    if (!done) {
+      previousTimeStamp = timestamp;
+      requestAnimationFrame(step);
+      return;
+    }
+    start = undefined;
   }
+  requestAnimationFrame(step);
 });
 
-watch(
-  main,
-  () => {
-    if (!main.value) return;
-    requestAnimationFrame(() => {
-      let _startY: number;
-      let _lastY: number;
+onMounted(() => {
+  updatePullToRefresh(0);
+  let _startY: number;
+  let _lastY: number;
 
-      // TouchStart
-      main.value.addEventListener(
-        "touchstart",
-        (e) => {
-          if (refreshing.value) return;
-          _startY = e.touches[0].pageY;
-        },
-        { passive: true }
-      );
+  // TouchStart
+  document.body.addEventListener(
+    "touchstart",
+    (e) => {
+      if (refreshing.value) return;
+      _startY = e.touches[0].pageY;
+    },
+    { passive: true }
+  );
 
-      // TouchMove
-      main.value.addEventListener(
-        "touchmove",
-        (e) => {
-          if (refreshing.value) return;
-          _lastY = e.touches[0].pageY;
-          const displacement = _lastY - _startY;
-          const threshold = 100;
-          if (
-            document.scrollingElement.scrollTop !== 0 ||
-            displacement < threshold
-          )
-            return;
-          updatePullToRefresh(displacement);
-          document.documentElement.classList.add("noscroll");
-        },
-        { passive: true }
-      );
+  // TouchMove
+  document.body.addEventListener(
+    "touchmove",
+    (e) => {
+      if (refreshing.value) return;
+      _lastY = e.touches[0].pageY;
+      const displacement = _lastY - _startY;
+      const threshold = 100;
+      if (document.scrollingElement.scrollTop !== 0 || displacement < threshold)
+        return;
+      requestAnimationFrame(() => {
+        updatePullToRefresh(displacement);
+      });
+      document.documentElement.classList.add("noscroll");
+    },
+    { passive: true }
+  );
 
-      // TouchEnd
-      main.value.addEventListener(
-        "touchend",
-        async () => {
-          document.documentElement.classList.remove("noscroll");
-          let displacement = _lastY - _startY;
-          document.documentElement.style.overflow = "auto";
-          const shouldRefresh = displacement > 250;
-          if (shouldRefresh) {
-            refreshing.value = true;
-            if (route.path === "/") {
-              requestAnimationFrame(() => (refreshing.value = false));
-            }
-          } else {
-            async function moveBack() {
-              displacement -= 10;
-              animHandler = updatePullToRefresh(displacement);
-              if (displacement > 0) {
-                await sleep(1);
-                moveBack();
-              } else {
-                animHandler = updatePullToRefresh(0);
-              }
-            }
-            moveBack();
+  // TouchEnd
+  document.body.addEventListener(
+    "touchend",
+    async () => {
+      document.documentElement.classList.remove("noscroll");
+      let displacement = _lastY - _startY;
+      const shouldRefresh = displacement > 250;
+      if (shouldRefresh) {
+        refreshing.value = true;
+        if (route.path === "/") {
+          requestAnimationFrame(() => (refreshing.value = false));
+        }
+      } else {
+        const startAt =
+          inverseReach(
+            +pullToRefreshIcon.value.style
+              .getPropertyValue("--y")
+              .replace("px", "") + 200,
+            300
+          ) * 300;
+        function step(timestamp: DOMHighResTimeStamp) {
+          if (start === undefined) {
+            start = timestamp;
           }
-        },
-        { passive: true }
-      );
-    });
-  },
-  { immediate: true }
-);
+          const elapsed = timestamp - start;
+          if (previousTimeStamp !== timestamp) {
+            displacement = Math.max(0, (1 - elapsed / duration) * startAt);
+            done = displacement === 0;
+            updatePullToRefresh(displacement);
+          }
+          if (!done) {
+            previousTimeStamp = timestamp;
+            requestAnimationFrame(step);
+            return;
+          }
+          start = undefined;
+        }
+        requestAnimationFrame(step);
+      }
+    },
+    { passive: true }
+  );
+});
 </script>
 
 <template>
@@ -222,7 +231,8 @@ html {
   position: absolute;
   top: 1rem;
   left: 50%;
-  transform: translateX(-50%) translateY(var(--y)) rotate(var(--angle));
+  transform: translateX(-50%) translateY(var(--y, -200px))
+    rotate(var(--angle, 0deg));
 }
 
 .slide-enter-active {

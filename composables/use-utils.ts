@@ -2,12 +2,15 @@ interface Options {
   stiffness?: number;
 }
 
-function reach(
-  n: number,
-  asymptote: number,
-  { stiffness = 2 }: Options = {}
+function reach(x: number, N: number, { stiffness = 1 }: Options = {}): number {
+  return -N * (Math.pow(Math.E, -x / stiffness) - 1);
+}
+function inverseReach(
+  reach: number,
+  N: number,
+  { stiffness = 1 }: Options = {}
 ): number {
-  return asymptote * (-Math.pow(Math.E, (-1 / stiffness) * n) + 1);
+  return -Math.log(-reach / N + 1) * stiffness;
 }
 
 function sleep(duration: number) {
@@ -24,5 +27,5 @@ function round(num: number, precision: number = 2): number {
 }
 
 export default () => {
-  return { log, round, reach, sleep };
+  return { log, round, reach, sleep, inverseReach };
 };
