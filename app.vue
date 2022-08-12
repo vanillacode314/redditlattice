@@ -59,7 +59,6 @@ watch(refreshing, () => {
     animHandler = undefined;
     return;
   } else {
-    displacement = 400;
     moveBack();
   }
   async function moveBack() {
