@@ -11,7 +11,7 @@
   "devDependencies": {
     "@vueuse/core": "^9.0.2",
     "@vueuse/nuxt": "^9.0.2",
-    "nuxt": "3.0.0-rc.6",
+    "nuxt": "3.0.0-rc.8",
     "workbox-cli": "^6.5.4"
   },
   "dependencies": {
