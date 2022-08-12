@@ -114,6 +114,7 @@ onMounted(() => {
     "touchend",
     async () => {
       document.documentElement.classList.remove("noscroll");
+      if (document.scrollingElement.scrollTop !== 0) return;
       let displacement = _lastY - _startY;
       const shouldRefresh = displacement > 250;
       if (shouldRefresh) {
