@@ -17,18 +17,32 @@ export default defineNuxtPlugin((nuxtApp) => {
       // Define variable
       let pressTimer = null;
 
+      let startY: number = 0;
       // Define funtion handlers
       // Create timeout ( run function after 1s )
       let start = (e) => {
         if (e.type === "click" && e.button !== 0) {
           return;
         }
+        startY = e.touches[0].pageY;
 
         if (pressTimer === null) {
           pressTimer = setTimeout(() => {
             // Run function
             handler(e);
           }, 1000);
+        }
+      };
+
+      const threshold = 10;
+      let move = (e) => {
+        if (e.type === "click" && e.button !== 0) {
+          return;
+        }
+
+        const dy = e.touches[0].pageY - startY;
+        if (threshold < Math.abs(dy) && pressTimer !== null) {
+          clearTimeout(pressTimer);
         }
       };
 
@@ -48,6 +62,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       el.addEventListener("contextmenu", (e) => e.preventDefault());
       el.addEventListener("mousedown", start);
       el.addEventListener("touchstart", start);
+      el.addEventListener("touchmove", move);
       // Cancel timeouts if this events happen
       el.addEventListener("click", cancel);
       el.addEventListener("mouseout", cancel);
