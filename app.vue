@@ -69,7 +69,7 @@ watch(refreshing, () => {
       await sleep(1);
       moveBack();
     } else {
-      updatePullToRefresh(0);
+      animHandler = updatePullToRefresh(0);
     }
   }
 });
@@ -117,7 +117,6 @@ watch(
         async () => {
           document.documentElement.classList.remove("noscroll");
           let displacement = _lastY - _startY;
-          _startY = 100000;
           document.documentElement.style.overflow = "auto";
           const shouldRefresh = displacement > 250;
           if (shouldRefresh) {
@@ -127,13 +126,13 @@ watch(
             }
           } else {
             async function moveBack() {
-              displacement -= 50;
+              displacement -= 10;
               animHandler = updatePullToRefresh(displacement);
               if (displacement > 0) {
+                await sleep(1);
                 moveBack();
-                await sleep(0.01);
               } else {
-                updatePullToRefresh(0);
+                animHandler = updatePullToRefresh(0);
               }
             }
             moveBack();
