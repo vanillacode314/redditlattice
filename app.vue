@@ -137,9 +137,9 @@ watch(
         (e) => {
           if (refreshing.value) return;
           const displacement = _lastY - _startY;
+          _lastY = e.touches[0].pageY;
           if (document.scrollingElement.scrollTop !== 0 && displacement < 70)
             return;
-          _lastY = e.touches[0].pageY;
           requestAnimationFrame(() => {
             const displacement = _lastY - _startY;
             refreshIconOffset.value =
