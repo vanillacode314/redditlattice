@@ -8,6 +8,12 @@
   "theme_color": "#000000",
   "icons": [
     {
+      "src": "/favicon.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/maskable_icon_x48.png",
       "sizes": "48x48",
       "type": "image/png",
@@ -54,12 +60,6 @@
       "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "maskable"
-    },
-    {
-      "src": "/favicon.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
     }
   ],
   "description": "A reddit viewer for image based subreddits. Lays out the images in a tight lattice."
