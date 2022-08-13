@@ -1,10 +1,11 @@
 {
-  "short_name": "redditlattice",
   "name": "redditlattice",
-  "start_url": "/",
-  "background_color": "#000000",
+  "short_name": "redditlattice",
+  "description": "A reddit viewer for image based subreddits. Lays out the images in a tight lattice.",
   "display": "standalone",
+  "start_url": "/",
   "scope": "/",
+  "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
     {
@@ -61,6 +62,5 @@
       "type": "image/png",
       "purpose": "maskable monochrome"
     }
-  ],
-  "description": "A reddit viewer for image based subreddits. Lays out the images in a tight lattice."
+  ]
 }
