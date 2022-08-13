@@ -32,7 +32,7 @@ export default defineNuxtConfig({
           content: "#000000",
         },
       ],
-      script: [{ src: "/registerSW.js" }],
+      script: [{ src: "/registerSW.js", defer: true }],
       link: [
         {
           rel: "icon",

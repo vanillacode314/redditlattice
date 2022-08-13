@@ -230,6 +230,7 @@ html {
   position: absolute;
   top: 1rem;
   left: 50%;
+  will-change: transform;
   transform: translateX(-50%) translateY(var(--y, -200px))
     rotate(var(--angle, 0deg));
 }
