@@ -80,7 +80,7 @@ function removeSearch({ title }: Item) {
 </script>
 
 <template>
-  <v-container>
+  <v-container class="myContainer">
     <v-form
       ref="form"
       @submit.prevent="onSubmit()"
@@ -102,18 +102,43 @@ function removeSearch({ title }: Item) {
         <icon name="i-mdi-magnify"></icon>
       </v-btn>
     </v-form>
-    <clearable-list
-      :onclick="setSubreddit"
-      :onremove="removeSubreddit"
-      :items="subredditItems"
-      title="SUBREDDIT"
-    ></clearable-list>
-    <v-divider></v-divider>
-    <clearable-list
-      :onclick="setSearch"
-      :onremove="removeSearch"
-      :items="searchesItems"
-      title="SEARCHES"
-    ></clearable-list>
+    <div class="scroll-wrapper">
+      <clearable-list
+        :onclick="setSubreddit"
+        :onremove="removeSubreddit"
+        :items="subredditItems"
+        title="SUBREDDIT"
+      ></clearable-list>
+      <v-divider></v-divider>
+      <clearable-list
+        :onclick="setSearch"
+        :onremove="removeSearch"
+        :items="searchesItems"
+        title="SEARCHES"
+      ></clearable-list>
+    </div>
   </v-container>
 </template>
+<style scoped>
+.myContainer {
+  max-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.scroll-wrapper {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+.scroll-wrapper::webkit-scrollbar {
+  width: 0.2rem;
+}
+
+.scroll-wrapper::webkit-scrollbar-track {
+  background-color: #333;
+}
+
+.scroll-wrapper::webkit-scrollbar-thumb {
+  background-color: #444;
+}
+</style>

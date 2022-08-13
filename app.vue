@@ -179,15 +179,15 @@ html {
   overflow: hidden;
 }
 
-*::-webkit-scrollbar {
-  width: 0.7rem;
+body::-webkit-scrollbar {
+  width: 0.3rem;
 }
 
-*::-webkit-scrollbar-track {
-  background-color: #333;
+body::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 
-*::-webkit-scrollbar-thumb {
+body::-webkit-scrollbar-thumb {
   background-color: #444;
 }
 </style>
