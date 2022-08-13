@@ -7,7 +7,7 @@ const online = useOnline();
 const loading = ref<boolean>(false);
 const pullToRefreshIcon = ref<HTMLElement>();
 const store = useStore();
-const { reach, inverseReach } = useUtils();
+const { animate, reach, inverseReach } = useUtils();
 const { refreshing } = storeToRefs(store);
 router.beforeEach(() => {
   loading.value = true;
@@ -21,6 +21,7 @@ useHead({
   title: "RedditLattice",
 });
 
+let wasScroll: boolean = false;
 function updatePullToRefresh(displacement: number) {
   if (!pullToRefreshIcon.value) return;
   pullToRefreshIcon.value.style.setProperty(
@@ -33,35 +34,18 @@ function updatePullToRefresh(displacement: number) {
   );
 }
 
-let duration: number = 300;
-let start: DOMHighResTimeStamp = undefined;
-let previousTimeStamp: DOMHighResTimeStamp = undefined;
-let done: boolean = false;
+const duration: number = 300;
 watch(refreshing, () => {
-  let startAt: number;
   if (refreshing.value) return;
-  const r = pullToRefreshIcon.value.style
+  const yPos = pullToRefreshIcon.value.style
     .getPropertyValue("--y")
     .replace("px", "");
-  startAt = inverseReach(r ? +r + 200 : 0, 300) * 300;
-  function step(timestamp: DOMHighResTimeStamp) {
-    if (start === undefined) {
-      start = timestamp;
-    }
-    const elapsed = timestamp - start;
-    if (previousTimeStamp !== timestamp) {
-      const displacement = Math.max(0, (1 - elapsed / duration) * startAt);
-      updatePullToRefresh(displacement);
-      done = displacement === 0;
-    }
-    if (!done) {
-      previousTimeStamp = timestamp;
-      requestAnimationFrame(step);
-      return;
-    }
-    start = undefined;
-  }
-  requestAnimationFrame(step);
+  const startAt = inverseReach(yPos ? +yPos + 200 : 0, 300) * 300;
+  animate((elapsed) => {
+    const displacement = Math.max(0, (1 - elapsed / duration) * startAt);
+    updatePullToRefresh(displacement);
+    return displacement === 0;
+  });
 });
 
 onMounted(() => {
@@ -73,6 +57,7 @@ onMounted(() => {
   document.body.addEventListener(
     "touchstart",
     (e) => {
+      wasScroll = document.documentElement.classList.contains("noscroll");
       if (refreshing.value) return;
       _startY = e.touches[0].pageY;
       _lastY = e.touches[0].pageY;
@@ -93,7 +78,7 @@ onMounted(() => {
       requestAnimationFrame(() => {
         updatePullToRefresh(displacement);
       });
-      document.documentElement.classList.add("noscroll");
+      if (!wasScroll) document.documentElement.classList.add("noscroll");
     },
     { passive: true }
   );
@@ -102,7 +87,7 @@ onMounted(() => {
   document.body.addEventListener(
     "touchend",
     async () => {
-      document.documentElement.classList.remove("noscroll");
+      if (!wasScroll) document.documentElement.classList.remove("noscroll");
       if (document.scrollingElement.scrollTop !== 0) return;
       let displacement = _lastY - _startY;
       const shouldRefresh = displacement > 250;
@@ -112,28 +97,15 @@ onMounted(() => {
           requestAnimationFrame(() => (refreshing.value = false));
         }
       } else {
-        const r = pullToRefreshIcon.value.style
+        const yPos = pullToRefreshIcon.value.style
           .getPropertyValue("--y")
           .replace("px", "");
-        const startAt = inverseReach(r ? +r + 200 : 0, 300) * 300;
-        function step(timestamp: DOMHighResTimeStamp) {
-          if (start === undefined) {
-            start = timestamp;
-          }
-          const elapsed = timestamp - start;
-          if (previousTimeStamp !== timestamp) {
-            displacement = Math.max(0, (1 - elapsed / duration) * startAt);
-            done = displacement === 0;
-            updatePullToRefresh(displacement);
-          }
-          if (!done) {
-            previousTimeStamp = timestamp;
-            requestAnimationFrame(step);
-            return;
-          }
-          start = undefined;
-        }
-        requestAnimationFrame(step);
+        const startAt = inverseReach(yPos ? +yPos + 200 : 0, 300) * 300;
+        animate((elapsed) => {
+          const displacement = Math.max(0, (1 - elapsed / duration) * startAt);
+          updatePullToRefresh(displacement);
+          return displacement === 0;
+        });
       }
     },
     { passive: true }
