@@ -89,16 +89,16 @@ async function onInfinite($state) {
   searchParams.append("sort", sort.value);
   const url = `/api/getImages?${searchParams.toString()}`;
   try {
-    const newImages = await $fetch<Post[]>(url);
-    if (newImages.error) {
+    const { posts: newPosts, error } = await $fetch<any>(url);
+    if (error) {
       $state.error();
       return;
     }
-    if (newImages.length === 0) {
-      $state.completed();
+    if (newPosts.length === 0) {
+      $state.complete();
       return;
     }
-    images.value = [...images.value, ...newImages];
+    images.value = [...images.value, ...newPosts];
     $state.loaded();
   } catch (e) {
     $state.error();
@@ -110,7 +110,7 @@ onMounted(() => {
   images.value = [];
   id.value = !id.value;
   subreddits.value = [
-    ...new Set([...subreddits.value, route.params.subreddit]),
+    ...new Set([...subreddits.value, route.params.subreddit as string]),
   ].sort();
 });
 </script>
@@ -138,6 +138,9 @@ onMounted(() => {
         <div class="d-flex pa-6 justify-center">
           <v-btn color="error" @click="retry">Retry</v-btn>
         </div>
+      </template>
+      <template #complete>
+        <div class="d-flex pa-6 justify-center font-weight-bold">END</div>
       </template>
     </infinite-loading>
     <Fab icon="i-mdi-sort" :actions="fabActions" :active="sort"> </Fab>
