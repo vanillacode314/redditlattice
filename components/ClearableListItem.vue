@@ -17,6 +17,7 @@ const emit = defineEmits(["click", "remove"]);
 
 <style scoped>
 .item {
+  cursor: pointer;
   display: flex;
   justify-content: space-between;
   padding: 0.75rem;

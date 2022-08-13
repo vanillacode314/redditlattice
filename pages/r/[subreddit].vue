@@ -15,7 +15,7 @@ import "@appnest/masonry-layout";
 import { storeToRefs } from "pinia";
 const id = ref<boolean>(true);
 const store = useStore();
-const { title, query, refreshing, sort } = storeToRefs(store);
+const { subreddits, title, query, refreshing, sort } = storeToRefs(store);
 const fabActions = ref<Action[]>([
   {
     id: SortType.Top,
@@ -109,6 +109,9 @@ async function onInfinite($state) {
 onMounted(() => {
   images.value = [];
   id.value = !id.value;
+  subreddits.value = [
+    ...new Set([...subreddits.value, route.params.subreddit]),
+  ].sort();
 });
 </script>
 
