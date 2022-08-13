@@ -108,7 +108,7 @@ onMounted(() => {
       const shouldRefresh = displacement > 250;
       if (shouldRefresh) {
         refreshing.value = true;
-        if (route.path === "/") {
+        if (!route.path.startsWith("/r/")) {
           requestAnimationFrame(() => (refreshing.value = false));
         }
       } else {
