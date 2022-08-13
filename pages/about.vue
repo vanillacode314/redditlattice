@@ -1,3 +1,13 @@
+<script lang="ts" setup>
+import { storeToRefs } from "pinia";
+
+const store = useStore();
+const { title } = storeToRefs(store);
+title.value = `RedditLattice`;
+useHead({
+  title: "About - RedditLattice",
+});
+</script>
 <template>
   <v-container>
     <div class="content">

@@ -19,17 +19,6 @@ const main = ref<HTMLElement>();
 
 useHead({
   title: "RedditLattice",
-  meta: [
-    {
-      name: "description",
-      content:
-        "A reddit viewer for image based subreddits. Lays out the images in a tight lattice.",
-    },
-    {
-      name: "theme-color",
-      content: "#000000",
-    },
-  ],
 });
 
 function updatePullToRefresh(displacement: number) {

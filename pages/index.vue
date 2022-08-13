@@ -9,6 +9,9 @@ const { addQuery } = store;
 const searchTerm = ref<string>("");
 const srInput = ref<HTMLElement>();
 title.value = `RedditLattice`;
+useHead({
+  title: "Home - RedditLattice",
+});
 
 /// METHODS ///
 async function onSubmit() {

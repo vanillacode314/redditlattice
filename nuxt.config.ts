@@ -20,6 +20,17 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      meta: [
+        {
+          name: "description",
+          content:
+            "A reddit viewer for image based subreddits. Lays out the images in a tight lattice.",
+        },
+        {
+          name: "theme-color",
+          content: "#000000",
+        },
+      ],
       script: [{ src: "/registerSW.js" }],
       link: [
         {
