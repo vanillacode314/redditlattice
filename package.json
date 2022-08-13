@@ -24,6 +24,7 @@
     "pinia": "^2.0.17",
     "sass": "^1.54.0",
     "v3-infinite-loading": "^1.2.1",
+    "vue-gtag": "^2.0.1",
     "vuetify": "3.0.0-beta.6"
   }
 }

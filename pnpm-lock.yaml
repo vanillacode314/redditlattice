@@ -13,6 +13,7 @@ specifiers:
   pinia: ^2.0.17
   sass: ^1.54.0
   v3-infinite-loading: ^1.2.1
+  vue-gtag: ^2.0.1
   vuetify: 3.0.0-beta.6
   workbox-cli: ^6.5.4
 
@@ -26,6 +27,7 @@ dependencies:
   pinia: 2.0.18
   sass: 1.54.4
   v3-infinite-loading: 1.2.1
+  vue-gtag: 2.0.1
   vuetify: 3.0.0-beta.6
 
 devDependencies:
@@ -7406,6 +7408,12 @@ packages:
     peerDependenciesMeta:
       '@vue/composition-api':
         optional: true
+
+  /vue-gtag/2.0.1:
+    resolution: {integrity: sha512-aM4A58FVL0wV2ptYi+xzAjeg+pQVRyUcfBc5UkXAwQrR4t3WBhor50Izp2I+3Oo7+l+vWJ7u78DGcNzReb8S/A==}
+    peerDependencies:
+      vue: ^3.0.0
+    dev: false
 
   /vue-router/4.1.3_vue@3.2.37:
     resolution: {integrity: sha512-XvK81bcYglKiayT7/vYAg/f36ExPC4t90R/HIpzrZ5x+17BOWptXLCrEPufGgZeuq68ww4ekSIMBZY1qdUdfjA==}
