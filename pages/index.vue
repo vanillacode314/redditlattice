@@ -46,6 +46,8 @@ function setSearch({ title: search }: Item) {
 
 /// LIFECYCLE HOOKS ///
 onMounted(() => {
+  document.body.classList.add("noscroll");
+  document.documentElement.classList.add("noscroll");
   const listItems = document.querySelectorAll(".v-list-item");
   for (const item of listItems) {
     item.addEventListener("focus", (event) => {
@@ -62,6 +64,10 @@ onMounted(() => {
       }
     });
   }
+});
+onUnmounted(() => {
+  document.body.classList.remove("noscroll");
+  document.documentElement.classList.remove("noscroll");
 });
 
 const subredditItems = computed(() =>
