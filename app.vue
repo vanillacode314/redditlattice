@@ -189,6 +189,18 @@ html {
   overscroll-behavior-y: none;
   overflow: hidden;
 }
+
+*::-webkit-scrollbar {
+  width: 0.7rem;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: #333;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #444;
+}
 </style>
 
 <style scoped lang="scss">

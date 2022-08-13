@@ -77,7 +77,7 @@ function removeSearch({ title }: Item) {
 </script>
 
 <template>
-  <v-container fluid>
+  <v-container>
     <v-form
       ref="form"
       @submit.prevent="onSubmit()"
