@@ -21,6 +21,13 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      link: [
+        {
+          rel: "icon",
+          href: "/favicon.png",
+        },
+        { rel: "manifest", href: "/manifest.json" },
+      ],
       meta: [
         {
           name: "description",
@@ -33,13 +40,6 @@ export default defineNuxtConfig({
         },
       ],
       script: [{ src: "/registerSW.js", defer: true }],
-      link: [
-        {
-          rel: "icon",
-          href: "/favicon.png",
-        },
-        { rel: "manifest", href: "/manifest.json" },
-      ],
     },
   },
 });
