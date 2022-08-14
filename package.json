@@ -1,6 +1,6 @@
 {
   "name": "RedditLattice",
-  "description": "A reddit viewer for image based subreddits. Lays out the images in a tight lattice.",
+  "description": "A FOSS reddit viewer for image based subreddits. Lays out the images in a tight lattice. Created with NuxtJS, VueJS, and Vuetify.",
   "private": true,
   "scripts": {
     "build": "nuxt build && workbox generateSW workbox-config.js",

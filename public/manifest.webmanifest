@@ -1,7 +1,7 @@
 {
   "name": "redditlattice",
   "short_name": "redditlattice",
-  "description": "A reddit viewer for image based subreddits. Lays out the images in a tight lattice.",
+  "description": "A FOSS reddit viewer for image based subreddits. Lays out the images in a tight lattice. Created with NuxtJS, VueJS, and Vuetify.",
   "display": "standalone",
   "start_url": "/",
   "scope": "/",

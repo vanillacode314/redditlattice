@@ -32,7 +32,7 @@ export default defineNuxtConfig({
         {
           name: "description",
           content:
-            "A reddit viewer for image based subreddits. Lays out the images in a tight lattice.",
+            "A FOSS reddit viewer for image based subreddits. Lays out the images in a tight lattice. Created with NuxtJS, VueJS, and Vuetify.",
         },
         {
           name: "theme-color",

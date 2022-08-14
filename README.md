@@ -1,4 +1,10 @@
-# Nuxt 3 Minimal Starter
+# RedditLattice
+
+> A FOSS reddit viewer for image based subreddits. Lays out the images in a tight lattice. Created with NuxtJS, VueJS, and Vuetify
+
+[https://redditlattice.netlify.app/](https://redditlattice.netlify.app/)
+
+# Development Guide
 
 Look at the [nuxt 3 documentation](https://v3.nuxtjs.org) to learn more.
 
