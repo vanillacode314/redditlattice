@@ -21,6 +21,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      title: "RedditLattice",
       link: [
         {
           rel: "icon",
