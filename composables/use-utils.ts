@@ -26,11 +26,11 @@ function round(num: number, precision: number = 2): number {
   return Math.round(num * p) / p;
 }
 
-let start: DOMHighResTimeStamp = undefined;
-let previousTimeStamp: DOMHighResTimeStamp = undefined;
-let done: boolean = false;
 type StepFunction = (elapsed: DOMHighResTimeStamp) => boolean;
 function animate(step: StepFunction) {
+  let start: DOMHighResTimeStamp = undefined;
+  let previousTimeStamp: DOMHighResTimeStamp = undefined;
+  let done: boolean = false;
   function doStep(timestamp: DOMHighResTimeStamp) {
     if (start === undefined) {
       start = timestamp;
