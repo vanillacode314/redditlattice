@@ -7,6 +7,13 @@
   "scope": "/",
   "background_color": "#000000",
   "theme_color": "#000000",
+  "share_target": {
+    "action": "/share-target/",
+    "method": "GET",
+    "params": {
+      "text": "q"
+    }
+  },
   "icons": [
     {
       "src": "/favicon.png",
