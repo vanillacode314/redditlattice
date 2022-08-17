@@ -5,13 +5,13 @@ export interface Action {
   callback: Function;
 }
 
+/// STATE ///
 const props = defineProps<{
   icon: string;
   actions: Action[];
-  active: Action["id"];
+  selected: Action["id"];
 }>();
-
-const selected = ref<boolean>(false);
+const active = ref<boolean>(false);
 const hidden = ref<boolean>(false);
 
 let last_known_scroll_position = 0;
@@ -19,6 +19,38 @@ let ticking = false;
 const threshold = 50; // in pixels
 const transitionDuration = 100;
 
+/// METHODS ///
+/** hide on scroll */
+const onScroll = () => {
+  const dy = window.scrollY - last_known_scroll_position;
+  last_known_scroll_position = window.scrollY;
+
+  if (!ticking) {
+    window.requestAnimationFrame(function () {
+      active.value = false;
+      if (Math.abs(dy) > threshold) {
+        if (dy > 0) {
+          hidden.value = true;
+        } else {
+          hidden.value = false;
+        }
+      }
+      ticking = false;
+    });
+
+    ticking = true;
+  }
+};
+
+function toggleActive() {
+  active.value = !active.value;
+}
+
+function close() {
+  active.value = false;
+}
+
+/// TRANSITION METHODS ///
 function onBeforeEnter(el) {
   const index = Number(el.dataset.index);
   el.style.opacity = 0;
@@ -55,35 +87,7 @@ function onLeave(el: HTMLElement, done) {
   anim.onfinish = done;
 }
 
-const onScroll = () => {
-  const dy = window.scrollY - last_known_scroll_position;
-  last_known_scroll_position = window.scrollY;
-
-  if (!ticking) {
-    window.requestAnimationFrame(function () {
-      selected.value = false;
-      if (Math.abs(dy) > threshold) {
-        if (dy > 0) {
-          hidden.value = true;
-        } else {
-          hidden.value = false;
-        }
-      }
-      ticking = false;
-    });
-
-    ticking = true;
-  }
-};
-
-function toggleActive() {
-  selected.value = !selected.value;
-}
-
-function close() {
-  selected.value = false;
-}
-
+/// LIFECYCLE HOOKS ///
 onMounted(() => {
   window.addEventListener("scroll", onScroll);
 });
@@ -104,13 +108,13 @@ onUnmounted(() => {
         >
           <span
             :data-index="index"
-            v-for="(action, index) in selected ? actions : []"
+            v-for="(action, index) in active ? actions : []"
             :key="action.id"
           >
             <v-btn
               icon
               v-if="selected"
-              :color="active === action.id ? 'primary' : ''"
+              :color="selected === action.id ? 'primary' : ''"
               @click="
                 () => {
                   action.callback();
@@ -123,15 +127,15 @@ onUnmounted(() => {
           </span>
         </TransitionGroup>
       </div>
-      <div class="fab" :class="{ active: selected }">
+      <div class="fab" :class="{ active }">
         <slot>
           <v-btn
             size="large"
             @click="toggleActive()"
-            :variant="selected ? 'flat' : 'elevated'"
+            :variant="active ? 'flat' : 'elevated'"
             icon
           >
-            <icon :name="selected ? 'i-mdi-close' : icon"></icon>
+            <icon :name="active ? 'i-mdi-close' : icon"></icon>
           </v-btn>
         </slot>
       </div>

@@ -8,11 +8,14 @@ export interface Post {
 import { SortType } from "~~/composables/use-store";
 import { Action } from "~~/components/Fab.vue";
 
-/// COMPONENTS ///
+/// WEB COMPONENTS ///
 import "@appnest/masonry-layout";
 
-/// STATE ///
 import { storeToRefs } from "pinia";
+const route = useRoute();
+const router = useRouter();
+
+/// STATE ///
 const id = ref<boolean>(true);
 const store = useStore();
 const { subreddits, title, query, refreshing, sort } = storeToRefs(store);
@@ -39,21 +42,21 @@ const fabActions = ref<Action[]>([
     },
   },
 ]);
-const route = useRoute();
-const router = useRouter();
 const images = ref<Post[]>([]);
-const masonry = ref(null);
 
+// flush images when sort type is changed
 watch(sort, () => {
   images.value = [];
 });
 
+// dynamic navbar title
 watchEffect(() => {
   title.value = route.query.q
     ? `${route.query.q} - /r/${route.params.subreddit}`
     : `/r/${route.params.subreddit}`;
 });
 
+// onSearch flush images and change route
 query.value = route.query.q as string;
 watch(query, () => {
   images.value = [];
@@ -61,14 +64,20 @@ watch(query, () => {
     path: `/r/${route.params.subreddit}`,
     query: { q: query.value },
   });
+  // HACK: to manually reset infinite scroll state
   id.value = !id.value;
 });
 
+// flush images on refresh
 watchEffect(() => {
   if (!refreshing.value) return;
   images.value = [];
+  // HACK: to manually reset infinite scroll state
   id.value = !id.value;
 });
+
+/// TEMPLATE REFS ///
+const masonry = ref(null);
 
 /// HEAD ///
 useHead({
@@ -78,8 +87,10 @@ useHead({
 });
 
 /// METHODS ///
-async function onInfinite($state) {
-  requestAnimationFrame(() => (refreshing.value = false));
+/**
+ * createSearchParams for local api query
+ */
+function createSearchParams(): URLSearchParams {
   const lastImage = images.value.at(-1);
   const searchParams = new URLSearchParams({
     subreddit: route.params.subreddit as string,
@@ -87,7 +98,15 @@ async function onInfinite($state) {
   if (route.query.q) searchParams.append("q", route.query.q as string);
   if (lastImage) searchParams.append("after", lastImage.name);
   searchParams.append("sort", sort.value);
-  const url = `/api/getImages?${searchParams.toString()}`;
+  return searchParams;
+}
+
+/**
+ * infinite loader handler
+ */
+async function onInfinite($state) {
+  requestAnimationFrame(() => (refreshing.value = false));
+  const url = `/api/getImages?${createSearchParams().toString()}`;
   try {
     const { posts: newPosts, error } = await $fetch<any>(url);
     if (error) {
@@ -106,8 +125,10 @@ async function onInfinite($state) {
 }
 
 /// LIFECYCLE HOOKS ///
+// flush old images on mount and add subreddit to localStorage
 onMounted(() => {
   images.value = [];
+  // HACK: to manually reset infinite scroll state
   id.value = !id.value;
   subreddits.value = [
     ...new Set([...subreddits.value, route.params.subreddit as string]),
@@ -143,7 +164,7 @@ onMounted(() => {
         <div class="d-flex pa-6 justify-center font-weight-bold">END</div>
       </template>
     </infinite-loading>
-    <Fab icon="i-mdi-sort" :actions="fabActions" :active="sort"> </Fab>
+    <Fab icon="i-mdi-sort" :actions="fabActions" :selected="sort"> </Fab>
   </div>
 </template>
 

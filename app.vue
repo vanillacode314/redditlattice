@@ -4,37 +4,27 @@ import { storeToRefs } from "pinia";
 const route = useRoute();
 const router = useRouter();
 const online = useOnline();
-const loading = ref<boolean>(false);
+
+/// REFS ///
 const pullToRefreshIcon = ref<HTMLElement>();
+
+/// STATE ///
 const store = useStore();
-const { animate, reach, inverseReach } = useUtils();
 const { refreshing } = storeToRefs(store);
-router.beforeEach(() => {
-  loading.value = true;
-});
-router.afterEach(() => {
-  loading.value = false;
-});
-const main = ref<HTMLElement>();
-
-useHead({
-  title: "RedditLattice",
-});
-
-let wasScroll: boolean = false;
-function updatePullToRefresh(displacement: number) {
-  if (!pullToRefreshIcon.value) return;
-  pullToRefreshIcon.value.style.setProperty(
-    "--angle",
-    `${reach(displacement / 300, 360)}deg`
-  );
-  pullToRefreshIcon.value.style.setProperty(
-    "--y",
-    `${reach(displacement / 300, 300) - 200}px`
-  );
-}
-
+/**
+ * if the scrollbar was hidden or not before pull to refresh was triggered
+ */
+let wasScrollHidden: boolean = false;
+/**
+ * duration for pull to refresh animation on touch release
+ */
 const duration: number = 300;
+/**
+ * if app is in loading state
+ */
+const loading = ref<boolean>(false);
+
+// watch refreshing and when it's set to false reset pull to refresh icon state
 watch(refreshing, () => {
   if (refreshing.value) return;
   const yPos = pullToRefreshIcon.value.style
@@ -48,7 +38,42 @@ watch(refreshing, () => {
   });
 });
 
-onMounted(() => {
+/// UTILS ///
+const { animate, reach, inverseReach } = useUtils();
+
+/// METHODS ///
+/**
+ * make loading variable reactive to router navigation state
+ */
+function setupLoading() {
+  router.beforeEach(() => {
+    loading.value = true;
+  });
+  router.afterEach(() => {
+    loading.value = false;
+  });
+}
+
+/**
+ * utility function to update pull to refresh icon state depending on user drag distance
+ * @param {number} displacement - the drag distance
+ */
+function updatePullToRefresh(displacement: number) {
+  if (!pullToRefreshIcon.value) return;
+  pullToRefreshIcon.value.style.setProperty(
+    "--angle",
+    `${reach(displacement / 300, 360)}deg`
+  );
+  pullToRefreshIcon.value.style.setProperty(
+    "--y",
+    `${reach(displacement / 300, 300) - 200}px`
+  );
+}
+
+/**
+ * utility function to add touch handlers for pull to refresh
+ */
+function setupPullToRefresh() {
   updatePullToRefresh(0);
   let _startY: number;
   let _lastY: number;
@@ -57,7 +82,7 @@ onMounted(() => {
   document.body.addEventListener(
     "touchstart",
     (e) => {
-      wasScroll = document.documentElement.classList.contains("noscroll");
+      wasScrollHidden = document.documentElement.classList.contains("noscroll");
       if (refreshing.value) return;
       _startY = e.touches[0].pageY;
       _lastY = e.touches[0].pageY;
@@ -78,7 +103,7 @@ onMounted(() => {
       requestAnimationFrame(() => {
         updatePullToRefresh(displacement);
       });
-      if (!wasScroll) document.documentElement.classList.add("noscroll");
+      if (!wasScrollHidden) document.documentElement.classList.add("noscroll");
     },
     { passive: true }
   );
@@ -87,7 +112,8 @@ onMounted(() => {
   document.body.addEventListener(
     "touchend",
     async () => {
-      if (!wasScroll) document.documentElement.classList.remove("noscroll");
+      if (!wasScrollHidden)
+        document.documentElement.classList.remove("noscroll");
       if (document.scrollingElement.scrollTop !== 0) return;
       let displacement = _lastY - _startY;
       const shouldRefresh = displacement > 250;
@@ -110,6 +136,17 @@ onMounted(() => {
     },
     { passive: true }
   );
+}
+
+/// LIFECYCLE HOOKS ///
+onMounted(() => {
+  setupLoading();
+  setupPullToRefresh();
+});
+
+/// HEAD ///
+useHead({
+  title: "RedditLattice",
 });
 </script>
 
@@ -127,7 +164,7 @@ onMounted(() => {
         </div>
       </template>
       <template v-else>
-        <div class="main" :class="{ refreshing: refreshing }" ref="main">
+        <div class="main" :class="{ refreshing: refreshing }">
           <NuxtPage />
           <div ref="pullToRefreshIcon" class="refresher">
             <v-btn variant="flat" color="primary" icon>
@@ -173,6 +210,7 @@ body::-webkit-scrollbar-thumb {
     transform: translateX(-50%) translateY(var(--y)) rotate(360deg);
   }
 }
+
 .online-notif {
   background-color: #222;
   padding: 0.5rem;
@@ -187,6 +225,7 @@ body::-webkit-scrollbar-thumb {
   font-weight: bold;
   right: 0;
 }
+
 .main {
   height: 100%;
   position: relative;
@@ -197,6 +236,7 @@ body::-webkit-scrollbar-thumb {
     }
   }
 }
+
 .refresher {
   z-index: 10;
   position: absolute;
@@ -210,9 +250,11 @@ body::-webkit-scrollbar-thumb {
 .slide-enter-active {
   transition: transform 0.3s ease-in;
 }
+
 .slide-leave-active {
   transition: transform 0.3s ease-out;
 }
+
 .slide-enter-from,
 .slide-leave-to {
   transform: translateY(100%);

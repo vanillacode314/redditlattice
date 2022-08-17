@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 
+/// STATE ///
 const store = useStore();
 const { searches, title, query, navVisible, searching, drawer } =
   storeToRefs(store);
-let searchTerm = ref<string>("");
-
+const searchTerm = ref<string>("");
 const isMobile = useMediaQuery("(max-width: 720px)");
 
+/// METHODS ///
+/** hide on scroll */
 let last_known_scroll_position = 0;
 let ticking = false;
 const threshold = 50; // in pixels
-
-const onScroll = () => {
+function onScroll() {
   const dy = window.scrollY - last_known_scroll_position;
   last_known_scroll_position = window.scrollY;
   const reached_top = window.scrollY < 1;
@@ -35,13 +36,7 @@ const onScroll = () => {
 
     ticking = true;
   }
-};
-onMounted(() => {
-  window.addEventListener("scroll", onScroll);
-});
-onUnmounted(() => {
-  window.removeEventListener("scroll", onScroll);
-});
+}
 
 function onSearch() {
   searching.value = true;
@@ -50,9 +45,6 @@ function onSearch() {
       ".search-field input"
     ) as HTMLInputElement;
     if (!inp) return;
-    inp.addEventListener("change", () => {
-      search();
-    });
     inp.focus();
   });
 }
@@ -67,7 +59,8 @@ function clearSearch() {
     const inp = document.querySelector(
       ".search-field input"
     ) as HTMLInputElement;
-    if (inp) inp.focus();
+    if (!inp) return;
+    inp.focus();
   });
 }
 
@@ -77,6 +70,14 @@ function search() {
   searching.value = false;
   searchTerm.value = "";
 }
+
+/// LIFECYCLE HOOKS ///
+onMounted(() => {
+  window.addEventListener("scroll", onScroll);
+});
+onUnmounted(() => {
+  window.removeEventListener("scroll", onScroll);
+});
 </script>
 
 <template>
@@ -109,31 +110,27 @@ function search() {
         </v-app-bar-title>
       </template>
       <template v-else>
-        <v-text-field
-          v-model="searchTerm"
-          class="search-field"
-          variant="plain"
-          hide-details
-        >
-        </v-text-field>
+        <form @submit.prevent="search" style="display: contents">
+          <v-text-field
+            v-model="searchTerm"
+            class="search-field"
+            variant="plain"
+            hide-details
+          >
+          </v-text-field>
+        </form>
       </template>
 
       <v-spacer></v-spacer>
-      <div class="wrap-btns">
-        <template v-if="$route.path.startsWith('/r/')">
-          <transition name="fade">
-            <template v-if="!searching">
-              <v-btn @click="onSearch()" icon>
-                <icon name="i-mdi-magnify"></icon>
-              </v-btn>
-            </template>
-            <template v-else>
-              <v-btn @click="clearSearch()" icon>
-                <icon name="i-mdi-close-circle"></icon>
-              </v-btn>
-            </template>
-          </transition>
-        </template>
+      <div class="wrap-btns" v-if="$route.path.startsWith('/r/')">
+        <transition name="fade">
+          <v-btn @click="onSearch()" icon v-if="!searching">
+            <icon name="i-mdi-magnify"></icon>
+          </v-btn>
+          <v-btn @click="clearSearch()" icon v-else>
+            <icon name="i-mdi-close-circle"></icon>
+          </v-btn>
+        </transition>
       </div>
     </v-app-bar>
   </Transition>
@@ -163,6 +160,6 @@ function search() {
 .fade-enter-from,
 .fade-leave-to {
   transform: rotate(180deg);
-  opacity: 0;
+  /* opacity: 0; */
 }
 </style>

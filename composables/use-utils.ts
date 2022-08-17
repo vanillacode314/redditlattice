@@ -2,31 +2,73 @@ interface Options {
   stiffness?: number;
 }
 
+/**
+ * Return value approaches N as x approaches 1
+ * @param {number} x - input value a number b/w 0 and 1
+ * @param {number} N - value to approach / reach
+ * @param {Options} [options={}] - options to modify the curve
+ * @param {number} [options.stiffness=1] - the stiffness of the curve
+ */
 function reach(x: number, N: number, { stiffness = 1 }: Options = {}): number {
   return -N * (Math.pow(Math.E, -x / stiffness) - 1);
 }
+
+/**
+ * Return value approaches 1 as x approaches N
+ *
+ * @param {number} x - input value aka the reach func return value
+ * @param {number} N - value that x approached / reached
+ * @param {Options} [options={}] - options to modify the curve
+ * @param {number} [options.stiffness=1] - the stiffness of the curve
+ */
 function inverseReach(
-  reach: number,
+  x: number,
   N: number,
   { stiffness = 1 }: Options = {}
 ): number {
-  return -Math.log(-reach / N + 1) * stiffness;
+  return -Math.log(-x / N + 1) * stiffness;
 }
 
-function sleep(duration: number) {
+/**
+ * a sleep function to use in async functions, uses setTimeout
+ *
+ * @param {number} duration - duration to sleep for
+ */
+function sleep(duration: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, duration));
 }
 
+/**
+ * log function with arbitrary base
+ *
+ * @param {number} base - base to use
+ * @param {number} num - number to find log of
+ * @returns {number} log of num with the given base
+ */
 function log(base: number, num: number): number {
   return Math.log(num) / Math.log(base);
 }
 
+/**
+ * round function with arbitrary precision
+ *
+ * @param {number} num - number to round
+ * @param {number} [precision] - precision aka number of decimal places to keep
+ * @returns {number} the num rounded to precision decimal places
+ */
 function round(num: number, precision: number = 2): number {
   const p = Math.pow(10, precision);
   return Math.round(num * p) / p;
 }
 
 type StepFunction = (elapsed: DOMHighResTimeStamp) => boolean;
+/**
+ * schedules the step function using requestAnimationFrame the step
+ * function provided is called with the amount of milliseconds elapsed
+ *
+ * @param {StepFunction} step - callback that takes number of milliseconds elapsed as its
+ * first argument and it must return a boolean that should be true when the animation is done
+ */
 function animate(step: StepFunction) {
   let start: DOMHighResTimeStamp = undefined;
   let previousTimeStamp: DOMHighResTimeStamp = undefined;
