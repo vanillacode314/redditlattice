@@ -157,7 +157,7 @@ useHead({
 </template>
 <style scoped>
 .myContainer {
-  max-height: 100vh;
+  height: calc(var(--vh, 1vh) * 100 - var(--navbar-height));
   overflow: hidden;
   display: flex;
   flex-direction: column;

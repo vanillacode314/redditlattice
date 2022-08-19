@@ -138,10 +138,21 @@ function setupPullToRefresh() {
   );
 }
 
+/** fix for weird vh unit behaviour */
+function getVH() {
+  let vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty("--vh", `${vh}px`);
+}
 /// LIFECYCLE HOOKS ///
 onMounted(() => {
   setupLoading();
   setupPullToRefresh();
+  getVH();
+  window.addEventListener("resize", getVH);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", getVH);
 });
 
 /// HEAD ///
@@ -179,10 +190,14 @@ useHead({
 </template>
 
 <style>
+:root {
+  --navbar-height: 64px;
+}
 body,
 html {
   overscroll-behavior-y: none;
 }
+
 .noscroll {
   overscroll-behavior-y: none;
   overflow: hidden;
