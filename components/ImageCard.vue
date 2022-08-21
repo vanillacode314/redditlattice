@@ -39,7 +39,7 @@ function removePopupImage() {
     :src="image.url"
     :key="image.name"
     :alt="image.title"
-    loading="lazy"
+    loading="eager"
     style="aspect-ratio: 1"
   />
   <div :class="{ isOnTop: isOnTop }" @click.self="removePopupImage">
