@@ -44,6 +44,9 @@ const fabActions = ref<Action[]>([
 ]);
 const images = ref<Post[]>([]);
 
+// id of the last image in the last request, used to request the next set of images after this id
+let after = "";
+
 // flush images when sort type is changed
 watch(sort, () => {
   images.value = [];
@@ -91,18 +94,11 @@ useHead({
  * createSearchParams for local api query
  */
 function createSearchParams(): URLSearchParams {
-  const lastImage = images.value.at(-1);
   const searchParams = new URLSearchParams({
     subreddit: route.params.subreddit as string,
   });
   if (route.query.q) searchParams.append("q", route.query.q as string);
-  if (lastImage)
-    searchParams.append(
-      "after",
-      lastImage.name.includes("-")
-        ? lastImage.name.split("-")[0]
-        : lastImage.name
-    );
+  if (lastImage) searchParams.append("after", after);
   searchParams.append("sort", sort.value);
   return searchParams;
 }
@@ -114,11 +110,15 @@ async function onInfinite($state) {
   requestAnimationFrame(() => (refreshing.value = false));
   const url = `/api/getImages?${createSearchParams().toString()}`;
   try {
-    const { posts: newPosts, error } = await $fetch<any>(url);
+    const data = await $fetch<any>(url);
+    const { posts: newPosts, error } = data;
+
+    // return on error
     if (error) {
       $state.error();
       return;
     }
+    after = data.after;
     if (newPosts.length === 0) {
       $state.complete();
       return;

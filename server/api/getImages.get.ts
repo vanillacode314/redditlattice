@@ -22,6 +22,27 @@ function getKeys(obj: Object, keys: string[]): Object {
   return retval;
 }
 
+function expandGallery(posts) {
+  return posts.flatMap((post) => {
+    if (
+      post.url.startsWith(`https://www.reddit.com/gallery/`) &&
+      Object.values(post.media_metadata).length > 0
+    ) {
+      let retVal = [];
+      for (const { id, m: mime } of Object.values(post.media_metadata)) {
+        const ext = mime.replace("image/", "");
+        retVal.push({
+          name: `${post.name}-${id}`,
+          url: `https://i.redd.it/${id}.${ext}`,
+          title: post.title,
+        });
+      }
+      return retVal;
+    }
+    return [post];
+  });
+}
+
 export default defineEventHandler(async (event) => {
   let { subreddit, sort, after, q } = useQuery(event);
   if (!sort) sort = "top";
@@ -46,25 +67,9 @@ export default defineEventHandler(async (event) => {
 
   if (res.ok) {
     const { data } = await res.json();
+    const after = data.after;
     let posts = data.children.map((c) => c.data);
-    posts = posts.flatMap((post) => {
-      if (
-        post.url.startsWith(`https://www.reddit.com/gallery/`) &&
-        Object.values(post.media_metadata).length > 0
-      ) {
-        let retVal = [];
-        for (const { id, m: mime } of Object.values(post.media_metadata)) {
-          const ext = mime.replace("image/", "");
-          retVal.push({
-            name: `${post.name}-${id}`,
-            url: `https://i.redd.it/${id}.${ext}`,
-            title: post.title,
-          });
-        }
-        return retVal;
-      }
-      return [post];
-    });
+    posts = expandGallery(posts);
     posts = posts.filter(
       (post) =>
         !post.is_self &&
@@ -73,9 +78,7 @@ export default defineEventHandler(async (event) => {
         extension_list.some((e) => post.url?.endsWith(e))
     );
     posts = posts.map((c) => getKeys(c, ["name", "url", "title"]));
-    return {
-      posts: posts,
-    };
+    return { posts, after };
   } else {
     return {
       error: res.statusText,
