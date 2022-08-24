@@ -133,6 +133,7 @@ async function onInfinite($state) {
 /// LIFECYCLE HOOKS ///
 // flush old images on mount and add subreddit to localStorage
 onMounted(() => {
+  after = "";
   images.value = [];
   // HACK: to manually reset infinite scroll state
   id.value = !id.value;
