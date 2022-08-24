@@ -98,7 +98,7 @@ function createSearchParams(): URLSearchParams {
     subreddit: route.params.subreddit as string,
   });
   if (route.query.q) searchParams.append("q", route.query.q as string);
-  if (lastImage) searchParams.append("after", after);
+  if (after) searchParams.append("after", after);
   searchParams.append("sort", sort.value);
   return searchParams;
 }
