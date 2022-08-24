@@ -95,7 +95,6 @@ function createSearchParams(): URLSearchParams {
   if (route.query.q) searchParams.append("q", route.query.q as string);
   if (after) searchParams.append("after", after);
   searchParams.append("sort", sort.value);
-  console.log(Object.fromEntries([...searchParams]));
   return searchParams;
 }
 
@@ -112,12 +111,16 @@ async function onInfinite($state) {
       $state.error();
       return;
     }
-    after = data.after;
+    images.value = [...images.value, ...newPosts];
     if (newPosts.length === 1) {
       $state.complete();
       return;
     }
-    images.value = [...images.value, ...newPosts];
+    if (!data.after) {
+      $state.complete();
+      return;
+    }
+    after = data.after;
     setTimeout(() => $state.loaded(), 1000);
   } catch (e) {
     $state.error();
