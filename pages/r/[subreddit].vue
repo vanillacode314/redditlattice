@@ -47,11 +47,6 @@ const images = ref<Post[]>([]);
 // id of the last image in the last request, used to request the next set of images after this id
 let after = "";
 
-// flush images when sort type is changed
-watch(sort, () => {
-  images.value = [];
-});
-
 // dynamic navbar title
 watchEffect(() => {
   title.value = route.query.q
@@ -59,24 +54,25 @@ watchEffect(() => {
     : `/r/${route.params.subreddit}`;
 });
 
+// flush images when sort type is changed
+watch(sort, () => {
+  resetState();
+});
+
 // onSearch flush images and change route
 query.value = route.query.q as string;
 watch(query, () => {
-  images.value = [];
+  resetState();
   router.push({
     path: `/r/${route.params.subreddit}`,
     query: { q: query.value },
   });
-  // HACK: to manually reset infinite scroll state
-  id.value = !id.value;
 });
 
 // flush images on refresh
 watchEffect(() => {
   if (!refreshing.value) return;
-  images.value = [];
-  // HACK: to manually reset infinite scroll state
-  id.value = !id.value;
+  resetState();
 });
 
 /// TEMPLATE REFS ///
@@ -90,9 +86,8 @@ useHead({
 });
 
 /// METHODS ///
-/**
- * createSearchParams for local api query
- */
+
+/** createSearchParams for local api query */
 function createSearchParams(): URLSearchParams {
   const searchParams = new URLSearchParams({
     subreddit: route.params.subreddit as string,
@@ -100,12 +95,11 @@ function createSearchParams(): URLSearchParams {
   if (route.query.q) searchParams.append("q", route.query.q as string);
   if (after) searchParams.append("after", after);
   searchParams.append("sort", sort.value);
+  console.log(Object.fromEntries([...searchParams]));
   return searchParams;
 }
 
-/**
- * infinite loader handler
- */
+/** infinite loader handler */
 async function onInfinite($state) {
   requestAnimationFrame(() => (refreshing.value = false));
   const url = `/api/getImages?${createSearchParams().toString()}`;
@@ -119,24 +113,29 @@ async function onInfinite($state) {
       return;
     }
     after = data.after;
-    if (newPosts.length === 0) {
+    if (newPosts.length === 1) {
       $state.complete();
       return;
     }
     images.value = [...images.value, ...newPosts];
-    $state.loaded();
+    setTimeout(() => $state.loaded(), 1000);
   } catch (e) {
     $state.error();
   }
 }
 
-/// LIFECYCLE HOOKS ///
-// flush old images on mount and add subreddit to localStorage
-onMounted(() => {
+/** reset grid state */
+function resetState() {
   after = "";
   images.value = [];
   // HACK: to manually reset infinite scroll state
   id.value = !id.value;
+}
+
+/// LIFECYCLE HOOKS ///
+// flush old images on mount and add subreddit to localStorage
+onMounted(() => {
+  resetState();
   subreddits.value = [
     ...new Set([...subreddits.value, route.params.subreddit as string]),
   ].sort();
@@ -154,7 +153,7 @@ onMounted(() => {
     </masonry-layout>
     <infinite-loading
       @infinite="onInfinite"
-      :identifier="`${route.query.q}-${route.params.subreddit}-${sort}-${id}`"
+      :identifier="`${route.query.q}-${route.params.subreddit}-${id}`"
       :distance="100"
     >
       <template #spinner>
