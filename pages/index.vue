@@ -20,9 +20,7 @@ const searchesItems = computed(() =>
 const subredditInput = ref<HTMLElement>();
 
 /// METHODS ///
-/**
- * checks if a query was provided and redirects to the results page
- */
+/** checks if a query was provided and redirects to the results page */
 async function onSubmit() {
   if (!searchTerm.value) return;
   addQuery(searchTerm.value);
@@ -34,9 +32,7 @@ async function onSubmit() {
   }
 }
 
-/**
- * set subreddit for the query input on subreddit item click in list
- */
+/** set subreddit for the query input on subreddit item click in list */
 function setSubreddit({ title: sr }: Item) {
   if (searchTerm.value.includes("?")) {
     const [_, search] = searchTerm.value.split("?");
@@ -46,9 +42,7 @@ function setSubreddit({ title: sr }: Item) {
   }
 }
 
-/**
- * set search for the query input on search item click in list
- */
+/** set search for the query input on search item click in list */
 function setSearch({ title: search }: Item) {
   if (!searchTerm.value) return;
   if (searchTerm.value.includes("?")) {
@@ -59,24 +53,18 @@ function setSearch({ title: search }: Item) {
   }
 }
 
-/**
- * remove item from saved subreddit list
- */
+/** remove item from saved subreddit list */
 function removeSubreddit({ title }: Item) {
   subreddits.value = subreddits.value.filter((sr) => sr !== title);
 }
 
-/**
- * remove item from saved search list
- */
+/** remove item from saved search list */
 function removeSearch({ title }: Item) {
   searches.value = searches.value.filter((s) => s !== title);
 }
 
-/**
- * makes so that clicking any list item will return focus to the
- subreddit input if it was focused before clicking
- */
+/** makes so that clicking any list item will return focus to the subreddit 
+input if it was focused before clicking */
 function setupListItemFocusHandlers() {
   const listItems = document.querySelectorAll(".v-list-item");
   for (const item of listItems) {
