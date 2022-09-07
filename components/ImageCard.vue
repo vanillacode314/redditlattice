@@ -17,8 +17,13 @@ function onImageLoad() {
   requestAnimationFrame(() => onImageLoad());
 }
 
-onMounted(() => {
-  const width = imgElement.value?.getBoundingClientRect().width ?? 0;
+onMounted(async () => {
+  await nextTick();
+  const cols = getComputedStyle(imgElement.value).getPropertyValue(
+    "--_masonry-layout-col-count"
+  );
+  const width =
+    imgElement.value.parentNode.getBoundingClientRect().width / cols;
   imgElement.value.src = `http://redditlattice-server.vercel.app/?url=${
     props.image.url
   }&width=${width * 1.3}&format=webp`;
