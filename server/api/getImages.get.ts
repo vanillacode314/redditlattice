@@ -10,6 +10,7 @@ const extension_list = [
   ".tiff",
   ".tif",
   ".psd",
+  "avif",
   ".bmp",
   ".raw",
   ".jp2",
