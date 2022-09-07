@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Post } from "@/pages/r/[subreddit].vue";
-defineProps<{
+const props = defineProps<{
   image: Post;
 }>();
 const emit = defineEmits(["load"]);
@@ -9,6 +9,8 @@ const isOnTop = ref<boolean>(false);
 
 function onImageLoad() {
   if (!imgElement.value) return;
+  const width = imgElement.value?.getBoundingClientRect().width ?? 0;
+  imgElement.value.src = `http://redditlattice-server.vercel.app/?url=${props.image.url}&width=${width}&format=webp`;
   if (imgElement.value.naturalHeight) {
     imgElement.value.style.aspectRatio = "auto";
     emit("load");
@@ -32,14 +34,13 @@ function removePopupImage() {
 }
 </script>
 
+<!-- :src="`http://localhost:3000/?url=${image.url}&width=${1080}&format=avif`" -->
 <template>
   <img
     v-longpress="popupImage"
     ref="imgElement"
-    :src="image.url"
     :key="image.name"
     :alt="image.title"
-    loading="eager"
     style="aspect-ratio: 1"
   />
   <div :class="{ isOnTop: isOnTop }" @click.self="removePopupImage">
