@@ -9,8 +9,6 @@ const isOnTop = ref<boolean>(false);
 
 function onImageLoad() {
   if (!imgElement.value) return;
-  const width = imgElement.value?.getBoundingClientRect().width ?? 0;
-  imgElement.value.src = `http://redditlattice-server.vercel.app/?url=${props.image.url}&width=${width}&format=webp`;
   if (imgElement.value.naturalHeight) {
     imgElement.value.style.aspectRatio = "auto";
     emit("load");
@@ -20,6 +18,8 @@ function onImageLoad() {
 }
 
 onMounted(() => {
+  const width = imgElement.value?.getBoundingClientRect().width ?? 0;
+  imgElement.value.src = `http://redditlattice-server.vercel.app/?url=${props.image.url}&width=${width}&format=webp`;
   onImageLoad();
 });
 
@@ -34,7 +34,6 @@ function removePopupImage() {
 }
 </script>
 
-<!-- :src="`http://localhost:3000/?url=${image.url}&width=${1080}&format=avif`" -->
 <template>
   <img
     v-longpress="popupImage"
