@@ -19,7 +19,9 @@ function onImageLoad() {
 
 onMounted(() => {
   const width = imgElement.value?.getBoundingClientRect().width ?? 0;
-  imgElement.value.src = `http://redditlattice-server.vercel.app/?url=${props.image.url}&width=${width}&format=webp`;
+  imgElement.value.src = `http://redditlattice-server.vercel.app/?url=${
+    props.image.url
+  }&width=${width * 1.3}&format=webp`;
   onImageLoad();
 });
 
