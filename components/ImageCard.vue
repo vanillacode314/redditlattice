@@ -19,14 +19,14 @@ function onImageLoad() {
 
 onMounted(async () => {
   await nextTick();
-  const cols = getComputedStyle(imgElement.value).getPropertyValue(
-    "--_masonry-layout-col-count"
+  const cols =
+    +getComputedStyle(imgElement.value).getPropertyValue(
+      "--_masonry-layout-col-count"
+    ) || 1;
+  const width = Math.ceil(
+    (imgElement.value.parentNode.getBoundingClientRect().width * 1.3) / cols
   );
-  const width =
-    imgElement.value.parentNode.getBoundingClientRect().width / cols;
-  imgElement.value.src = `http://redditlattice-server.vercel.app/?url=${
-    props.image.url
-  }&width=${width * 1.3}&format=webp`;
+  imgElement.value.src = `http://redditlattice-server.vercel.app/?url=${props.image.url}&width=${width}&format=webp`;
   onImageLoad();
 });
 
