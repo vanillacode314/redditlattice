@@ -5,7 +5,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(["load"]);
 const imgElement = ref<HTMLImageElement>(null);
-const isOnTop = ref<boolean>(false);
+const popupVisible = ref<boolean>(false);
 
 function onImageLoad() {
   if (!imgElement.value) return;
@@ -23,20 +23,21 @@ onMounted(async () => {
     +getComputedStyle(imgElement.value).getPropertyValue(
       "--_masonry-layout-col-count"
     ) || 1;
-  const width = Math.ceil(
-    (imgElement.value.parentNode.getBoundingClientRect().width * 1.3) / cols
-  );
-  imgElement.value.src = `http://redditlattice-server.vercel.app/?url=${props.image.url}&width=${width}&format=webp`;
+  const width =
+    Math.ceil(
+      imgElement.value.parentNode.getBoundingClientRect().width / cols
+    ) * 2;
+  imgElement.value.src = `https://redditlattice-server.vercel.app/?url=${props.image.url}&width=${width}&format=webp`;
   onImageLoad();
 });
 
 function popupImage() {
-  isOnTop.value = true;
+  popupVisible.value = true;
   document.documentElement.classList.add("noscroll");
 }
 
 function removePopupImage() {
-  isOnTop.value = false;
+  popupVisible.value = false;
   document.documentElement.classList.remove("noscroll");
 }
 </script>
@@ -49,9 +50,9 @@ function removePopupImage() {
     :alt="image.title"
     style="aspect-ratio: 1"
   />
-  <div :class="{ isOnTop: isOnTop }" @click.self="removePopupImage">
+  <div :class="{ isOnTop: popupVisible }" @click.self="removePopupImage">
     <transition name="scale">
-      <div v-if="isOnTop" class="overlay">
+      <div v-if="popupVisible" class="overlay">
         <img :src="image.url" :key="image.name" :alt="image.title" />
         <span class="text" @click.stop="removePopupImage">
           <v-sheet>{{ image.title }}</v-sheet>
