@@ -46,7 +46,6 @@ function removePopupImage() {
   <img
     v-longpress="popupImage"
     ref="imgElement"
-    loading="lazy"
     :key="image.name"
     :alt="image.title"
     style="aspect-ratio: 1"
