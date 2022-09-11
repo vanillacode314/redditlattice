@@ -106,7 +106,7 @@ useHead({
 </script>
 
 <template>
-  <v-container class="myContainer">
+  <v-container class="container_height_full">
     <v-form
       ref="form"
       @submit.prevent="onSubmit()"
@@ -146,7 +146,7 @@ useHead({
   </v-container>
 </template>
 <style scoped>
-.myContainer {
+.container_height_full {
   height: calc(var(--vh, 1vh) * 100 - var(--navbar-height));
   overflow: hidden;
   display: flex;
