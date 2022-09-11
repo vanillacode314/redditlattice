@@ -66,7 +66,7 @@ function removeSearch({ title }: Item) {
 /** makes so that clicking any list item will return focus to the subreddit 
 input if it was focused before clicking */
 function setupListItemFocusHandlers() {
-  const listItems = document.querySelectorAll(".v-list-item");
+  const listItems = document.querySelectorAll(".history .list-item");
   for (const item of listItems) {
     item.addEventListener("focus", (event) => {
       event.preventDefault();
@@ -89,7 +89,9 @@ onMounted(() => {
   title.value = `RedditLattice`;
   document.body.classList.add("noscroll");
   document.documentElement.classList.add("noscroll");
-  setupListItemFocusHandlers();
+  nextTick().then(() => {
+    setupListItemFocusHandlers();
+  });
 });
 
 onUnmounted(() => {
@@ -126,7 +128,7 @@ useHead({
         <icon name="i-mdi-magnify"></icon>
       </v-btn>
     </v-form>
-    <div class="scroll-wrapper">
+    <div class="history scroll-wrapper">
       <clearable-list
         :onclick="setSubreddit"
         :onremove="removeSubreddit"

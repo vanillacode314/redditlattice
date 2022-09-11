@@ -3,8 +3,13 @@ const emit = defineEmits(["click", "remove"]);
 </script>
 
 <template>
-  <v-sheet v-ripple class="mx-auto" @click="emit('click')">
-    <div class="item">
+  <v-sheet
+    v-ripple
+    class="list-item mx-auto"
+    @click="emit('click')"
+    tabindex="0"
+  >
+    <div class="wrapper">
       <span><slot /></span>
       <icon
         name="i-mdi-close-circle"
@@ -16,7 +21,7 @@ const emit = defineEmits(["click", "remove"]);
 </template>
 
 <style scoped>
-.item {
+.wrapper {
   cursor: pointer;
   display: flex;
   justify-content: space-between;
