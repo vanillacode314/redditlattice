@@ -101,7 +101,7 @@ onUnmounted(() => {
 
 /// HEAD ///
 useHead({
-  title: "Home - RedditLattice",
+  title: "RedditLattice",
 });
 </script>
 
