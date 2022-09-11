@@ -9,8 +9,8 @@ const { drawer } = storeToRefs(store);
     <v-list>
       <v-list-item
         title="RedditLattice"
-        subtitle="Made by VanillaCode"
-        href="https://vanillacode.netlify.app/"
+        subtitle="Made by Raqueebuddin Aziz"
+        href="https://raqueebuddinaziz.com/"
       ></v-list-item>
     </v-list>
     <v-divider></v-divider>

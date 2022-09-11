@@ -19,13 +19,16 @@ useHead({
         a tight lattice.
       </p>
       <p>
+        Uses a custom server to resize images on the fly for faster loading.
+      </p>
+      <p>
         I freelance as a professional web developer. Contact ME if you need my
         services
       </p>
     </div>
     <v-list>
       <v-sheet v-ripple class="mx-auto">
-        <a href="https://vanillacode.netlify.app/">
+        <a href="https://raqueebuddinaziz.com/">
           <div class="item">
             <icon name="i-mdi-face-man-profile"></icon>
             <span>Contact Me</span>
