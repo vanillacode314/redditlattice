@@ -33,6 +33,7 @@ defineProps<{
 .container {
   position: relative;
 }
+
 .subheader {
   display: block;
   padding: 0 0.75rem;
@@ -42,7 +43,7 @@ defineProps<{
 .list-move, /* apply transition to moving elements */
 .list-enter-active,
 .list-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .list-enter-from,
