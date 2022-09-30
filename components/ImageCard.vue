@@ -19,15 +19,16 @@ function onImageLoad() {
 
 onMounted(async () => {
   await nextTick();
-  const cols =
-    +getComputedStyle(imgElement.value).getPropertyValue(
-      "--_masonry-layout-col-count"
-    ) || 1;
-  const width =
-    Math.ceil(
-      imgElement.value.parentNode.getBoundingClientRect().width / cols
-    ) * 2;
-  imgElement.value.src = `https://redditlattice-server.vercel.app/?url=${props.image.url}&width=${width}&format=webp`;
+  /* const cols = */
+  /*   +getComputedStyle(imgElement.value).getPropertyValue( */
+  /*     "--_masonry-layout-col-count" */
+  /*   ) || 1; */
+  /* const width = */
+  /*   Math.ceil( */
+  /*     imgElement.value.parentNode.getBoundingClientRect().width / cols */
+  /*   ) * 2; */
+  /* imgElement.value.src = `https://redditlattice-server.vercel.app/?url=${props.image.url}&width=${width}&format=webp`; */
+  imgElement.value.src = props.image.url;
   onImageLoad();
 });
 
