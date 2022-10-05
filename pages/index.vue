@@ -120,7 +120,6 @@ useHead({
           v-model="searchTerm"
           label="Subreddit"
           required
-          clearable
           hide-details
         ></v-text-field>
       </span>
