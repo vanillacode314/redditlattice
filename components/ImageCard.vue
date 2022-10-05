@@ -107,6 +107,7 @@ function onError() {
   aspect-ratio: 1;
 }
 img {
+  display: block;
   width: 100%;
   object-fit: contain;
 }
