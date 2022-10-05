@@ -5,7 +5,10 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(["load"]);
 const imgElement = ref<HTMLImageElement>(null);
+const pictureElement = ref<HTMLPictureElement>(null);
 const popupVisible = ref<boolean>(false);
+const srcSets = ref<Record<string, string>>({});
+const error = ref<boolean>(false);
 
 function onImageLoad() {
   if (!imgElement.value) return;
@@ -17,17 +20,35 @@ function onImageLoad() {
   requestAnimationFrame(() => onImageLoad());
 }
 
+function getProcessedImageURL(
+  url: string,
+  width: number,
+  format: string = "webp"
+): string {
+  return `https://redditlattice-server-production.up.railway.app/?url=${url}&width=${width}&format=${format}`;
+}
+
 onMounted(async () => {
   await nextTick();
   const cols =
-    +getComputedStyle(imgElement.value).getPropertyValue(
+    +getComputedStyle(pictureElement.value).getPropertyValue(
       "--_masonry-layout-col-count"
     ) || 1;
   const width =
     Math.ceil(
-      imgElement.value.parentNode.getBoundingClientRect().width / cols
+      pictureElement.value.parentNode.getBoundingClientRect().width / cols
     ) * 2;
-  imgElement.value.src = `https://redditlattice-server-production.up.railway.app/?url=${props.image.url}&width=${width}&format=webp`;
+  /* srcSets.value["image/avif"] = getProcessedImageURL( */
+  /*   props.image.url, */
+  /*   width, */
+  /*   "avif" */
+  /* ); */
+  srcSets.value["image/webp"] = getProcessedImageURL(
+    props.image.url,
+    width,
+    "webp"
+  );
+  imgElement.value.src = getProcessedImageURL(props.image.url, width);
   onImageLoad();
 });
 
@@ -40,16 +61,33 @@ function removePopupImage() {
   popupVisible.value = false;
   document.documentElement.classList.remove("noscroll");
 }
+
+async function retry() {
+  error.value = false;
+  await nextTick();
+  onImageLoad();
+}
+
+function onError() {
+  error.value = true;
+}
 </script>
 
 <template>
-  <img
-    v-longpress="popupImage"
-    ref="imgElement"
-    :key="image.name"
-    :alt="image.title"
-    style="aspect-ratio: 1"
-  />
+  <div class="retry-box" v-if="error">
+    <v-btn color="primary" @click="retry">Retry</v-btn>
+  </div>
+  <picture ref="pictureElement" v-longpress="popupImage" v-else>
+    <source v-for="(url, format) in srcSets" :srcset="url" :type="format" />
+    <img
+      @error="onError()"
+      v-longpress="popupImage"
+      ref="imgElement"
+      :key="image.name"
+      :alt="image.title"
+      style="aspect-ratio: 1"
+    />
+  </picture>
   <div :class="{ isOnTop: popupVisible }" @click.self="removePopupImage">
     <transition name="scale">
       <div v-if="popupVisible" class="overlay">
@@ -63,6 +101,11 @@ function removePopupImage() {
 </template>
 
 <style scoped>
+.retry-box {
+  display: grid;
+  place-content: center;
+  aspect-ratio: 1;
+}
 img {
   width: 100%;
   object-fit: contain;
