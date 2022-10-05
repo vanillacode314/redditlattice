@@ -3,11 +3,12 @@ import type { Post } from "@/pages/r/[subreddit].vue";
 const props = defineProps<{
   image: Post;
 }>();
+
 const emit = defineEmits(["load"]);
 const imgElement = ref<HTMLImageElement>(null);
 const pictureElement = ref<HTMLPictureElement>(null);
 const popupVisible = ref<boolean>(false);
-const srcSets = ref<Record<string, string>>({});
+const srcSets = ref<Map<string, string>>(new Map());
 const error = ref<boolean>(false);
 
 function onImageLoad() {
@@ -28,29 +29,30 @@ function getProcessedImageURL(
   return `https://redditlattice-server-production.up.railway.app/?url=${url}&width=${width}&format=${format}`;
 }
 
-onMounted(async () => {
-  await nextTick();
+function updateSources() {
   const cols =
     +getComputedStyle(pictureElement.value).getPropertyValue(
       "--_masonry-layout-col-count"
     ) || 1;
   const width =
     Math.ceil(
-      pictureElement.value.parentNode.getBoundingClientRect().width / cols
+      (
+        pictureElement.value.parentNode as HTMLDivElement
+      ).getBoundingClientRect().width / cols
     ) * 2;
-  /* srcSets.value["image/avif"] = getProcessedImageURL( */
-  /*   props.image.url, */
-  /*   width, */
-  /*   "avif" */
-  /* ); */
-  srcSets.value["image/webp"] = getProcessedImageURL(
-    props.image.url,
-    width,
-    "webp"
+
+  [
+    /* "avif", */
+    "webp",
+  ].forEach((format) =>
+    srcSets.value.set(
+      `image/${format}`,
+      getProcessedImageURL(props.image.url, width, format)
+    )
   );
+
   imgElement.value.src = getProcessedImageURL(props.image.url, width);
-  onImageLoad();
-});
+}
 
 function popupImage() {
   popupVisible.value = true;
@@ -71,6 +73,12 @@ async function retry() {
 function onError() {
   error.value = true;
 }
+
+onMounted(async () => {
+  await nextTick();
+  updateSources();
+  onImageLoad();
+});
 </script>
 
 <template>
@@ -78,7 +86,7 @@ function onError() {
     <v-btn color="primary" @click="retry">Retry</v-btn>
   </div>
   <picture ref="pictureElement" v-longpress="popupImage" v-else>
-    <source v-for="(url, format) in srcSets" :srcset="url" :type="format" />
+    <source v-for="[format, url] in srcSets" :srcset="url" :type="format" />
     <img
       @error="onError()"
       v-longpress="popupImage"
