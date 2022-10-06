@@ -7,7 +7,7 @@ export interface Item {
 defineProps<{
   title?: string;
   items: Item[];
-  reverse: boolean;
+  reverse?: boolean;
   onclick: (item: Item) => void;
   onremove: (item: Item) => void;
 }>();

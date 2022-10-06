@@ -148,10 +148,10 @@ useHead({
   <transition name="slide">
     <div v-if="!online" bg="gray" class="online-notif">Not Online</div>
   </transition>
-  <div flex="~ col" h-full>
+  <div flex="~ col" h-full max-h-full>
     <Drawer />
     <Navbar />
-    <div grow>
+    <div grow overflow-hidden>
       <template v-if="loading">
         <Spinner />
       </template>

@@ -80,15 +80,8 @@ useHead({
 </script>
 
 <template>
-  <main p-5 h-full class="grid grid-rows-[1fr_auto]" gap-5>
-    <form
-      @submit.prevent="onSubmit"
-      flex
-      gap-3
-      items-center
-      row-start-2
-      row-end-3
-    >
+  <main p-5 h-full flex flex-col-reverse gap-4>
+    <form @submit.prevent="onSubmit" flex gap-3 items-center>
       <div
         ring="~ pink-800"
         flex
@@ -100,6 +93,7 @@ useHead({
         py-2
         px-4
         items-center
+        shrink-0
       >
         <span font="bold" text="gray-500">/r/</span>
         <input
@@ -131,8 +125,8 @@ useHead({
       gap-2
       overflow-auto
       py-5
-      row-start-1
-      row-end-2
+      grow
+      shrink-1
     >
       <clearable-list
         :onclick="setSubreddit"
