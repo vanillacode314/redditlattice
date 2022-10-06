@@ -153,7 +153,9 @@ useHead({
     <Navbar />
     <div grow overflow-hidden>
       <template v-if="loading">
-        <Spinner />
+        <div grid place-content-center p-5>
+          <Spinner />
+        </div>
       </template>
       <template v-else>
         <NuxtPage />
