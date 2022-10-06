@@ -1,0 +1,32 @@
+:root {
+  --navbar-height: 64px;
+}
+
+body,
+html {
+  background-color: black;
+  color: white;
+  overscroll-behavior-y: none;
+  font-family: "Roboto", sans-serif;
+  height: 100%;
+}
+#__nuxt {
+  height: 100%;
+}
+
+.noscroll {
+  overscroll-behavior-y: none;
+  overflow: hidden;
+}
+
+body::-webkit-scrollbar {
+  width: 0.3rem;
+}
+
+body::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #444;
+}

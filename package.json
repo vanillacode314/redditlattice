@@ -1,0 +1,26 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "nuxt build && workbox generateSW workbox-config.js",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@iconify-json/mdi": "^1.1.33",
+    "@pinia/nuxt": "^0.4.2",
+    "@unocss/nuxt": "^0.45.26",
+    "@unocss/reset": "^0.45.26",
+    "@vueuse/core": "^9.3.0",
+    "@vueuse/nuxt": "^9.3.0",
+    "nuxt": "3.0.0-rc.11",
+    "workbox-cli": "^6.5.4"
+  },
+  "dependencies": {
+    "@appnest/masonry-layout": "^2.0.8",
+    "pinia": "^2.0.22",
+    "v3-infinite-loading": "^1.2.1",
+    "vue-gtag": "^2.0.1"
+  }
+}
