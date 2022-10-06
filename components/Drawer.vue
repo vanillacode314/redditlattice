@@ -28,7 +28,7 @@ const { drawerVisible } = storeToRefs(store);
       >
         <a href="https://raqueebuddinaziz.com" flex="~ col" gap-1 p-5>
           <span text="lg">RedditLattice </span>
-          <span text="xs gray-500" font="bold" uppercase>
+          <span text="xs gray-500" font="bold" uppercase tracking-wide>
             Made by Raqueebuddin Aziz
           </span>
         </a>

@@ -13,7 +13,7 @@ useHead({
 </script>
 
 <template>
-  <div flex flex-col gap-5>
+  <div flex flex-col gap-5 py-5>
     <div flex flex-col gap-2>
       <span px-5 text="xs gray-500" font="bold" uppercase v-if="title"
         >Summary</span
