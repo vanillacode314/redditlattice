@@ -9,6 +9,7 @@ html {
   overscroll-behavior-y: none;
   font-family: "Roboto", sans-serif;
   height: 100%;
+  overflow: hidden;
 }
 #__nuxt {
   height: 100%;

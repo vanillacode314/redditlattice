@@ -80,7 +80,7 @@ useHead({
 </script>
 
 <template>
-  <main p-5 h-full flex flex-col-reverse gap-4>
+  <main p-5 h-full flex flex-col-reverse gap-4 overflow-hidden>
     <form @submit.prevent="onSubmit" flex gap-3 items-center>
       <div
         ring="~ pink-800"

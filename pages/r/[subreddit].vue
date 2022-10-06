@@ -146,7 +146,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div overflow-auto max-h-full id="scroller">
     <masonry-layout gap="0" ref="masonry">
       <ImageCard
         v-for="image of images"
@@ -155,9 +155,10 @@ onMounted(() => {
       />
     </masonry-layout>
     <infinite-loading
+      target="#scroller"
       @infinite="onInfinite"
       :identifier="`${route.query.q}-${route.params.subreddit}-${id}`"
-      :distance="100"
+      :distance="400"
     >
       <template #spinner>
         <div grid place-content-center p-5>
