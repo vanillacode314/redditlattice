@@ -14,6 +14,9 @@ const options = {
           maxEntries: 250,
           maxAgeSeconds: 7 * 24 * 60 * 60,
         },
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
       },
     },
   ],
