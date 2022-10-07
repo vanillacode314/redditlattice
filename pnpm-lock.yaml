@@ -13,7 +13,9 @@ specifiers:
   svelte: ^3.50.1
   v3-infinite-loading: ^1.2.1
   vue-gtag: ^2.0.1
+  workbox-build: ^6.5.4
   workbox-cli: ^6.5.4
+  workbox-strategies: ^6.5.4
 
 dependencies:
   '@appnest/masonry-layout': 2.0.8
@@ -30,7 +32,9 @@ devDependencies:
   '@vueuse/nuxt': 9.3.0_nuxt@3.0.0-rc.11
   nuxt: 3.0.0-rc.11
   svelte: 3.50.1
+  workbox-build: 6.5.4
   workbox-cli: 6.5.4
+  workbox-strategies: 6.5.4
 
 packages:
 
