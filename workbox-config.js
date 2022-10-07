@@ -7,7 +7,7 @@ const options = {
   runtimeCaching: [
     {
       urlPattern: ({ request }) => request.destination === "image",
-      handler: "CacheFirst",
+      handler: "StaleWhileRevalidate",
       options: {
         cacheName: "images-assets",
         expiration: {
