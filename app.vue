@@ -33,7 +33,17 @@ useHead({
     <div v-if="!online" bg="gray" class="online-notif">Not Online</div>
   </transition>
   <div flex="~ col" h-full max-h-full relative>
-    <div absolute top-0 inset-x-0 z-10 p-6 grid place-content-center>
+    <div
+      absolute
+      top-0
+      inset-x-0
+      z-10
+      p-6
+      grid
+      place-content-center
+      pointer-events-none
+      bg-transparent
+    >
       <div id="pull-to-refresh" p-2 bg="purple" rounded-full>
         <div text="2xl" class="i-mdi-refresh"></div>
       </div>
