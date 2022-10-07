@@ -18,7 +18,6 @@ const searchesItems = computed(() =>
 
 /// METHODS ///
 async function onSubmit() {
-  console.log(searchTerm.value);
   if (!searchTerm.value) return;
 
   addQuery(searchTerm.value);
@@ -120,7 +119,7 @@ useHead({
       </button>
     </form>
     <div
-      class="scroll-wrapper"
+      id="scroller"
       flex="~ col-reverse"
       gap-2
       overflow-auto
@@ -146,16 +145,3 @@ useHead({
     </div>
   </main>
 </template>
-<style scoped>
-.scroll-wrapper::webkit-scrollbar {
-  width: 0.2rem;
-}
-
-.scroll-wrapper::webkit-scrollbar-track {
-  background-color: #333;
-}
-
-.scroll-wrapper::webkit-scrollbar-thumb {
-  background-color: #444;
-}
-</style>

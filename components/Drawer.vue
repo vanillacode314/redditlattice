@@ -8,7 +8,7 @@ const { drawerVisible } = storeToRefs(store);
 <template>
   <Transition name="fade">
     <template v-if="drawerVisible" transition-opacity>
-      <div bg="white/5" fixed inset-0 z-10 @click="drawerVisible = false" />
+      <div bg="white/5" fixed inset-0 z-20 @click="drawerVisible = false" />
     </template>
   </Transition>
   <Transition name="slide">
@@ -19,7 +19,7 @@ const { drawerVisible } = storeToRefs(store);
         left-0
         inset-y-0
         shadow="~ gray-500"
-        z-20
+        z-30
         w-80
         transition-transform
         transition-opacity

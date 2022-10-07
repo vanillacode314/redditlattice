@@ -9,7 +9,6 @@ html {
   overscroll-behavior-y: none;
   font-family: "Roboto", sans-serif;
   height: 100%;
-  overflow: hidden;
 }
 #__nuxt {
   height: 100%;
@@ -29,5 +28,17 @@ body::-webkit-scrollbar-track {
 }
 
 body::-webkit-scrollbar-thumb {
+  background-color: #444;
+}
+
+#scroller::webkit-scrollbar {
+  width: 0.2rem;
+}
+
+#scroller::webkit-scrollbar-track {
+  background-color: #333;
+}
+
+#scroller::webkit-scrollbar-thumb {
   background-color: #444;
 }

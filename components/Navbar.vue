@@ -81,7 +81,18 @@ onUnmounted(() => {
 
 <template>
   <Transition name="slide">
-    <nav bg="black" text="white" flex gap-5 px-5 py-3 sticky top-0 items-center>
+    <nav
+      bg="black"
+      text="white"
+      flex
+      gap-5
+      px-5
+      py-3
+      sticky
+      top-0
+      items-center
+      z-20
+    >
       <template v-if="!isSearching">
         <button
           type="button"

@@ -69,12 +69,6 @@ watch(query, () => {
   });
 });
 
-// flush images on refresh
-watchEffect(() => {
-  if (!isRefreshing.value) return;
-  resetState();
-});
-
 /// TEMPLATE REFS ///
 const masonry = ref(null);
 
@@ -143,6 +137,16 @@ onMounted(() => {
     ...new Set([...subreddits.value, route.params.subreddit as string]),
   ].sort();
 });
+
+const { cleanUp } = onRefresh({
+  callback(state) {
+    console.log("refresh?", state);
+    resetState();
+    state.set(false);
+  },
+});
+
+onUnmounted(() => cleanUp());
 </script>
 
 <template>

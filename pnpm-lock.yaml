@@ -10,6 +10,7 @@ specifiers:
   '@vueuse/nuxt': ^9.3.0
   nuxt: 3.0.0-rc.11
   pinia: ^2.0.22
+  svelte: ^3.50.1
   v3-infinite-loading: ^1.2.1
   vue-gtag: ^2.0.1
   workbox-cli: ^6.5.4
@@ -28,6 +29,7 @@ devDependencies:
   '@vueuse/core': 9.3.0
   '@vueuse/nuxt': 9.3.0_nuxt@3.0.0-rc.11
   nuxt: 3.0.0-rc.11
+  svelte: 3.50.1
   workbox-cli: 6.5.4
 
 packages:
@@ -6487,6 +6489,11 @@ packages:
   /supports-preserve-symlinks-flag/1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+    dev: true
+
+  /svelte/3.50.1:
+    resolution: {integrity: sha512-bS4odcsdj5D5jEg6riZuMg5NKelzPtmsCbD9RG+8umU03TeNkdWnP6pqbCm0s8UQNBkqk29w/Bdubn3C+HWSwA==}
+    engines: {node: '>= 8'}
     dev: true
 
   /svg-tags/1.0.0:
