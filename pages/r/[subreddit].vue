@@ -140,7 +140,6 @@ onMounted(() => {
 
 const { cleanUp } = onRefresh({
   callback(state) {
-    console.log("refresh?", state);
     resetState();
     state.set(false);
   },

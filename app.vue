@@ -52,7 +52,7 @@ useHead({
 </template>
 <style scoped>
 #pull-to-refresh {
-  --initial: -100%;
+  --initial: -200%;
   --y: calc(var(--offset, 0px) + var(--initial));
   transform: translateY(var(--y)) rotate(var(--angle, 0deg));
 }

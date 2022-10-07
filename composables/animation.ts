@@ -16,7 +16,7 @@ function getElements(scrollAreaId, pullToRefreshId) {
 export function onRefresh({
   scrollAreaId = "scroller",
   pullToRefreshId = "pull-to-refresh",
-  thresholdDistance = 100,
+  thresholdDistance = 125,
   callback = (refreshing) => refreshing.set(false),
 } = {}) {
   // this represents refreshing state if we are currently refreshing or not, this will be return to the caller of this function

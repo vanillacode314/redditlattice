@@ -8,6 +8,25 @@ const { searches, title, query, navVisible, isSearching, drawerVisible } =
 const searchTerm = ref<string>("");
 const route = useRoute();
 const searchInput = ref<HTMLInputElement>(null);
+const router = useRouter();
+
+router.beforeEach(() => {
+  const scroller = document.getElementById("scroller");
+  scroller.removeEventListener("scroll", onScroll);
+});
+router.afterEach(() => {
+  const scroller = document.getElementById("scroller");
+  scroller.addEventListener("scroll", onScroll);
+});
+
+onMounted(() => {
+  const scroller = document.getElementById("scroller");
+  scroller.addEventListener("scroll", onScroll);
+});
+onUnmounted(() => {
+  const scroller = document.getElementById("scroller");
+  scroller.removeEventListener("scroll", onScroll);
+});
 
 /// METHODS ///
 /** hide on scroll */
@@ -16,12 +35,13 @@ let ticking = false;
 const threshold = 50; // in pixels
 
 const onScroll = () => {
-  const dy = window.scrollY - last_known_scroll_position;
-  last_known_scroll_position = window.scrollY;
-  const reached_top = window.scrollY < 1;
+  const scroller = document.getElementById("scroller");
+  const dy = scroller.scrollTop - last_known_scroll_position;
+  last_known_scroll_position = scroller.scrollTop;
+  const reached_top = scroller.scrollTop === 0;
 
   if (!ticking) {
-    window.requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
       if (reached_top) {
         if (dy < 0) {
           navVisible.value = true;
@@ -68,20 +88,12 @@ const search = () => {
   isSearching.value = false;
   searchTerm.value = "";
 };
-
-/// LIFECYCLE HOOKS ///
-onMounted(() => {
-  window.addEventListener("scroll", onScroll);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("scroll", onScroll);
-});
 </script>
 
 <template>
   <Transition name="slide">
     <nav
+      v-if="navVisible"
       bg="black"
       text="white"
       flex

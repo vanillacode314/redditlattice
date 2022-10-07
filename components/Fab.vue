@@ -22,8 +22,9 @@ const transitionDuration = 100;
 /// METHODS ///
 /** hide on scroll */
 const onScroll = () => {
-  const dy = window.scrollY - last_known_scroll_position;
-  last_known_scroll_position = window.scrollY;
+  const scroller = document.getElementById("scroller");
+  const dy = scroller.scrollTop - last_known_scroll_position;
+  last_known_scroll_position = scroller.scrollTop;
 
   if (!ticking) {
     window.requestAnimationFrame(function () {
@@ -89,10 +90,12 @@ function onLeave(el: HTMLElement, done) {
 
 /// LIFECYCLE HOOKS ///
 onMounted(() => {
-  window.addEventListener("scroll", onScroll);
+  const scroller = document.getElementById("scroller");
+  scroller.addEventListener("scroll", onScroll);
 });
 onUnmounted(() => {
-  window.removeEventListener("scroll", onScroll);
+  const scroller = document.getElementById("scroller");
+  scroller.removeEventListener("scroll", onScroll);
 });
 </script>
 
