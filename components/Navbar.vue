@@ -8,25 +8,22 @@ const { searches, title, query, navVisible, isSearching, drawerVisible } =
 const searchTerm = ref<string>("");
 const route = useRoute();
 const searchInput = ref<HTMLInputElement>(null);
-const router = useRouter();
 
-router.beforeEach(() => {
-  const scroller = document.getElementById("scroller");
-  scroller.removeEventListener("scroll", onScroll);
-});
-router.afterEach(() => {
-  const scroller = document.getElementById("scroller");
-  scroller.addEventListener("scroll", onScroll);
-});
+let scroller: HTMLElement;
 
-onMounted(() => {
-  const scroller = document.getElementById("scroller");
-  scroller.addEventListener("scroll", onScroll);
-});
-onUnmounted(() => {
-  const scroller = document.getElementById("scroller");
-  scroller.removeEventListener("scroll", onScroll);
-});
+watch(
+  route,
+  () => {
+    nextTick().then(() => {
+      navVisible.value = true;
+      if (scroller) scroller.removeEventListener("scroll", onScroll);
+      scroller = document.getElementById("scroller");
+      scroller.addEventListener("scroll", onScroll);
+    });
+  },
+
+  { immediate: true }
+);
 
 /// METHODS ///
 /** hide on scroll */
@@ -35,7 +32,6 @@ let ticking = false;
 const threshold = 50; // in pixels
 
 const onScroll = () => {
-  const scroller = document.getElementById("scroller");
   const dy = scroller.scrollTop - last_known_scroll_position;
   last_known_scroll_position = scroller.scrollTop;
   const reached_top = scroller.scrollTop === 0;

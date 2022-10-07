@@ -1,8 +1,6 @@
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
-  experimental: {
-    reactivityTransform: true,
-  },
+  experimental: {},
   ssr: false,
   modules: ["@pinia/nuxt", "@vueuse/nuxt", "@unocss/nuxt"],
   css: ["@unocss/reset/tailwind.css"],
