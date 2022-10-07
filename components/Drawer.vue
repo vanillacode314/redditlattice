@@ -54,6 +54,18 @@ const { drawerVisible } = storeToRefs(store);
             un-text="sm"
             font="bold"
             uppercase
+            to="/settings"
+            @click="drawerVisible = false"
+            >Settings</NuxtLink
+          >
+          <NuxtLink
+            bg="black hover:gray-900"
+            px-5
+            py-3
+            tracking-wide
+            un-text="sm"
+            font="bold"
+            uppercase
             to="/about"
             @click="drawerVisible = false"
             >About</NuxtLink
