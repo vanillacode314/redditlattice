@@ -108,7 +108,7 @@ const search = () => {
           class="i-mdi-menu"
           text="2xl"
         ></button>
-        <span text="xl">
+        <span text="xl" truncate>
           {{ title }}
         </span>
         <span class="grow" />
