@@ -79,7 +79,7 @@ useHead({
 </script>
 
 <template>
-  <main p-5 h-full flex flex-col-reverse gap-4 overflow-hidden>
+  <main pb-5 px-5 h-full flex flex-col-reverse gap-4 overflow-hidden>
     <form @submit.prevent="onSubmit" flex gap-3 items-center>
       <div
         ring="~ pink-800"
@@ -126,6 +126,7 @@ useHead({
       py-5
       grow
       shrink-1
+      p="t-[30%]"
     >
       <clearable-list
         :onclick="setSubreddit"
