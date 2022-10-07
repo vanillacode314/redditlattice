@@ -4,11 +4,11 @@ import { storeToRefs } from "pinia";
 /// STATE ///
 const store = useStore();
 const { title } = storeToRefs(store);
-title.value = `About`;
+title.value = `Settings`;
 
 /// HEAD ///
 useHead({
-  title: "About - RedditLattice",
+  title: "Settings - RedditLattice",
 });
 
 const clearCache = () => {
