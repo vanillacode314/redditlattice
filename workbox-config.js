@@ -6,7 +6,9 @@ const options = {
   ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
   runtimeCaching: [
     {
-      urlPattern: ({ request }) => request.destination === "image",
+      urlPattern: ({ request, url }) =>
+        request.destination === "image" &&
+        url.origin === "https://redditlattice-server-production.up.railway.app",
       handler: "StaleWhileRevalidate",
       options: {
         cacheName: "images-assets",
@@ -14,8 +16,11 @@ const options = {
           maxEntries: 250,
           maxAgeSeconds: 7 * 24 * 60 * 60,
         },
+        fetchOptions: {
+          mode: "cors",
+        },
         cacheableResponse: {
-          statuses: [0, 200],
+          statuses: [200],
         },
       },
     },
