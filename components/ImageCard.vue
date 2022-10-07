@@ -12,13 +12,34 @@ const srcSets = ref<Map<string, string>>(new Map());
 const error = ref<boolean>(false);
 
 function onImageLoad() {
-  if (!imgElement.value) return;
-  if (imgElement.value.naturalHeight) {
-    imgElement.value.style.aspectRatio = "auto";
-    emit("load");
-    return;
+  if (!pictureElement.value) return;
+  pictureElement.value.style.height = `${getWidth()}px`;
+  function checkSize() {
+    if (imgElement.value.naturalHeight) {
+      pictureElement.value.style.height = `${
+        (imgElement.value.naturalHeight / imgElement.value.naturalWidth) *
+        getWidth()
+      }px`;
+      emit("load");
+      return;
+    }
+    requestAnimationFrame(() => checkSize());
   }
-  requestAnimationFrame(() => onImageLoad());
+  requestAnimationFrame(() => checkSize());
+  window.addEventListener("resize", () => {
+    requestAnimationFrame(() => checkSize());
+  });
+}
+
+function getWidth() {
+  const cols =
+    +getComputedStyle(pictureElement.value).getPropertyValue(
+      "--_masonry-layout-col-count"
+    ) || 1;
+  return (
+    (pictureElement.value.parentNode as HTMLDivElement).getBoundingClientRect()
+      .width / cols
+  );
 }
 
 function getProcessedImageURL(
@@ -30,17 +51,7 @@ function getProcessedImageURL(
 }
 
 function updateSources() {
-  const cols =
-    +getComputedStyle(pictureElement.value).getPropertyValue(
-      "--_masonry-layout-col-count"
-    ) || 1;
-  const width =
-    Math.ceil(
-      (
-        pictureElement.value.parentNode as HTMLDivElement
-      ).getBoundingClientRect().width / cols
-    ) * 2;
-
+  const width = Math.ceil(getWidth() * 2);
   [
     /* "avif", */
     "webp",
@@ -85,7 +96,13 @@ onMounted(async () => {
   <div class="retry-box" v-if="error">
     <Button bg="purple-800 hover:purple-700" @click="retry">Retry</Button>
   </div>
-  <picture ref="pictureElement" v-longpress="popupImage" v-else>
+  <picture
+    ref="pictureElement"
+    v-longpress="popupImage"
+    v-else
+    transition-height
+    overflow-hidden
+  >
     <source v-for="[format, url] in srcSets" :srcset="url" :type="format" />
     <img
       @error="onError()"
@@ -93,13 +110,18 @@ onMounted(async () => {
       ref="imgElement"
       :key="image.name"
       :alt="image.title"
-      style="aspect-ratio: 1"
     />
   </picture>
   <div :class="{ isOnTop: popupVisible }" @click.self="removePopupImage">
     <Transition name="scale">
-      <div v-if="popupVisible" class="overlay">
-        <img :src="image.url" :key="image.name" :alt="image.title" bg="black" />
+      <div v-if="popupVisible" class="overlay" w-full bg="black">
+        <img
+          :src="image.url"
+          :key="image.name"
+          :alt="image.title"
+          bg="black"
+          w-full
+        />
         <span
           @click.stop="removePopupImage"
           bg="black"
