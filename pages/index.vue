@@ -126,7 +126,7 @@ useHead({
       py-5
       grow
       shrink-1
-      p="t-[30%]"
+      p="t-[70%]"
     >
       <clearable-list
         :onclick="setSubreddit"
