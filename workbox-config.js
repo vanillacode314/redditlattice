@@ -8,6 +8,9 @@ module.exports = {
       urlPattern: ({ request, url }) =>
         url.origin === "https://redditlattice-server-production.up.railway.app",
       handler: "CacheFirst",
+      options: {
+        cacheName: "images-cache",
+      },
     },
   ],
 };
