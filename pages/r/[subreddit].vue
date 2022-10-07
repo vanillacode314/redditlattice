@@ -174,7 +174,9 @@ onUnmounted(() => cleanUp());
         </div>
       </template>
       <template #complete>
-        <div font-bold tracking-wide uppercase text="sm" font="bold">END</div>
+        <div p-5 grid place-content-center>
+          <div font-bold tracking-wide uppercase text="sm" font="bold">END</div>
+        </div>
       </template>
     </infinite-loading>
     <Fab icon="i-mdi-sort" :actions="fabActions" :selected="sort"> </Fab>
