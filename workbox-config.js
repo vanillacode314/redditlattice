@@ -9,7 +9,7 @@ const options = {
       urlPattern: ({ request, url }) =>
         request.destination === "image" &&
         url.origin === "https://redditlattice-server-production.up.railway.app",
-      handler: "StaleWhileRevalidate",
+      handler: "CacheFirst",
       options: {
         cacheName: "images-assets",
         expiration: {
