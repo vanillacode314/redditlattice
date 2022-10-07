@@ -51,7 +51,7 @@ function getProcessedImageURL(
 }
 
 function updateSources() {
-  const width = Math.ceil(getWidth() * 2);
+  const width = Math.ceil(getWidth() / 100) * 200;
   [
     /* "avif", */
     "webp",
