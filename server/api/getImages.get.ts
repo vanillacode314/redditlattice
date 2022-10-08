@@ -1,46 +1,29 @@
-const extension_list = [
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".svg",
-  ".gif",
-  ".jpe",
-  ".jif",
-  ".webp",
-  ".tiff",
-  ".tif",
-  ".psd",
-  "avif",
-  ".bmp",
-  ".raw",
-  ".jp2",
-];
+import { IMAGE_EXTENSION_LIST } from "~/consts";
+import type { IPost, IRemotePostsData } from "~/types";
+import { getKeys } from "~~/composables/use-utils";
 
-import { getKeys } from "@/composables/use-utils";
+type ReturnKeys = "name" | "url" | "title";
 
-function expandGallery(posts) {
-  return posts.flatMap((post) => {
-    if (
-      post.url.startsWith(`https://www.reddit.com/gallery/`) &&
-      Object.values(post.media_metadata).length > 0
-    ) {
-      let retVal = [];
-      for (const { id, m: mime } of Object.values(post.media_metadata)) {
-        const ext = mime.replace("image/", "");
-        retVal.push({
-          name: `${post.name}-${id}`,
-          url: `https://i.redd.it/${id}.${ext}`,
-          title: post.title,
-        });
-      }
-      return retVal;
-    }
-    return [post];
-  });
+function expandGallery(post: IPost): Pick<IPost, ReturnKeys>[] {
+  if (
+    !post.url.startsWith(`https://www.reddit.com/gallery/`) ||
+    Object.values(post.media_metadata).length === 0
+  )
+    return [];
+  return Array.from(
+    Object.values(post.media_metadata).map(({ id, m: mime }) => {
+      const fileExtension = mime.replace("image/", "");
+      return {
+        name: `${post.name}-${id}`,
+        url: `https://i.redd.it/${id}.${fileExtension}`,
+        title: post.title,
+      };
+    })
+  );
 }
 
 export default defineEventHandler(async (event) => {
-  let { subreddit, sort, after, q } = useQuery(event);
+  let { subreddit, sort, after: before, q } = useQuery(event);
   if (!sort) sort = "top";
 
   let url: string;
@@ -53,31 +36,28 @@ export default defineEventHandler(async (event) => {
   if (q) {
     searchParams.append("q", q as string);
     searchParams.append("sort", sort as string);
-    if (after) searchParams.append("after", after as string);
+    if (before) searchParams.append("after", before as string);
     url = `https://www.reddit.com/r/${subreddit}/search.json?${searchParams.toString()}`;
   } else {
-    if (after) searchParams.append("after", after as string);
+    if (before) searchParams.append("after", before as string);
     url = `https://www.reddit.com/r/${subreddit}/${sort}.json?${searchParams.toString()}`;
   }
-  const res = await fetch(url, { redirect: "error" });
 
-  if (res.ok) {
-    const { data } = await res.json();
-    const after = data.after;
-    let posts = data.children.map((c) => c.data);
-    posts = expandGallery(posts);
-    posts = posts.filter(
-      (post) =>
+  const {
+    data: { children, after },
+  } = await $fetch(url, { redirect: "error" });
+
+  const posts: Pick<IPost, ReturnKeys>[] = children
+    .map((c) => c.data)
+    .flatMap(expandGallery)
+    .filter(
+      (post: IPost) =>
         !post.is_self &&
         !post.is_video &&
         !post.media &&
-        extension_list.some((e) => post.url?.endsWith(e))
-    );
-    posts = posts.map((c) => getKeys(c, ["name", "url", "title"]));
-    return { posts, after };
-  } else {
-    return {
-      error: res.statusText,
-    };
-  }
+        IMAGE_EXTENSION_LIST.some((e) => post.url?.endsWith(e))
+    )
+    .map((post: IPost) => getKeys(post, ["name", "url", "title"]));
+
+  return { posts, after };
 });

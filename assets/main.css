@@ -19,26 +19,21 @@ html {
   overflow: hidden;
 }
 
-body::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 0.3rem;
 }
 
-body::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
-body::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
   background-color: #444;
 }
 
-#scroller::webkit-scrollbar {
-  width: 0.2rem;
-}
-
-#scroller::webkit-scrollbar-track {
-  background-color: #333;
-}
-
-#scroller::webkit-scrollbar-thumb {
-  background-color: #444;
+img {
+  display: block;
+  width: 100%;
+  object-fit: contain;
+  block-size: auto;
 }

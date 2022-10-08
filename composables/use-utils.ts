@@ -1,9 +1,12 @@
-export function getKeys(obj: Object, keys: string[]): Object {
-  const retval = {};
+export function getKeys<
+  Key extends string | number | symbol,
+  T extends Record<Key, any>
+>(obj: T, keys: Key[]): Partial<T> {
+  const newObject: Partial<T> = {};
   keys.forEach((key) => {
-    if (Object.hasOwn(obj, key)) retval[key] = obj[key];
+    if (Object.hasOwn(obj, key)) newObject[key] = obj[key];
   });
-  return retval;
+  return newObject;
 }
 
 export function sleep(duration: number): Promise<void> {

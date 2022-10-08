@@ -1,15 +1,10 @@
 <script setup lang="ts">
-export interface Action {
-  id: string;
-  icon: string;
-  callback: Function;
-}
-
+import type { IAction } from "~/types";
 /// STATE ///
 const props = defineProps<{
   icon: string;
-  actions: Action[];
-  selected: Action["id"];
+  actions: IAction[];
+  selected: IAction["id"];
 }>();
 const active = ref<boolean>(false);
 const hidden = ref<boolean>(false);

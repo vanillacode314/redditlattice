@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import type { Post } from "@/pages/r/[subreddit].vue";
+import type { IPost } from "~~/types";
 const props = defineProps<{
-  image: Post;
+  image: IPost;
 }>();
 
 const emit = defineEmits(["load"]);
-const imgElement = ref<HTMLImageElement>(null);
-const pictureElement = ref<HTMLPictureElement>(null);
+const imgElement = ref<HTMLImageElement>();
+const pictureElement = ref<HTMLPictureElement>();
 const popupVisible = ref<boolean>(false);
 const srcSets = ref<Map<string, string>>(new Map());
 const error = ref<boolean>(false);
 
 function onImageLoad() {
   if (!pictureElement.value) return;
-  pictureElement.value.style.height = `${getWidth()}px`;
+  pictureElement.value.style.blockSize = `${getWidth()}px`;
   function checkSize() {
+    if (!imgElement.value) return;
+    if (!pictureElement.value) return;
     if (imgElement.value.naturalHeight) {
       pictureElement.value.style.height = `${
         (imgElement.value.naturalHeight / imgElement.value.naturalWidth) *
@@ -32,10 +34,10 @@ function onImageLoad() {
 }
 
 function getWidth() {
-  const cols =
-    +getComputedStyle(pictureElement.value).getPropertyValue(
-      "--_masonry-layout-col-count"
-    ) || 1;
+  if (!pictureElement.value) return 400;
+  const cols = +getComputedStyle(pictureElement.value).getPropertyValue(
+    "--_masonry-layout-col-count"
+  );
   return (
     (pictureElement.value.parentNode as HTMLDivElement).getBoundingClientRect()
       .width / cols
@@ -62,7 +64,8 @@ function updateSources() {
     )
   );
 
-  imgElement.value.src = getProcessedImageURL(props.image.url, width);
+  if (imgElement.value)
+    imgElement.value.src = getProcessedImageURL(props.image.url, width);
 }
 
 function popupImage() {

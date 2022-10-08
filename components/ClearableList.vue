@@ -20,7 +20,7 @@ defineProps<{
     }}</span>
     <ul flex="~ col" :class="{ 'flex-col-reverse': reverse }">
       <TransitionGroup name="list">
-        <li v-for="item of items">
+        <li v-for="item of items" :key="item.id">
           <clearable-list-item
             :key="item.id"
             @click="onclick(item)"

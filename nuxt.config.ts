@@ -1,5 +1,8 @@
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
+  typescript: {
+    strict: true,
+  },
   experimental: {},
   ssr: false,
   modules: ["@pinia/nuxt", "@vueuse/nuxt", "@unocss/nuxt"],
@@ -37,6 +40,11 @@ export default defineNuxtConfig({
         },
       ],
       script: [{ src: "/registerSW.js", defer: true }],
+    },
+  },
+  vue: {
+    compilerOptions: {
+      isCustomElement: (tag) => ["masonry-layout"].includes(tag),
     },
   },
 });

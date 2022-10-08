@@ -1,10 +1,5 @@
 import { defineStore } from "pinia";
-
-export enum SortType {
-  HOT = "hot",
-  NEW = "new",
-  TOP = "top",
-}
+import { SortType } from "~/types";
 
 export default defineStore("main", () => {
   const drawerVisible = ref<boolean>(false);

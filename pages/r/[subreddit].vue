@@ -1,12 +1,5 @@
 <script setup lang="ts">
-/// TYPES ///
-export interface Post {
-  name: string;
-  url: string;
-  title: string;
-}
-import { SortType } from "~~/composables/use-store";
-import { Action } from "~~/components/Fab.vue";
+import { IAction, SortType, IPost } from "~/types";
 
 /// WEB COMPONENTS ///
 import "@appnest/masonry-layout";
@@ -19,7 +12,8 @@ const router = useRouter();
 const id = ref<boolean>(true);
 const store = useStore();
 const { subreddits, title, query, isRefreshing, sort } = storeToRefs(store);
-const fabActions = ref<Action[]>([
+const images = ref<IPost[]>([]);
+const fabActions = ref<IAction[]>([
   {
     id: SortType.TOP,
     icon: "i-mdi-arrow-up-bold",
@@ -42,13 +36,13 @@ const fabActions = ref<Action[]>([
     },
   },
 ]);
-const images = ref<Post[]>([]);
+const masonry = ref();
 
 // id of the last image in the last request, used to request the next set of images after this id
 let after = "";
 
 // dynamic navbar title
-watchEffect(() => {
+watch(route, () => {
   title.value = route.query.q
     ? `${route.query.q} - /r/${route.params.subreddit}`
     : `/r/${route.params.subreddit}`;
@@ -69,20 +63,8 @@ watch(query, () => {
   });
 });
 
-/// TEMPLATE REFS ///
-const masonry = ref(null);
-
-/// HEAD ///
-useHead({
-  title: route.query.q
-    ? `${route.query.q} - r/${route.params.subreddit} - RedditLattice`
-    : `r/${route.params.subreddit} - RedditLattice`,
-});
-
 /// METHODS ///
-
-/** createSearchParams for local api query */
-function createSearchParams(): URLSearchParams {
+const createSearchParams: () => URLSearchParams = () => {
   const searchParams = new URLSearchParams({
     subreddit: route.params.subreddit as string,
   });
@@ -90,40 +72,34 @@ function createSearchParams(): URLSearchParams {
   if (after) searchParams.append("after", after);
   searchParams.append("sort", sort.value);
   return searchParams;
-}
+};
 
 /** infinite loader handler */
-async function onInfinite($state) {
+const onInfinite = async ($state: any) => {
   requestAnimationFrame(() => (isRefreshing.value = false));
   const url = `/api/getImages?${createSearchParams().toString()}`;
   try {
-    const data = await $fetch<any>(url);
-    const { posts: newPosts, error } = data;
-
-    if (error) {
-      $state.error();
-      return;
-    }
+    const { posts: newPosts, after: a } = await $fetch(url);
     images.value = [...images.value, ...newPosts];
-    if (!data.after) {
+
+    if (!a) {
       $state.complete();
       return;
     }
-    after = data.after;
+
+    after = a;
     nextTick().then(() => $state.loaded());
   } catch (e) {
-    console.error("INFINITE_LOADING_ERROR:", e);
     $state.error();
   }
-}
+};
 
-/** reset grid state */
-function resetState() {
+const resetState = () => {
   after = "";
   images.value = [];
-  // HACK: to manually reset infinite scroll state
+  // HACK: manually reset infinite scroll state
   id.value = !id.value;
-}
+};
 
 /// LIFECYCLE HOOKS ///
 // flush old images on mount and add subreddit to localStoragebuttoe
@@ -142,6 +118,12 @@ const { cleanUp } = onRefresh({
 });
 
 onUnmounted(() => cleanUp());
+
+useHead({
+  title: route.query.q
+    ? `${route.query.q} - r/${route.params.subreddit} - RedditLattice`
+    : `r/${route.params.subreddit} - RedditLattice`,
+});
 </script>
 
 <template>
@@ -153,6 +135,7 @@ onUnmounted(() => cleanUp());
         @load="masonry.scheduleLayout()"
       />
     </masonry-layout>
+
     <infinite-loading
       target="#scroller"
       @infinite="onInfinite"
@@ -177,14 +160,7 @@ onUnmounted(() => cleanUp());
         </div>
       </template>
     </infinite-loading>
+
     <Fab icon="i-mdi-sort" :actions="fabActions" :selected="sort"> </Fab>
   </div>
 </template>
-
-<style scoped>
-img {
-  display: block;
-  width: 100%;
-  object-fit: contain;
-}
-</style>

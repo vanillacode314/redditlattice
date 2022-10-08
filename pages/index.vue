@@ -1,6 +1,5 @@
 <script setup lang="ts">
-/// TYPES ///
-import { Item } from "~~/components/ClearableList.vue";
+import type { Item } from "~~/components/ClearableList.vue";
 
 import { storeToRefs } from "pinia";
 
@@ -9,10 +8,10 @@ const store = useStore();
 const { title, searches, subreddits } = storeToRefs(store);
 const { addQuery } = store;
 const searchTerm = ref<string>("");
-const subredditItems = computed(() =>
+const subredditItems = computed<Item[]>(() =>
   subreddits.value.map((sr) => ({ id: sr, title: sr }))
 );
-const searchesItems = computed(() =>
+const searchesItems = computed<Item[]>(() =>
   searches.value.map((s) => ({ id: s, title: s }))
 );
 
@@ -80,6 +79,7 @@ useHead({
 
 <template>
   <main pb-5 px-5 h-full flex flex-col-reverse gap-4 overflow-hidden>
+    <NuxtLink to="/about">About</NuxtLink>
     <form @submit.prevent="onSubmit" flex gap-3 items-center>
       <div
         ring="~ pink-800"
@@ -135,7 +135,7 @@ useHead({
         title="SUBREDDIT"
         reverse
       ></clearable-list>
-      <v-divider></v-divider>
+      <div border="b gray-800"></div>
       <clearable-list
         :onclick="setSearch"
         :onremove="removeSearch"
