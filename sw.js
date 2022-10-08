@@ -1,15 +1,17 @@
-const { update } = require("idb-keyval");
-const { registerRoute, Route } = require("workbox-routing");
-const { CacheFirst } = require("workbox-strategies");
-const { precacheAndRoute } = require("workbox-precaching");
+importScripts("/third_party/workbox-v6.5.4/workbox-sw.js");
+importScripts("/third_party/idb-keyval.js");
+
+workbox.setConfig({
+  modulePathPrefix: "/third_party/workbox-v6.5.4/",
+});
 
 const IDB_LRU_CACHE_KEY = "image-assets";
 
-registerRoute(
+workbox.routing.registerRoute(
   ({ request, url }) =>
     request.destination === "image" &&
     url.origin === "https://redditlattice-server-production.up.railway.app",
-  new CacheFirst({
+  new workbox.strategies.CacheFirst({
     cacheName: "image-assets",
     fetchOptions: {
       mode: "cors",
@@ -18,7 +20,7 @@ registerRoute(
       {
         cacheWillUpdate: async ({ request, response }) => {
           console.log("SERVICE-WORKER:WillUpdate", { request, response });
-          await update(IDB_LRU_CACHE_KEY, async (cacheDb) => {
+          await idbKeyval.update(IDB_LRU_CACHE_KEY, async (cacheDb) => {
             cacheDb = cacheDb || { urls: [], limit: 500 };
             if (cacheDb.urls.length + 1 > cacheDb.limit) {
               const cache = await caches.open("images-assets");
@@ -31,7 +33,7 @@ registerRoute(
         },
         cachedResponseWillBeUsed: async ({ request, response }) => {
           console.log("SERVICE-WORKER:WillBeUsed", { request, response });
-          await update(IDB_LRU_CACHE_KEY, async (cacheDb) => {
+          await idbKeyval.update(IDB_LRU_CACHE_KEY, async (cacheDb) => {
             cacheDb = cacheDb || { urls: [], limit: 500 };
             cacheDb.urls = cacheDb.urls.filter((url) => url != request.url);
             cacheDb.urls.push(request.url);
@@ -44,4 +46,4 @@ registerRoute(
   })
 );
 
-precacheAndRoute(self.__WB_MANIFEST);
+workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
