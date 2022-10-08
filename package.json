@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build": "nuxt build && workbox generateSw workbox-config.js",
+    "build": "nuxt build && workbox generateSW workbox-config.js",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
