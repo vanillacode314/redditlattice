@@ -20,11 +20,12 @@ workbox.routing.registerRoute(
       {
         cacheWillUpdate: async ({ request, response }) => {
           console.log("SERVICE-WORKER:WillUpdate", { request, response });
-          await idbKeyval.update(IDB_LRU_CACHE_KEY, async (cacheDb) => {
+          await idbKeyval.update(IDB_LRU_CACHE_KEY, (cacheDb) => {
             cacheDb = cacheDb || { urls: [], limit: 500 };
             if (cacheDb.urls.length + 1 > cacheDb.limit) {
-              const cache = await caches.open("images-assets");
-              cache.delete(cacheDb.urls.unshift());
+              caches.open("images-assets").then((cache) => {
+                cache.delete(cacheDb.urls.unshift());
+              });
             }
             cacheDb.urls.push(request.url);
             return cacheDb;
@@ -33,7 +34,7 @@ workbox.routing.registerRoute(
         },
         cachedResponseWillBeUsed: async ({ request, response }) => {
           console.log("SERVICE-WORKER:WillBeUsed", { request, response });
-          await idbKeyval.update(IDB_LRU_CACHE_KEY, async (cacheDb) => {
+          await idbKeyval.update(IDB_LRU_CACHE_KEY, (cacheDb) => {
             cacheDb = cacheDb || { urls: [], limit: 500 };
             cacheDb.urls = cacheDb.urls.filter((url) => url != request.url);
             cacheDb.urls.push(request.url);
