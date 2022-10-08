@@ -9,7 +9,7 @@ function expandGallery(post: IPost): Pick<IPost, ReturnKeys>[] {
     !post.url.startsWith(`https://www.reddit.com/gallery/`) ||
     Object.values(post.media_metadata).length === 0
   )
-    return [];
+    return [post];
   return Array.from(
     Object.values(post.media_metadata).map(({ id, m: mime }) => {
       const fileExtension = mime.replace("image/", "");
@@ -33,6 +33,7 @@ export default defineEventHandler(async (event) => {
     restrict_sr: "true",
     t: "all",
   });
+
   if (q) {
     searchParams.append("q", q as string);
     searchParams.append("sort", sort as string);
