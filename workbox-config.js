@@ -21,6 +21,7 @@ const options = {
         plugins: [
           {
             cacheWillUpdate: async ({ request, response }) => {
+              console.log("SERVICE-WORKER:WillUpdate", { request, response });
               await update(IDB_LRU_CACHE_KEY, async (cacheDb) => {
                 cacheDb = cacheDb || { urls: [], limit: 500 };
                 if (cacheDb.urls.length + 1 > cacheDb.limit) {
@@ -33,6 +34,7 @@ const options = {
               return response;
             },
             cachedResponseWillBeUsed: async ({ request, response }) => {
+              console.log("SERVICE-WORKER:WillBeUsed", { request, response });
               await update(IDB_LRU_CACHE_KEY, async (cacheDb) => {
                 cacheDb = cacheDb || { urls: [], limit: 500 };
                 cacheDb.urls = cacheDb.urls.filter((url) => url != request.url);
