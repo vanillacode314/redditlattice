@@ -23,8 +23,9 @@ workbox.routing.registerRoute(
           await idbKeyval.update(IDB_LRU_CACHE_KEY, (cacheDb) => {
             cacheDb = cacheDb || { urls: [], limit: 500 };
             if (cacheDb.urls.length + 1 > cacheDb.limit) {
+              const key = cacheDb.urls.unshift();
               caches.open("images-assets").then((cache) => {
-                cache.delete(cacheDb.urls.unshift());
+                cache.delete(key);
               });
             }
             cacheDb.urls.push(request.url);
