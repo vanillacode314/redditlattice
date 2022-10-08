@@ -100,23 +100,19 @@ async function onInfinite($state) {
     const data = await $fetch<any>(url);
     const { posts: newPosts, error } = data;
 
-    // return on error
     if (error) {
       $state.error();
       return;
     }
     images.value = [...images.value, ...newPosts];
-    if (newPosts.length === 1) {
-      $state.complete();
-      return;
-    }
     if (!data.after) {
       $state.complete();
       return;
     }
     after = data.after;
-    setTimeout(() => $state.loaded(), 1000);
+    nextTick().then(() => $state.loaded());
   } catch (e) {
+    console.error("INFINITE_LOADING_ERROR:", e);
     $state.error();
   }
 }
@@ -175,7 +171,9 @@ onUnmounted(() => cleanUp());
       </template>
       <template #complete>
         <div p-5 grid place-content-center>
-          <div font-bold tracking-wide uppercase text="sm" font="bold">END</div>
+          <div font-bold tracking-wide uppercase text="sm" font="bold">
+            {{ images.length > 0 ? "END" : "NO IMAGES FOUND" }}
+          </div>
         </div>
       </template>
     </infinite-loading>
