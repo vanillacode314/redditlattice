@@ -33,7 +33,7 @@ const updateLimit = async (qty: number = -1) => {
   let limit: number;
 
   await update(IDB_LRU_CACHE_KEY, (cacheDb) => {
-    cacheDb = cacheDb || { urls: [], limit: 500 };
+    cacheDb = cacheDb || { limit: 500 };
     if (qty > -1) cacheDb.limit = qty;
     limit = cacheDb.limit;
     console.log(cacheDb);

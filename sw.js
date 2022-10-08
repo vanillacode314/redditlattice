@@ -148,6 +148,8 @@ workbox.routing.registerRoute(
               map: new Map(),
               limit: 500,
             };
+            if (!cacheDb.urls) cacheDb.urls = new DoublyLinkedList();
+            if (!cacheDb.map) cacheDb.map = new Map();
             if (cacheDb.urls.length + 1 > cacheDb.limit) {
               const url = cacheDb.urls.tail.value;
               cacheDb.urls.remove(cacheDb.urls.length - 1);
@@ -170,6 +172,8 @@ workbox.routing.registerRoute(
               map: new Map(),
               limit: 500,
             };
+            if (!cacheDb.urls) cacheDb.urls = new DoublyLinkedList();
+            if (!cacheDb.map) cacheDb.map = new Map();
             const node = cacheDb.map.get(request.url);
             if (node) {
               cacheDb.urls.remove(node);
