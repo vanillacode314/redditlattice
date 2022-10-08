@@ -18,3 +18,10 @@ export function round(num: number, precision: number = 2): number {
   const p = Math.pow(10, precision);
   return Math.round(num * p) / p;
 }
+
+const byteMap = ["B", "KB", "MB", "GB", "TB", "PB"];
+
+export function formatBytes(bytes: number, base: number = 1024): string {
+  const index = Math.min(Math.floor(log(base, bytes)), byteMap.length - 1);
+  return `${round(bytes / Math.pow(base, index))} ${byteMap[index]}`;
+}
