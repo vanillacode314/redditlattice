@@ -18,7 +18,7 @@ workbox.routing.registerRoute(
     },
     plugins: [
       {
-        cacheWillUpdate: async ({ request, response }) => {
+        cacheDidUpdate: async ({ request, response }) => {
           /* console.log("SERVICE-WORKER:WillUpdate", { request, response }); */
           await idbKeyval.update(IDB_LRU_CACHE_KEY, (cacheDb) => {
             cacheDb = cacheDb || { urls: [], limit: 500 };
