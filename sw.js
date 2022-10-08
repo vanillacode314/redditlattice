@@ -22,7 +22,7 @@ workbox.routing.registerRoute(
           /* console.log("SERVICE-WORKER:WillUpdate", { request, response }); */
           await idbKeyval.update(IDB_LRU_CACHE_KEY, (cacheDb) => {
             cacheDb = cacheDb || { urls: [], limit: 500 };
-            if (cacheDb.urls.length + 1 > cacheDb.limit) {
+            while (cacheDb.urls.length + 1 > cacheDb.limit) {
               const key = cacheDb.urls.unshift();
               if (key)
                 caches.open("images-assets").then((cache) => {
