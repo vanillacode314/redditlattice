@@ -23,6 +23,7 @@ const getUsageStats = async () => {
 
 const clearCache = async () => {
   caches.delete("images-assets");
+  usageStats.value = await getUsageStats();
 };
 
 onMounted(async () => {
