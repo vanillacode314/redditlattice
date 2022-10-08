@@ -14,7 +14,7 @@ const options = {
         cacheName: "images-assets",
         expiration: {
           maxEntries: 250,
-          maxAgeSeconds: 7 * 24 * 60 * 60,
+          maxAgeSeconds: 365 * 24 * 60 * 60,
         },
         fetchOptions: {
           mode: "cors",
