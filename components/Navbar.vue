@@ -18,7 +18,7 @@ watch(
       navVisible.value = true;
       if (scroller) scroller.removeEventListener("scroll", onScroll);
       scroller = document.getElementById("scroller");
-      scroller.addEventListener("scroll", onScroll);
+      if (scroller) scroller.addEventListener("scroll", onScroll);
     });
   },
 

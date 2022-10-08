@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@appnest/masonry-layout": "^2.0.8",
+    "idb-keyval": "^6.2.0",
     "pinia": "^2.0.22",
     "v3-infinite-loading": "^1.2.1",
     "vue-gtag": "^2.0.1"
