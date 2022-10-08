@@ -29,9 +29,6 @@ useHead({
 </script>
 
 <template>
-  <transition name="slide">
-    <div v-if="!online" bg="gray" class="online-notif">Not Online</div>
-  </transition>
   <div flex="~ col" h-full max-h-full relative>
     <div
       absolute
@@ -48,6 +45,20 @@ useHead({
         <div text="2xl" class="i-mdi-refresh"></div>
       </div>
     </div>
+    <transition name="slide">
+      <div
+        v-if="!online"
+        bg="gray-800"
+        px-5
+        py-2
+        text="sm"
+        font="bold"
+        tracking-wide
+        uppercase
+      >
+        Not Online
+      </div>
+    </transition>
     <Navbar />
     <Drawer />
     <div grow overflow-hidden>
