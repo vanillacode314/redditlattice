@@ -24,11 +24,13 @@ workbox.routing.registerRoute(
             cacheDb = cacheDb || { urls: [], limit: 500 };
             if (cacheDb.urls.length + 1 > cacheDb.limit) {
               const key = cacheDb.urls.unshift();
-              caches.open("images-assets").then((cache) => {
-                cache.delete(key);
-              });
+              if (key)
+                caches.open("images-assets").then((cache) => {
+                  cache.delete(key);
+                });
             }
-            cacheDb.urls.push(request.url);
+            if (!cacheDb.urls.includes(request.url))
+              cacheDb.urls.push(request.url);
             return cacheDb;
           });
           return response;
