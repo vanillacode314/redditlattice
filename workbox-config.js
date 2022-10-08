@@ -1,8 +1,11 @@
 /** @type {Parameters<import('workbox-build').generateSW>[0]} */
 const options = {
   globDirectory: "dist",
-  globPatterns: ["**/*.{mjs,css,ttf,svg,eot,woff,woff2,html,png,json}"],
+  globPatterns: [
+    "**/*.{js,webmanifest,mjs,css,ttf,svg,eot,woff,woff2,html,png,json}",
+  ],
   swDest: "dist/sw.js",
+  dontCacheBustURLsMatching: /\..*\./,
   ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
   runtimeCaching: [
     {
