@@ -12,7 +12,7 @@ workbox.routing.registerRoute(
     request.destination === "image" &&
     url.origin === "https://redditlattice-server-production.up.railway.app",
   new workbox.strategies.CacheFirst({
-    cacheName: "image-assets",
+    cacheName: "images-assets",
     fetchOptions: {
       mode: "cors",
     },

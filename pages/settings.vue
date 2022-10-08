@@ -25,7 +25,7 @@ const getUsageStats = async () => {
 };
 
 const clearCache = async () => {
-  await caches.delete("image-assets");
+  await caches.delete("images-assets");
   usageStats.value = await getUsageStats();
 };
 
