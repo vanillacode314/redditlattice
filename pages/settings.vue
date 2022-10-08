@@ -54,15 +54,15 @@ onMounted(async () => {
 
 <template>
   <div p-5 flex flex-col-reverse h-full gap-5>
-    <Button
-      @click="saveChanges()"
-      bg="green-800 hover:green-700"
-      relative
-      overflow-hidden
-      transition-colors
-    >
-      <span> Save Changes </span>
-    </Button>
+    <!-- <Button -->
+    <!--   @click="saveChanges()" -->
+    <!--   bg="green-800 hover:green-700" -->
+    <!--   relative -->
+    <!--   overflow-hidden -->
+    <!--   transition-colors -->
+    <!-- > -->
+    <!--   <span> Save Changes </span> -->
+    <!-- </Button> -->
     <Button
       @click="clearCache()"
       bg="blue-800 hover:red-700"
@@ -83,26 +83,26 @@ onMounted(async () => {
         }})
       </span>
     </Button>
-    <div
-      ring="~ pink-800"
-      flex
-      gap-3
-      bg-black
-      outline-none
-      rounded
-      py-2
-      px-4
-      items-center
-    >
-      <span uppercase font="bold" text="xs gray-500">Max cache entries</span>
-      <input
-        v-model="cacheLimit"
-        type="number"
-        id="cache-limit"
-        bg-transparent
-        outline-none
-      />
-      <span uppercase font="bold" text="xs gray-500">Images</span>
-    </div>
+    <!-- <div -->
+    <!--   ring="~ pink-800" -->
+    <!--   flex -->
+    <!--   gap-3 -->
+    <!--   bg-black -->
+    <!--   outline-none -->
+    <!--   rounded -->
+    <!--   py-2 -->
+    <!--   px-4 -->
+    <!--   items-center -->
+    <!-- > -->
+    <!--   <span uppercase font="bold" text="xs gray-500">Max cache entries</span> -->
+    <!--   <input -->
+    <!--     v-model="cacheLimit" -->
+    <!--     type="number" -->
+    <!--     id="cache-limit" -->
+    <!--     bg-transparent -->
+    <!--     outline-none -->
+    <!--   /> -->
+    <!--   <span uppercase font="bold" text="xs gray-500">Images</span> -->
+    <!-- </div> -->
   </div>
 </template>
