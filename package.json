@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@iconify-json/mdi": "^1.1.33",
+    "@nuxtjs/partytown": "^1.2.2",
     "@pinia/nuxt": "^0.4.2",
     "@unocss/nuxt": "^0.45.26",
     "@unocss/reset": "^0.45.26",

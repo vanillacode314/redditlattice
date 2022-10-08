@@ -79,7 +79,6 @@ useHead({
 
 <template>
   <main pb-5 px-5 h-full flex flex-col-reverse gap-4 overflow-hidden>
-    <NuxtLink to="/about">About</NuxtLink>
     <form @submit.prevent="onSubmit" flex gap-3 items-center>
       <div
         ring="~ pink-800"

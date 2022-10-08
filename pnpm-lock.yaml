@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@appnest/masonry-layout': ^2.0.8
   '@iconify-json/mdi': ^1.1.33
+  '@nuxtjs/partytown': ^1.2.2
   '@pinia/nuxt': ^0.4.2
   '@unocss/nuxt': ^0.45.26
   '@unocss/reset': ^0.45.26
@@ -31,6 +32,7 @@ dependencies:
 
 devDependencies:
   '@iconify-json/mdi': 1.1.33
+  '@nuxtjs/partytown': 1.2.2
   '@pinia/nuxt': 0.4.2_typescript@4.8.4
   '@unocss/nuxt': 0.45.26
   '@unocss/reset': 0.45.26
@@ -1271,6 +1273,11 @@ packages:
       to-fast-properties: 2.0.0
     dev: true
 
+  /@builder.io/partytown/0.7.1:
+    resolution: {integrity: sha512-hvu2gG9NDtCa5aoL4JkvDe3E5SegXlHAkhtA+Az96uTtFA0PYuEPjDYGiayGTkZuRKUmxetebWjIFgSDNdlBOw==}
+    hasBin: true
+    dev: true
+
   /@cloudflare/kv-asset-handler/0.2.0:
     resolution: {integrity: sha512-MVbXLbTcAotOPUj0pAMhVtJ+3/kFkwJqc5qNOleOZTv6QkZZABDMS21dSrSlVswEHwrpWC03e4fWytjqKvuE2A==}
     dependencies:
@@ -1542,6 +1549,18 @@ packages:
       - typescript
       - vls
       - vti
+    dev: true
+
+  /@nuxtjs/partytown/1.2.2:
+    resolution: {integrity: sha512-mev71SBQ9nSpVxn47i83VwMDWFxqzoyt/EWnllMGKEJgAsVWwQUxFkAu06roAb/kV7mTXcQM4GeC/hAgjOdnYQ==}
+    dependencies:
+      '@builder.io/partytown': 0.7.1
+      '@nuxt/kit': 3.0.0-rc.11
+      knitwork: 0.1.2
+      serve-static: 1.15.0
+      ufo: 0.8.5
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@pinia/nuxt/0.4.2_typescript@4.8.4:
