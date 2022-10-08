@@ -1,6 +1,6 @@
-import { get, set, update } from "idb-keyval";
-import { IDB_LRU_CACHE_KEY } from "./consts";
+const { update } = require("idb-keyval");
 
+const IDB_LRU_CACHE_KEY = "image-assets";
 /** @type {Parameters<import('workbox-build').generateSW>[0]} */
 const options = {
   globDirectory: "dist",
@@ -14,9 +14,13 @@ const options = {
         url.origin === "https://redditlattice-server-production.up.railway.app",
       handler: "CacheFirst",
       options: {
+        cacheName: "images-assets",
+        fetchOptions: {
+          mode: "cors",
+        },
         plugins: [
           {
-            async cacheWillUpdate({ request, response }) {
+            cacheWillUpdate: async ({ request, response }) => {
               await update(IDB_LRU_CACHE_KEY, async (cacheDb) => {
                 cacheDb = cacheDb || { urls: [], limit: 500 };
                 if (cacheDb.urls.length + 1 > cacheDb.limit) {
@@ -28,7 +32,7 @@ const options = {
               });
               return response;
             },
-            async cachedResponseWillBeUsed({ request, response }) {
+            cachedResponseWillBeUsed: async ({ request, response }) => {
               await update(IDB_LRU_CACHE_KEY, async (cacheDb) => {
                 cacheDb = cacheDb || { urls: [], limit: 500 };
                 cacheDb.urls = cacheDb.urls.filter((url) => url != request.url);
@@ -39,13 +43,6 @@ const options = {
             },
           },
         ],
-        cacheName: "images-assets",
-        fetchOptions: {
-          mode: "cors",
-        },
-        cacheableResponse: {
-          statuses: [200],
-        },
       },
     },
   ],
