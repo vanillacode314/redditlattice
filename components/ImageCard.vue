@@ -45,9 +45,8 @@ function onImageLoad() {
 function getWidth(): number {
   if (!pictureElement.value) return 400;
   const cols =
-    +getComputedStyle(pictureElement.value).getPropertyValue(
-      "--_masonry-layout-col-count"
-    ) || 1;
+    +getComputedStyle(pictureElement.value).getPropertyValue("--col-count") ||
+    1;
   const grid = document.querySelector<HTMLDivElement>(".image-grid");
   if (!grid) return 400;
   return grid.getBoundingClientRect().width / cols;

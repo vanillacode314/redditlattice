@@ -32,3 +32,11 @@ export function formatBytes(bytes: number, base: number = 1024): string {
 export function isEmpty(obj: object): boolean {
   return Object.values(obj).length === 0;
 }
+
+export function difference<T>(set1: Set<T>, set2: Set<T>): Set<T> {
+  const diffSet = new Set<T>();
+  for (const item of set1) {
+    if (!set2.has(item)) diffSet.add(item);
+  }
+  return diffSet;
+}

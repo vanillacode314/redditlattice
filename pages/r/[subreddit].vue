@@ -2,9 +2,6 @@
 import { IAction, SortType } from "~/types";
 import type { InfiniteState } from "~~/components/InfiniteLoading.vue";
 
-/// WEB COMPONENTS ///
-import "@appnest/masonry-layout";
-
 import { storeToRefs } from "pinia";
 import { RouteLocationNormalizedLoaded } from "vue-router";
 const route = useRoute();
@@ -36,7 +33,15 @@ const fabActions = ref<IAction[]>([
     },
   },
 ]);
-const masonry = ref();
+const masonryItems = computed(
+  () =>
+    new Set(
+      images.value.data.map((image) => ({
+        id: image.name,
+        data: image,
+      }))
+    )
+);
 
 // dynamic navbar title
 watchEffect(() => {
@@ -135,13 +140,13 @@ definePageMeta({
 
 <template>
   <div max-h-full id="scroller" class="image-grid" ref="scroller">
-    <masonry-layout gap="0" ref="masonry">
-      <ImageCard
-        v-for="image of images.data"
-        :image="image"
-        @load="masonry.scheduleLayout()"
-      />
-    </masonry-layout>
+    <Masonry
+      :max-width="400"
+      :items="masonryItems"
+      #default="{ item: { data: image } }"
+    >
+      <ImageCard :image="image" />
+    </Masonry>
 
     <InfiniteLoading target="#scroller" :distance="300" @infinite="onInfinite">
       <template #idle="{ load }">

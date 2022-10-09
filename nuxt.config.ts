@@ -42,9 +42,4 @@ export default defineNuxtConfig({
       script: [{ src: "/registerSW.js", defer: true }],
     },
   },
-  vue: {
-    compilerOptions: {
-      isCustomElement: (tag) => ["masonry-layout"].includes(tag),
-    },
-  },
 });
