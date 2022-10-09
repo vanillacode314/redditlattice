@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { SortType } from "~/types";
+import { IPost, SortType } from "~/types";
 
 export default defineStore("main", () => {
   const drawerVisible = ref<boolean>(false);
@@ -10,6 +10,8 @@ export default defineStore("main", () => {
   const subreddits = useLocalStorage<string[]>("subreddits", []);
   const searches = useLocalStorage<string[]>("searches", []);
   const sort = useLocalStorage<SortType>("sort", SortType.TOP);
+  const images = ref<Pick<IPost, "name" | "url" | "title">[]>([]);
+  const savedScroll = ref<number>(0);
 
   function addQuery(query: string) {
     if (query.includes("?")) {
@@ -24,6 +26,8 @@ export default defineStore("main", () => {
   }
 
   return {
+    savedScroll,
+    images,
     drawerVisible,
     subreddits,
     searches,

@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { storeToRefs } from "pinia";
 import type { IPost } from "~~/types";
 const props = defineProps<{
-  image: IPost;
+  image: Pick<IPost, "name" | "url" | "title">;
 }>();
+
+const store = useStore();
+const { savedScroll } = storeToRefs(store);
 
 const emit = defineEmits(["load"]);
 const imgElement = ref<HTMLImageElement>();
@@ -19,7 +23,7 @@ function onImageLoad() {
     if (!imgElement.value) return;
     if (!pictureElement.value) return;
     if (imgElement.value.naturalHeight) {
-      pictureElement.value.style.height = `${
+      pictureElement.value.style.blockSize = `${
         (imgElement.value.naturalHeight / imgElement.value.naturalWidth) *
         getWidth()
       }px`;
@@ -36,9 +40,10 @@ function onImageLoad() {
 
 function getWidth() {
   if (!pictureElement.value) return 400;
-  const cols = +getComputedStyle(pictureElement.value).getPropertyValue(
-    "--_masonry-layout-col-count"
-  );
+  const cols =
+    +getComputedStyle(pictureElement.value).getPropertyValue(
+      "--_masonry-layout-col-count"
+    ) || 1;
   return (
     (pictureElement.value.parentNode as HTMLDivElement).getBoundingClientRect()
       .width / cols
@@ -70,12 +75,16 @@ function updateSources() {
 }
 
 function popupImage() {
-  /* router.replace({ hash: "#popup" }); */
+  /* const scroller = document.getElementById("scroller"); */
+  /* if (scroller) savedScroll.value = scroller.scrollTop; */
+  /* const url = new URL(window.location.href); */
+  /* url.hash = "#popup"; */
+  /* history.pushState({}, "", url); */
   popupVisible.value = true;
 }
 
 function removePopupImage() {
-  /* router.replace({ hash: undefined }); */
+  /* router.back(); */
   popupVisible.value = false;
 }
 
@@ -110,7 +119,6 @@ onMounted(async () => {
     <source v-for="[format, url] in srcSets" :srcset="url" :type="format" />
     <img
       @error="onError()"
-      v-longpress="popupImage"
       ref="imgElement"
       :key="image.name"
       :alt="image.title"

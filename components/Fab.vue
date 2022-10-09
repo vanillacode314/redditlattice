@@ -86,11 +86,11 @@ function onLeave(el: HTMLElement, done) {
 /// LIFECYCLE HOOKS ///
 onMounted(() => {
   const scroller = document.getElementById("scroller");
-  scroller.addEventListener("scroll", onScroll);
+  if (scroller) scroller.addEventListener("scroll", onScroll);
 });
 onUnmounted(() => {
   const scroller = document.getElementById("scroller");
-  scroller.removeEventListener("scroll", onScroll);
+  if (scroller) scroller.removeEventListener("scroll", onScroll);
 });
 </script>
 

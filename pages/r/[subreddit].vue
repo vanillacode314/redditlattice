@@ -1,18 +1,15 @@
 <script setup lang="ts">
-import { IAction, SortType, IPost } from "~/types";
+import { IAction, SortType } from "~/types";
 
 /// WEB COMPONENTS ///
 import "@appnest/masonry-layout";
 
 import { storeToRefs } from "pinia";
 const route = useRoute();
-const router = useRouter();
 
 /// STATE ///
-const id = ref<boolean>(true);
 const store = useStore();
-const { subreddits, title, query, sort } = storeToRefs(store);
-const images = ref<IPost[]>([]);
+const { images, subreddits, title, query, sort } = storeToRefs(store);
 const fabActions = ref<IAction[]>([
   {
     id: SortType.TOP,
@@ -42,7 +39,7 @@ const masonry = ref();
 let after = "";
 
 // dynamic navbar title
-watch(route, () => {
+watchEffect(() => {
   title.value = route.query.q
     ? `${route.query.q} - /r/${route.params.subreddit}`
     : `/r/${route.params.subreddit}`;
@@ -55,11 +52,11 @@ watch(sort, () => {
 
 // onSearch flush images and change route
 query.value = route.query.q as string;
-watch(query, () => {
+watch(query, (q) => {
   resetState();
-  router.push({
+  navigateTo({
     path: `/r/${route.params.subreddit}`,
-    query: { q: query.value },
+    query: { q },
   });
 });
 
@@ -76,9 +73,10 @@ const createSearchParams: () => URLSearchParams = () => {
 
 /** infinite loader handler */
 const onInfinite = async ($state: any) => {
-  const url = `/api/getImages?${createSearchParams().toString()}`;
   try {
-    const { posts: newPosts, after: a } = await $fetch(url);
+    const { posts: newPosts, after: a } = await $fetch("/api/getImages", {
+      query: Object.fromEntries(createSearchParams()),
+    });
     images.value = [...images.value, ...newPosts];
 
     if (!a) {
@@ -96,13 +94,12 @@ const onInfinite = async ($state: any) => {
 const resetState = () => {
   after = "";
   images.value = [];
-  // HACK: manually reset infinite scroll state
-  id.value = !id.value;
 };
 
 /// LIFECYCLE HOOKS ///
 // flush old images on mount and add subreddit to localStorage
 onMounted(() => {
+  /* resetState(); */
   subreddits.value = [
     ...new Set([...subreddits.value, route.params.subreddit as string]),
   ].sort();
@@ -125,7 +122,6 @@ useHead({
 
 definePageMeta({
   key: (route) => route.query.q + "-" + route.params.subreddit,
-  keepalive: true,
 });
 </script>
 
@@ -142,7 +138,7 @@ definePageMeta({
     <infinite-loading
       target="#scroller"
       @infinite="onInfinite"
-      :identifier="`${route.query.q}-${route.params.subreddit}-${id}`"
+      :identifier="`${$route.query.q}-${$route.params.subreddit}-${sort}`"
       :distance="300"
     >
       <template #spinner>
