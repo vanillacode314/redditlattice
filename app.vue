@@ -22,7 +22,7 @@ useHead({
       bg-transparent
     >
       <div id="pull-to-refresh" p-2 bg="purple" rounded-full>
-        <div text="2xl" class="i-mdi-refresh"></div>
+        <div text="3xl" class="i-mdi-refresh"></div>
       </div>
     </div>
     <transition name="slide">
@@ -42,9 +42,6 @@ useHead({
     <Navbar />
     <Drawer />
     <div grow overflow-hidden>
-      <!-- <div grid place-content-center p-5 v-if="loading"> -->
-      <!--   <Spinner /> -->
-      <!-- </div> -->
       <NuxtPage />
     </div>
   </div>

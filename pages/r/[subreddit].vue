@@ -72,7 +72,11 @@ const createSearchParams: () => URLSearchParams = () => {
 };
 
 /** infinite loader handler */
-const onInfinite = async ($state: InfiniteState) => {
+const onInfinite = async ($state: InfiniteState, firstload: boolean) => {
+  if (firstload && images.value.data.length > 0) {
+    $state.value = "idle";
+    return;
+  }
   try {
     const { posts: newPosts, after: a } = await $fetch("/api/getImages", {
       query: Object.fromEntries(createSearchParams()),
@@ -103,8 +107,7 @@ const getKey: (route: RouteLocationNormalizedLoaded) => string = (route) => {
 
 /// LIFECYCLE HOOKS ///
 // flush old images on mount and add subreddit to localStorage
-onMounted(async () => {
-  await nextTick();
+onMounted(() => {
   if (images.value.key !== getKey(route)) resetState();
   addSubreddit(route.params.subreddit as string);
 });
@@ -125,13 +128,13 @@ useHead({
 });
 
 definePageMeta({
+  pageTransition: false,
   key: (route) => `${route.query.q}-${route.params.subreddit}`,
-  keepalive: true,
 });
 </script>
 
 <template>
-  <div max-h-full id="scroller" class="image-grid">
+  <div max-h-full id="scroller" class="image-grid" ref="scroller">
     <masonry-layout gap="0" ref="masonry">
       <ImageCard
         v-for="image of images.data"
@@ -141,6 +144,13 @@ definePageMeta({
     </masonry-layout>
 
     <InfiniteLoading target="#scroller" :distance="300" @infinite="onInfinite">
+      <template #idle="{ load }">
+        <div p-5 grid place-content-center>
+          <Button bg="purple-800 hover:purple-700" @click="load"
+            >Load More</Button
+          >
+        </div>
+      </template>
       <template #loading>
         <div grid place-content-center p-5>
           <Spinner />
@@ -159,6 +169,7 @@ definePageMeta({
         </div>
       </template>
     </InfiniteLoading>
+
     <Fab icon="i-mdi-sort" :actions="fabActions" :selected="sort"> </Fab>
   </div>
 </template>

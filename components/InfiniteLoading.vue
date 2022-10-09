@@ -10,36 +10,40 @@ const props = withDefaults(
     firstload?: boolean;
   }>(),
   {
-    firstload: true,
     distance: 0,
     target: "body",
+    firstload: true,
   }
 );
 
 const emit = defineEmits<{
-  (e: "infinite", $state: typeof state): void;
+  (e: "infinite", $state: typeof state, firstload: boolean): void;
 }>();
 
 const state = ref<State>("idle");
 
 const onScroll = () => {
+  if (state.value !== "idle") return;
   const scrollArea = document.querySelector(props.target);
   if (!scrollArea) return;
   const dy =
     scrollArea.scrollHeight - scrollArea.scrollTop - scrollArea.clientHeight;
+  console.log({ dy });
   if (dy <= props.distance) load();
 };
 
-const load = () => {
+const load = (firstload: boolean = false) => {
   state.value = "loading";
-  emit("infinite", state);
+  emit("infinite", state, firstload);
 };
 
 onMounted(() => {
-  const scrollArea = document.querySelector(props.target);
-  if (!scrollArea) return;
-  scrollArea.addEventListener("scroll", onScroll);
-  if (props.firstload) load();
+  nextTick().then(() => {
+    const scrollArea = document.querySelector(props.target);
+    if (!scrollArea) return;
+    scrollArea.addEventListener("scroll", onScroll);
+    if (props.firstload) load(true);
+  });
 });
 
 onUnmounted(() => {
@@ -50,7 +54,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="state === 'idle'"><slot name="idle"></slot></div>
+  <div v-if="state === 'idle'"><slot name="idle" :load="load"></slot></div>
   <div v-if="state === 'error'"><slot name="error" :retry="load"></slot></div>
   <div v-if="state === 'loading'"><slot name="loading"></slot></div>
   <div v-if="state === 'completed'"><slot name="completed"></slot></div>
