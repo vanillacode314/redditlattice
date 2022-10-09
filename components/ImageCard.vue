@@ -70,12 +70,12 @@ function updateSources() {
 }
 
 function popupImage() {
-  router.replace({ hash: "#popup" });
+  /* router.replace({ hash: "#popup" }); */
   popupVisible.value = true;
 }
 
 function removePopupImage() {
-  router.replace({ hash: undefined });
+  /* router.replace({ hash: undefined }); */
   popupVisible.value = false;
 }
 
