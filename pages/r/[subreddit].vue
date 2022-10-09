@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IAction, SortType } from "~/types";
+import { IAction, SortType } from "~/types";
 import type { InfiniteState } from "~~/components/InfiniteLoading.vue";
 
 /// WEB COMPONENTS ///
