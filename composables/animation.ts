@@ -99,7 +99,7 @@ export function onRefresh({
     );
     if (!touch) return;
 
-    scrollArea.style.overflowY = "overflow";
+    scrollArea.style.removeProperty("overflow-y");
 
     // reset touchId
     touchId = -1;
