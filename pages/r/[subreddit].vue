@@ -33,14 +33,11 @@ const fabActions = ref<IAction[]>([
     },
   },
 ]);
-const masonryItems = computed(
-  () =>
-    new Set(
-      images.value.data.map((image) => ({
-        id: image.name,
-        data: image,
-      }))
-    )
+const masonryItems = computed(() =>
+  images.value.data.map((image) => ({
+    id: image.name,
+    data: image,
+  }))
 );
 
 // dynamic navbar title

@@ -6,7 +6,7 @@ export interface IItem {
 
 const props = withDefaults(
   defineProps<{
-    items: Set<IItem>;
+    items: IItem[];
     maxWidth: number;
     gap?: number;
   }>(),
@@ -22,7 +22,7 @@ watch(
   () => props.items,
   (newVal, oldVal) => {
     if (!newVal || !oldVal) return;
-    const diff = difference(newVal, oldVal);
+    const diff = newVal.filter((i) => !oldVal.some((j) => i.id === j.id));
     addItems(diff);
   }
 );
@@ -62,7 +62,7 @@ const getTallestColumnIndex: () => number = () => {
 
 const addItems = (items: Iterable<IItem>) => {
   for (const item of items) {
-    requestIdleCallback(() => {
+    requestAnimationFrame(() => {
       addItem(item);
     });
   }

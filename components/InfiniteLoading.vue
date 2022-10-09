@@ -28,7 +28,6 @@ const onScroll = () => {
   if (!scrollArea) return;
   const dy =
     scrollArea.scrollHeight - scrollArea.scrollTop - scrollArea.clientHeight;
-  console.log({ dy });
   if (dy <= props.distance) load();
 };
 
