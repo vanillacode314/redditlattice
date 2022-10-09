@@ -3,6 +3,7 @@ import { storeToRefs } from "pinia";
 
 const store = useStore();
 const { drawerVisible } = storeToRefs(store);
+const version = __version__;
 
 interface ILink {
   title: string;
@@ -56,10 +57,10 @@ const links: ILink[] = [
           w-80
           transition-transform
           transition-opacity
-          gap-2
+          gap-5
           flex="~ col"
         >
-          <a href="https://raqueebuddinaziz.com" flex="~ col" gap-1 p-5>
+          <a href="https://raqueebuddinaziz.com" flex="~ col" gap-1 pt-5 px-5>
             <span text="lg">RedditLattice </span>
             <span text="xs gray-500" font="bold" uppercase tracking-wide>
               Made by Raqueebuddin Aziz
@@ -88,6 +89,17 @@ const links: ILink[] = [
               </span>
             </NuxtLink>
           </div>
+          <span class="grow" />
+          <span
+            text="xs gray-500"
+            font="bold"
+            uppercase
+            tracking-wide
+            p-5
+            self-end
+          >
+            {{ version }}
+          </span>
         </div>
       </template>
     </Transition>

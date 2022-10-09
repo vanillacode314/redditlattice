@@ -1,3 +1,7 @@
+import fs from "fs";
+const packageJson = fs.readFileSync("./package.json");
+const version = JSON.parse(packageJson.toString()).version;
+
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
   typescript: {
@@ -40,6 +44,11 @@ export default defineNuxtConfig({
         },
       ],
       script: [{ src: "/registerSW.js", defer: true }],
+    },
+  },
+  vite: {
+    define: {
+      __version__: JSON.stringify(version),
     },
   },
 });
