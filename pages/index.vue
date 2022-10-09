@@ -43,9 +43,9 @@ function setSearch({ title: query }: Item) {
   if (!searchTerm.value) return;
   if (searchTerm.value.includes("?")) {
     const [sr, _] = searchTerm.value.split("?");
-    searchTerm.value = `${sr}?${query}`;
+    searchTerm.value = `${sr}${query ? "?" : ""}${query}`;
   } else {
-    searchTerm.value = `${searchTerm.value}?${query}`;
+    searchTerm.value = `${searchTerm.value}${query ? "?" : ""}${query}`;
   }
 }
 
@@ -78,8 +78,8 @@ useHead({
 </script>
 
 <template>
-  <main pb-5 px-5 h-full flex flex-col-reverse gap-4 overflow-hidden>
-    <form @submit.prevent="onSubmit" flex gap-3 items-center>
+  <main pb-5 h-full flex flex-col-reverse gap-4 overflow-hidden>
+    <form @submit.prevent="onSubmit" flex gap-3 items-center px-4>
       <div
         ring="~ pink-800"
         flex
@@ -121,7 +121,6 @@ useHead({
       id="scroller"
       flex="~ col-reverse"
       gap-2
-      overflow-auto
       py-5
       grow
       shrink-1

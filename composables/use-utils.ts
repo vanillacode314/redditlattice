@@ -28,3 +28,7 @@ export function formatBytes(bytes: number, base: number = 1024): string {
   const index = Math.min(Math.floor(log(base, bytes)), byteMap.length - 1);
   return `${round(bytes / Math.pow(base, index))} ${byteMap[index]}`;
 }
+
+export function isEmpty(obj: object): boolean {
+  return Object.values(obj).length === 0;
+}

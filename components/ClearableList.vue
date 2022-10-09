@@ -15,7 +15,7 @@ defineProps<{
 
 <template>
   <div flex flex-col gap-2 :class="{ 'flex-col-reverse': reverse }">
-    <span text="xs gray-500" font="bold" uppercase v-if="title">{{
+    <span px-4 text="xs gray-500" font="bold" uppercase v-if="title">{{
       title
     }}</span>
     <ul flex="~ col" :class="{ 'flex-col-reverse': reverse }">
@@ -25,6 +25,7 @@ defineProps<{
             :key="item.id"
             @click="onclick(item)"
             @remove="onremove(item)"
+            px-4
           >
             {{ item.title }}
           </clearable-list-item>

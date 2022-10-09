@@ -19,16 +19,26 @@ html {
   overflow: hidden;
 }
 
-*::-webkit-scrollbar {
-  width: 0.3rem;
+#scroller {
+  overflow: overlay;
 }
 
+*::-webkit-scrollbar {
+  width: 5px;
+}
+
+@media screen and (min-width: 768px) {
+  *::-webkit-scrollbar {
+    width: 10px;
+  }
+}
 *::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #444;
+  border-radius: 20px;
+  background-color: rgb(255 255 255 / 20%);
 }
 
 img {

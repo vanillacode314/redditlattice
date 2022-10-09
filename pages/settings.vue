@@ -16,8 +16,8 @@ const usageStats = ref<{ total: number; used: number }>({ total: 0, used: 0 });
 const getUsageStats = async () => {
   const { quota, usage } = await navigator.storage.estimate();
   return {
-    total: quota,
-    used: usage,
+    total: quota || 1,
+    used: usage || 0,
   };
 };
 
@@ -32,7 +32,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div p-5 flex flex-col-reverse h-full gap-5>
+  <div p-5 flex flex-col-reverse h-full gap-5 id="scroller">
     <Button
       @click="clearCache()"
       bg="blue-800 hover:red-700"

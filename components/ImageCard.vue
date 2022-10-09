@@ -10,6 +10,7 @@ const pictureElement = ref<HTMLPictureElement>();
 const popupVisible = ref<boolean>(false);
 const srcSets = ref<Map<string, string>>(new Map());
 const error = ref<boolean>(false);
+const router = useRouter();
 
 function onImageLoad() {
   if (!pictureElement.value) return;
@@ -69,13 +70,13 @@ function updateSources() {
 }
 
 function popupImage() {
+  router.replace({ hash: "#popup" });
   popupVisible.value = true;
-  document.documentElement.classList.add("noscroll");
 }
 
 function removePopupImage() {
+  router.replace({ hash: undefined });
   popupVisible.value = false;
-  document.documentElement.classList.remove("noscroll");
 }
 
 async function retry() {

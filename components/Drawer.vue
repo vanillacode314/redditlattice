@@ -3,77 +3,79 @@ import { storeToRefs } from "pinia";
 
 const store = useStore();
 const { drawerVisible } = storeToRefs(store);
+
+const links = [
+  {
+    title: "Home",
+    href: "/",
+  },
+  {
+    title: "About",
+    href: "/about",
+  },
+  {
+    title: "Settings",
+    href: "/settings",
+  },
+];
 </script>
 
 <template>
-  <Transition name="fade">
-    <template v-if="drawerVisible" transition-opacity>
-      <div bg="white/5" fixed inset-0 z-20 @click="drawerVisible = false" />
-    </template>
-  </Transition>
-  <Transition name="slide">
-    <template v-if="drawerVisible">
-      <div
-        bg="black"
-        fixed
-        left-0
-        inset-y-0
-        shadow="~ gray-500"
-        z-30
-        w-80
-        transition-transform
-        transition-opacity
-        gap-2
-        flex="~ col"
-      >
-        <a href="https://raqueebuddinaziz.com" flex="~ col" gap-1 p-5>
-          <span text="lg">RedditLattice </span>
-          <span text="xs gray-500" font="bold" uppercase tracking-wide>
-            Made by Raqueebuddin Aziz
-          </span>
-        </a>
-        <div border="b gray-500" w-full></div>
-        <div flex="~ col">
-          <NuxtLink
-            bg="black hover:gray-900"
-            px-5
-            py-3
-            to="/"
-            un-text="sm"
-            tracking-wide
-            font="bold"
-            uppercase
-            @click="drawerVisible = false"
-            >Home</NuxtLink
-          >
-          <NuxtLink
-            bg="black hover:gray-900"
-            px-5
-            py-3
-            tracking-wide
-            un-text="sm"
-            font="bold"
-            uppercase
-            to="/settings"
-            @click="drawerVisible = false"
-            >Settings</NuxtLink
-          >
-          <NuxtLink
-            bg="black hover:gray-900"
-            px-5
-            py-3
-            tracking-wide
-            un-text="sm"
-            font="bold"
-            uppercase
-            to="/about"
-            @click="drawerVisible = false"
-            >About</NuxtLink
-          >
+  <div>
+    <Transition name="fade">
+      <template v-if="drawerVisible">
+        <div
+          bg="white/5"
+          transition-opacity
+          fixed
+          inset-0
+          z-20
+          @click="drawerVisible = false"
+        />
+      </template>
+    </Transition>
+    <Transition name="slide">
+      <template v-if="drawerVisible">
+        <div
+          class="drawer"
+          bg="black"
+          fixed
+          left-0
+          inset-y-0
+          shadow="~ gray-500"
+          z-30
+          w-80
+          transition-transform
+          transition-opacity
+          gap-2
+          flex="~ col"
+        >
+          <a href="https://raqueebuddinaziz.com" flex="~ col" gap-1 p-5>
+            <span text="lg">RedditLattice </span>
+            <span text="xs gray-500" font="bold" uppercase tracking-wide>
+              Made by Raqueebuddin Aziz
+            </span>
+          </a>
+          <div border="b gray-500" w-full></div>
+          <div flex="~ col">
+            <NuxtLink
+              v-for="{ title, href } of links"
+              bg="black hover:gray-900"
+              px-5
+              py-3
+              un-text="sm"
+              tracking-wide
+              font="bold"
+              uppercase
+              :to="href"
+              @click="drawerVisible = false"
+              >{{ title }}</NuxtLink
+            >
+          </div>
         </div>
-      </div>
-    </template>
-  </Transition>
+      </template>
+    </Transition>
+  </div>
 </template>
 
 <style scoped>
@@ -93,6 +95,7 @@ const { drawerVisible } = storeToRefs(store);
 .fade-leave-to {
   opacity: 0;
 }
+
 .fade-enter-to,
 .fade-leave-from {
   opacity: 1;

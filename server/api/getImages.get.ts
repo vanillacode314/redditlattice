@@ -1,13 +1,13 @@
 import { IMAGE_EXTENSION_LIST } from "~/consts";
 import type { IPost, IRemotePostsData } from "~/types";
-import { getKeys } from "~~/composables/use-utils";
+import { getKeys, isEmpty } from "~~/composables/use-utils";
 
 type ReturnKeys = "name" | "url" | "title";
 
 function expandGallery(post: IPost): Pick<IPost, ReturnKeys>[] {
   if (
     !post.url.startsWith(`https://www.reddit.com/gallery/`) ||
-    Object.values(post.media_metadata).length === 0
+    isEmpty(post.media_metadata || {})
   )
     return [post];
   return Array.from(

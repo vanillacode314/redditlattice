@@ -11,7 +11,7 @@ const router = useRouter();
 /// STATE ///
 const id = ref<boolean>(true);
 const store = useStore();
-const { subreddits, title, query, isRefreshing, sort } = storeToRefs(store);
+const { subreddits, title, query, sort } = storeToRefs(store);
 const images = ref<IPost[]>([]);
 const fabActions = ref<IAction[]>([
   {
@@ -76,21 +76,20 @@ const createSearchParams: () => URLSearchParams = () => {
 
 /** infinite loader handler */
 const onInfinite = async ($state: any) => {
-  requestAnimationFrame(() => (isRefreshing.value = false));
   const url = `/api/getImages?${createSearchParams().toString()}`;
   try {
     const { posts: newPosts, after: a } = await $fetch(url);
     images.value = [...images.value, ...newPosts];
 
     if (!a) {
-      $state.complete();
+      setTimeout(() => $state.complete());
       return;
     }
 
     after = a;
-    nextTick().then(() => $state.loaded());
+    setTimeout(() => $state.loaded());
   } catch (e) {
-    $state.error();
+    setTimeout(() => $state.error());
   }
 };
 
@@ -102,9 +101,8 @@ const resetState = () => {
 };
 
 /// LIFECYCLE HOOKS ///
-// flush old images on mount and add subreddit to localStoragebuttoe
+// flush old images on mount and add subreddit to localStorage
 onMounted(() => {
-  resetState();
   subreddits.value = [
     ...new Set([...subreddits.value, route.params.subreddit as string]),
   ].sort();
@@ -124,10 +122,15 @@ useHead({
     ? `${route.query.q} - r/${route.params.subreddit} - RedditLattice`
     : `r/${route.params.subreddit} - RedditLattice`,
 });
+
+definePageMeta({
+  key: (route) => route.query.q + "-" + route.params.subreddit,
+  keepalive: true,
+});
 </script>
 
 <template>
-  <div overflow-auto max-h-full id="scroller">
+  <div max-h-full id="scroller">
     <masonry-layout gap="0" ref="masonry">
       <ImageCard
         v-for="image of images"
@@ -140,7 +143,7 @@ useHead({
       target="#scroller"
       @infinite="onInfinite"
       :identifier="`${route.query.q}-${route.params.subreddit}-${id}`"
-      :distance="400"
+      :distance="300"
     >
       <template #spinner>
         <div grid place-content-center p-5>

@@ -1,20 +1,18 @@
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
 
-/// STATE ///
 const store = useStore();
 const { title } = storeToRefs(store);
 title.value = `About`;
 
-/// HEAD ///
 useHead({
   title: "About - RedditLattice",
 });
 </script>
 
 <template>
-  <div flex flex-col gap-5 py-5>
-    <div flex flex-col gap-2>
+  <div flex flex-col-reverse gap-5 py-5 h-full id="scroller">
+    <div flex flex-col-reverse gap-2>
       <span px-5 text="xs gray-500" font="bold" uppercase v-if="title"
         >Summary</span
       >
@@ -32,7 +30,7 @@ useHead({
         </p>
       </div>
     </div>
-    <div flex flex-col gap-2>
+    <div flex flex-col-reverse gap-2>
       <span px-5 text="xs gray-500" font="bold" uppercase v-if="title"
         >links</span
       >
