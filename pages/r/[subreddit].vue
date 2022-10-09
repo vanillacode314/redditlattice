@@ -99,7 +99,7 @@ const resetState = () => {
 /// LIFECYCLE HOOKS ///
 // flush old images on mount and add subreddit to localStorage
 onMounted(() => {
-  /* resetState(); */
+  resetState();
   subreddits.value = [
     ...new Set([...subreddits.value, route.params.subreddit as string]),
   ].sort();
