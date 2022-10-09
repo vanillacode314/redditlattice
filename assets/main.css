@@ -1,3 +1,7 @@
+* {
+  max-height: 99999999999px;
+}
+
 :root {
   --navbar-height: 64px;
 }

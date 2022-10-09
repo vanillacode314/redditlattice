@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { IAction, SortType } from "~/types";
+import type { IAction, SortType } from "~/types";
+import type { InfiniteState } from "~~/components/InfiniteLoading.vue";
 
 /// WEB COMPONENTS ///
 import "@appnest/masonry-layout";
 
 import { storeToRefs } from "pinia";
+import { RouteLocationNormalizedLoaded } from "vue-router";
 const route = useRoute();
 
 /// STATE ///
 const store = useStore();
-const { images, subreddits, title, query, sort } = storeToRefs(store);
+const { addSubreddit } = store;
+const { images, title, query, sort } = storeToRefs(store);
 const fabActions = ref<IAction[]>([
   {
     id: SortType.TOP,
@@ -35,14 +38,11 @@ const fabActions = ref<IAction[]>([
 ]);
 const masonry = ref();
 
-// id of the last image in the last request, used to request the next set of images after this id
-let after = "";
-
 // dynamic navbar title
 watchEffect(() => {
   title.value = route.query.q
-    ? `${route.query.q} - /r/${route.params.subreddit}`
-    : `/r/${route.params.subreddit}`;
+    ? `${route.query.q} - r/${route.params.subreddit}`
+    : `r/${route.params.subreddit}`;
 });
 
 // flush images when sort type is changed
@@ -66,43 +66,47 @@ const createSearchParams: () => URLSearchParams = () => {
     subreddit: route.params.subreddit as string,
   });
   if (route.query.q) searchParams.append("q", route.query.q as string);
-  if (after) searchParams.append("after", after);
+  if (images.value.after) searchParams.append("after", images.value.after);
   searchParams.append("sort", sort.value);
   return searchParams;
 };
 
 /** infinite loader handler */
-const onInfinite = async ($state: any) => {
+const onInfinite = async ($state: InfiniteState) => {
   try {
     const { posts: newPosts, after: a } = await $fetch("/api/getImages", {
       query: Object.fromEntries(createSearchParams()),
     });
-    images.value = [...images.value, ...newPosts];
+    images.value.data = [...images.value.data, ...newPosts];
 
     if (!a) {
-      setTimeout(() => $state.complete());
+      setTimeout(() => ($state.value = "completed"));
       return;
     }
 
-    after = a;
-    setTimeout(() => $state.loaded());
+    images.value.after = a;
+    setTimeout(() => ($state.value = "idle"));
   } catch (e) {
-    setTimeout(() => $state.error());
+    setTimeout(() => ($state.value = "error"));
   }
 };
 
 const resetState = () => {
-  after = "";
-  images.value = [];
+  images.value.key = getKey(route);
+  images.value.after = "";
+  images.value.data = [];
+};
+
+const getKey: (route: RouteLocationNormalizedLoaded) => string = (route) => {
+  return `${route.params.subreddit}-${route.query.q}`;
 };
 
 /// LIFECYCLE HOOKS ///
 // flush old images on mount and add subreddit to localStorage
-onMounted(() => {
-  resetState();
-  subreddits.value = [
-    ...new Set([...subreddits.value, route.params.subreddit as string]),
-  ].sort();
+onMounted(async () => {
+  await nextTick();
+  if (images.value.key !== getKey(route)) resetState();
+  addSubreddit(route.params.subreddit as string);
 });
 
 const { cleanUp } = onRefresh({
@@ -121,27 +125,23 @@ useHead({
 });
 
 definePageMeta({
-  key: (route) => route.query.q + "-" + route.params.subreddit,
+  key: (route) => `${route.query.q}-${route.params.subreddit}`,
+  keepalive: true,
 });
 </script>
 
 <template>
-  <div max-h-full id="scroller">
+  <div max-h-full id="scroller" class="image-grid">
     <masonry-layout gap="0" ref="masonry">
       <ImageCard
-        v-for="image of images"
+        v-for="image of images.data"
         :image="image"
         @load="masonry.scheduleLayout()"
       />
     </masonry-layout>
 
-    <infinite-loading
-      target="#scroller"
-      @infinite="onInfinite"
-      :identifier="`${$route.query.q}-${$route.params.subreddit}-${sort}`"
-      :distance="300"
-    >
-      <template #spinner>
+    <InfiniteLoading target="#scroller" :distance="300" @infinite="onInfinite">
+      <template #loading>
         <div grid place-content-center p-5>
           <Spinner />
         </div>
@@ -154,12 +154,11 @@ definePageMeta({
       <template #complete>
         <div p-5 grid place-content-center>
           <div font-bold tracking-wide uppercase text="sm" font="bold">
-            {{ images.length > 0 ? "END" : "NO IMAGES FOUND" }}
+            {{ images.data.length > 0 ? "END" : "NO IMAGES FOUND" }}
           </div>
         </div>
       </template>
-    </infinite-loading>
-
+    </InfiniteLoading>
     <Fab icon="i-mdi-sort" :actions="fabActions" :selected="sort"> </Fab>
   </div>
 </template>

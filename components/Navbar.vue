@@ -3,13 +3,14 @@ import { storeToRefs } from "pinia";
 
 /// STATE ///
 const store = useStore();
+const { addSearch } = store;
 const { searches, title, query, navVisible, isSearching, drawerVisible } =
   storeToRefs(store);
 const searchTerm = ref<string>("");
 const route = useRoute();
-const searchInput = ref<HTMLInputElement>(null);
+const searchInput = ref<HTMLInputElement>();
 
-let scroller: HTMLElement;
+let scroller: HTMLElement | null;
 
 watch(
   route,
@@ -32,6 +33,7 @@ let ticking = false;
 const threshold = 50; // in pixels
 
 const onScroll = () => {
+  if (!scroller) return;
   const dy = scroller.scrollTop - last_known_scroll_position;
   last_known_scroll_position = scroller.scrollTop;
   const reached_top = scroller.scrollTop === 0;
@@ -58,8 +60,8 @@ const onScroll = () => {
 
 const onSearch = () => {
   isSearching.value = true;
-  nextTick().then(() => {
-    searchInput.value.focus();
+  requestAnimationFrame(() => {
+    searchInput.value?.focus();
   });
 };
 
@@ -69,10 +71,8 @@ const cancelSearch = () => {
 
 const clearSearch = () => {
   searchTerm.value = "";
-  nextTick().then(() => {
-    const inp = document.querySelector(
-      ".search-field input"
-    ) as HTMLInputElement;
+  requestAnimationFrame(() => {
+    const inp = document.querySelector<HTMLInputElement>(".search-field input");
     if (!inp) return;
     inp.focus();
   });
@@ -80,7 +80,7 @@ const clearSearch = () => {
 
 const search = () => {
   query.value = searchTerm.value;
-  searches.value = [...new Set([...searches.value, query.value])].sort();
+  addSearch(query.value);
   isSearching.value = false;
   searchTerm.value = "";
 };
@@ -104,8 +104,12 @@ const search = () => {
       <template v-if="!isSearching">
         <button
           type="button"
-          @click="drawerVisible = !drawerVisible"
-          class="i-mdi-menu"
+          @click="
+            route.path === '/'
+              ? (drawerVisible = !drawerVisible)
+              : $router.push({ path: '/' })
+          "
+          :class="route.path === '/' ? 'i-mdi-menu' : 'i-mdi-arrow-left'"
           text="2xl"
         ></button>
         <span text="xl" truncate>

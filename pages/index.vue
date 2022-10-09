@@ -59,18 +59,7 @@ function removeSearch({ title }: Item) {
   searches.value = searches.value.filter((s) => s !== title);
 }
 
-/// LIFECYCLE HOOKS ///
-onMounted(() => {
-  title.value = `RedditLattice`;
-  document.body.classList.add("noscroll");
-  document.documentElement.classList.add("noscroll");
-});
-
-onUnmounted(() => {
-  document.body.classList.remove("noscroll");
-  document.documentElement.classList.remove("noscroll");
-});
-
+title.value = `RedditLattice`;
 /// HEAD ///
 useHead({
   title: "RedditLattice",

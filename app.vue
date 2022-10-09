@@ -1,26 +1,6 @@
 <script lang="ts" setup>
 import "@/assets/main.css";
-
-const router = useRouter();
 const online = useOnline();
-
-/// STATE ///
-const loading = ref<boolean>(false);
-
-/// METHODS ///
-function setupLoading() {
-  router.beforeEach(() => {
-    loading.value = true;
-  });
-  router.afterEach(() => {
-    loading.value = false;
-  });
-}
-
-/// LIFECYCLE HOOKS ///
-onMounted(() => {
-  setupLoading();
-});
 
 /// HEAD ///
 useHead({
@@ -62,12 +42,10 @@ useHead({
     <Navbar />
     <Drawer />
     <div grow overflow-hidden>
-      <template v-if="loading">
-        <div grid place-content-center p-5 id="scroller"></div>
-      </template>
-      <template v-else>
-        <NuxtPage />
-      </template>
+      <!-- <div grid place-content-center p-5 v-if="loading"> -->
+      <!--   <Spinner /> -->
+      <!-- </div> -->
+      <NuxtPage />
     </div>
   </div>
 </template>
@@ -75,7 +53,7 @@ useHead({
 <style>
 .page-enter-active,
 .page-leave-active {
-  transition: all 0.4s;
+  transition: all 0.2s;
 }
 .page-enter-from,
 .page-leave-to {

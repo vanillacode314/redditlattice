@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
 import type { IPost } from "~~/types";
 const props = defineProps<{
   image: Pick<IPost, "name" | "url" | "title">;
 }>();
 
-const store = useStore();
-const { savedScroll } = storeToRefs(store);
+const emit = defineEmits<{
+  (e: "load"): void;
+}>();
 
-const emit = defineEmits(["load"]);
 const imgElement = ref<HTMLImageElement>();
 const pictureElement = ref<HTMLPictureElement>();
-const popupVisible = ref<boolean>(false);
+const popupVisible = computed<boolean>(() =>
+  route.hash.startsWith("#popup")
+    ? route.hash.replace("#popup-", "") === props.image.name
+    : false
+);
 const srcSets = ref<Map<string, string>>(new Map());
 const error = ref<boolean>(false);
+const route = useRoute();
 const router = useRouter();
 
 function onImageLoad() {
@@ -38,16 +42,15 @@ function onImageLoad() {
   });
 }
 
-function getWidth() {
+function getWidth(): number {
   if (!pictureElement.value) return 400;
   const cols =
     +getComputedStyle(pictureElement.value).getPropertyValue(
       "--_masonry-layout-col-count"
     ) || 1;
-  return (
-    (pictureElement.value.parentNode as HTMLDivElement).getBoundingClientRect()
-      .width / cols
-  );
+  const grid = document.querySelector<HTMLDivElement>(".image-grid");
+  if (!grid) return 400;
+  return grid.getBoundingClientRect().width / cols;
 }
 
 function getProcessedImageURL(
@@ -75,17 +78,11 @@ function updateSources() {
 }
 
 function popupImage() {
-  /* const scroller = document.getElementById("scroller"); */
-  /* if (scroller) savedScroll.value = scroller.scrollTop; */
-  /* const url = new URL(window.location.href); */
-  /* url.hash = "#popup"; */
-  /* history.pushState({}, "", url); */
-  popupVisible.value = true;
+  navigateTo({ hash: `#popup-${props.image.name}` });
 }
 
 function removePopupImage() {
-  /* router.back(); */
-  popupVisible.value = false;
+  router.back();
 }
 
 async function retry() {

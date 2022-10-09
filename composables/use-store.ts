@@ -10,23 +10,38 @@ export default defineStore("main", () => {
   const subreddits = useLocalStorage<string[]>("subreddits", []);
   const searches = useLocalStorage<string[]>("searches", []);
   const sort = useLocalStorage<SortType>("sort", SortType.TOP);
-  const images = ref<Pick<IPost, "name" | "url" | "title">[]>([]);
-  const savedScroll = ref<number>(0);
+  const images = ref<{
+    key: string;
+    after: string;
+    data: Pick<IPost, "name" | "url" | "title">[];
+  }>({ after: "", key: "", data: [] });
 
   function addQuery(query: string) {
     if (query.includes("?")) {
-      const [subreddit, search] = query.split("?");
-      subreddits.value.push(subreddit.toLowerCase());
-      searches.value.push(search.toLowerCase());
-    } else {
-      subreddits.value.push(query.toLowerCase());
+      const [sr, search] = query.split("?");
+      addSubreddit(sr);
+      addSearch(search);
+      return;
     }
-    subreddits.value = [...new Set(subreddits.value)].sort();
-    searches.value = [...new Set(searches.value)].sort();
+    addSubreddit(query);
+  }
+
+  function addSubreddit(name: string) {
+    if (!name) return;
+    if (!subreddits.value.includes(name))
+      subreddits.value.push(name.toLowerCase());
+    subreddits.value.sort();
+  }
+
+  function addSearch(name: string) {
+    if (!name) return;
+    if (!searches.value.includes(name)) searches.value.push(name.toLowerCase());
+    searches.value.sort();
   }
 
   return {
-    savedScroll,
+    addSubreddit,
+    addSearch,
     images,
     drawerVisible,
     subreddits,
