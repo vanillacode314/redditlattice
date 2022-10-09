@@ -4,7 +4,7 @@ import { storeToRefs } from "pinia";
 /// STATE ///
 const store = useStore();
 const { addSearch } = store;
-const { searches, title, query, navVisible, isSearching, drawerVisible } =
+const { title, query, navVisible, isSearching, drawerVisible } =
   storeToRefs(store);
 const searchTerm = ref<string>("");
 const route = useRoute();
@@ -105,11 +105,13 @@ const search = () => {
         <button
           type="button"
           @click="
-            route.path === '/'
+            !route.path.startsWith('/r/')
               ? (drawerVisible = !drawerVisible)
               : $router.push({ path: '/' })
           "
-          :class="route.path === '/' ? 'i-mdi-menu' : 'i-mdi-arrow-left'"
+          :class="
+            !route.path.startsWith('/r/') ? 'i-mdi-menu' : 'i-mdi-arrow-left'
+          "
           text="2xl"
         ></button>
         <span text="xl" truncate>

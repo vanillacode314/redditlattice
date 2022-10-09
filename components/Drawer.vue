@@ -4,18 +4,27 @@ import { storeToRefs } from "pinia";
 const store = useStore();
 const { drawerVisible } = storeToRefs(store);
 
-const links = [
+interface ILink {
+  title: string;
+  icon?: string;
+  href: string;
+}
+
+const links: ILink[] = [
   {
     title: "Home",
+    icon: "i-mdi-home",
     href: "/",
   },
   {
-    title: "About",
-    href: "/about",
+    title: "Settings",
+    icon: "i-mdi-cog",
+    href: "/settings",
   },
   {
-    title: "Settings",
-    href: "/settings",
+    title: "About",
+    icon: "i-mdi-about",
+    href: "/about",
   },
 ];
 </script>
@@ -42,7 +51,7 @@ const links = [
           fixed
           left-0
           inset-y-0
-          shadow="~ gray-500"
+          shadow="lg gray-700"
           z-30
           w-80
           transition-transform
@@ -56,10 +65,12 @@ const links = [
               Made by Raqueebuddin Aziz
             </span>
           </a>
-          <div border="b gray-500" w-full></div>
+          <div border="b gray-700" w-full></div>
           <div flex="~ col">
             <NuxtLink
-              v-for="{ title, href } of links"
+              v-for="{ icon, title, href } of links"
+              flex
+              gap-3
               bg="black hover:gray-900"
               px-5
               py-3
@@ -67,10 +78,15 @@ const links = [
               tracking-wide
               font="bold"
               uppercase
+              items-center
               :to="href"
               @click="drawerVisible = false"
-              >{{ title }}</NuxtLink
             >
+              <div v-if="icon" text="2xl" :class="icon" />
+              <span>
+                {{ title }}
+              </span>
+            </NuxtLink>
           </div>
         </div>
       </template>
