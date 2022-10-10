@@ -8,6 +8,7 @@ const emit = defineEmits<{
   (e: "load"): void;
 }>();
 
+const hasImage = ref<boolean>(false);
 const imgElement = ref<HTMLImageElement>();
 const pictureElement = ref<HTMLPictureElement>();
 const popupVisible = computed<boolean>(() =>
@@ -31,6 +32,7 @@ function onImageLoad() {
         (imgElement.value.naturalHeight / imgElement.value.naturalWidth) *
         getWidth()
       }px`;
+      hasImage.value = true;
       emit("load");
       return;
     }
@@ -105,21 +107,34 @@ onMounted(async () => {
   <div class="retry-box" v-if="error">
     <Button bg="purple-800 hover:purple-700" @click="retry">Retry</Button>
   </div>
-  <picture
-    ref="pictureElement"
-    v-longpress="popupImage"
+  <div
     v-else
+    ref="pictureElement"
     transition-height
     overflow-hidden
+    place-content-center
+    grid
+    relative
   >
-    <source v-for="[format, url] in srcSets" :srcset="url" :type="format" />
-    <img
-      @error="onError()"
-      ref="imgElement"
-      :key="image.name"
-      :alt="image.title"
-    />
-  </picture>
+    <div
+      v-if="!hasImage"
+      animate-pulse
+      bg-gray-800
+      p-5
+      h-10
+      w-10
+      rounded-full
+    ></div>
+    <picture v-longpress="popupImage" absolute inset-0>
+      <source v-for="[format, url] in srcSets" :srcset="url" :type="format" />
+      <img
+        @error="onError()"
+        ref="imgElement"
+        :key="image.name"
+        :alt="image.title"
+      />
+    </picture>
+  </div>
   <div :class="{ isOnTop: popupVisible }" @click.self="removePopupImage">
     <Transition name="scale">
       <div v-if="popupVisible" class="overlay" w-full bg="black">
