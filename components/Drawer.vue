@@ -52,11 +52,8 @@ const links: ILink[] = [
           fixed
           left-0
           inset-y-0
-          shadow="lg gray-700"
           z-30
           w-80
-          transition-transform
-          transition-opacity
           gap-5
           flex="~ col"
         >
@@ -109,13 +106,18 @@ const links: ILink[] = [
 <style scoped>
 .slide-enter-from,
 .slide-leave-to {
-  opacity: 0;
   transform: translateX(-100%);
+}
+
+.slide-leave-active {
+  transition: all 0.2s ease-out;
+}
+.slide-enter-active {
+  transition: all 0.2s ease-in;
 }
 
 .slide-enter-to,
 .slide-leave-from {
-  opacity: 1;
   transform: translateX(0%);
 }
 
