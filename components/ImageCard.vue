@@ -77,7 +77,7 @@ function updateSources() {
 }
 
 function popupImage() {
-  navigateTo({ hash: `#popup-${props.image.name}` });
+  navigateTo({ ...route, hash: `#popup-${props.image.name}` });
 }
 
 function removePopupImage() {
