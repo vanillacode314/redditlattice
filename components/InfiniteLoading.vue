@@ -8,8 +8,10 @@ const props = withDefaults(
     distance?: number;
     target?: string;
     firstload?: boolean;
+    key?: string;
   }>(),
   {
+    key: "",
     distance: 0,
     target: "body",
     firstload: true,
@@ -21,6 +23,13 @@ const emit = defineEmits<{
 }>();
 
 const state = ref<State>("idle");
+
+watch(
+  () => props.key,
+  (value) => {
+    setup();
+  }
+);
 
 const onScroll = () => {
   if (state.value !== "idle") return;
@@ -36,12 +45,16 @@ const load = (firstload: boolean = false) => {
   emit("infinite", state, firstload);
 };
 
+const setup = () => {
+  if (props.firstload) load(true);
+};
+
 onMounted(() => {
   nextTick().then(() => {
     const scrollArea = document.querySelector(props.target);
     if (!scrollArea) return;
     scrollArea.addEventListener("scroll", onScroll);
-    if (props.firstload) load(true);
+    setup();
   });
 });
 

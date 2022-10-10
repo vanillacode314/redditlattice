@@ -20,14 +20,18 @@ const distributedItems = ref<IItem[][]>();
 
 watch(
   () => props.items,
-  (newVal, oldVal) => {
+  async (newVal, oldVal) => {
     if (!newVal || !oldVal) return;
-    const diff = newVal.filter((i) => !oldVal.some((j) => i.id === j.id));
-    addItems(diff);
+    const newItems = newVal.filter((i) => !oldVal.some((j) => i.id === j.id));
+    const deletedItems = oldVal.filter(
+      (i) => !newVal.some((j) => i.id === j.id)
+    );
+    await addItems(newItems);
+    removeItems(deletedItems);
   }
 );
 
-watch(cols, (newVal, oldVal) => {
+watch(cols, () => {
   resetDistribution();
   setTimeout(() => {
     addItems(props.items);
@@ -60,17 +64,38 @@ const getTallestColumnIndex: () => number = () => {
   return tallestColIndex;
 };
 
-const addItems = (items: Iterable<IItem>) => {
-  for (const item of items) {
-    requestAnimationFrame(() => {
+const addItems = async (items: Array<IItem>) => {
+  if (!items.length) return;
+  return await new Promise<void>((resolve) => {
+    let count = 0;
+    const len = items.length;
+    const handleItem = (item: IItem) => {
+      count++;
       addItem(item);
-    });
-  }
+      if (count < len) {
+        requestAnimationFrame(() => handleItem(items[count]));
+        return;
+      }
+      resolve();
+    };
+    requestAnimationFrame(() => handleItem(items[count]));
+  });
 };
 
 const addItem = (item: IItem) => {
   const idx = getShortestColumnIndex();
-  if (distributedItems.value) distributedItems.value[idx].push(item);
+  distributedItems.value![idx].push(item);
+};
+
+const removeItems = (items: Array<IItem>) => {
+  for (const [x, col] of distributedItems.value!.entries()) {
+    let newCol = [];
+    for (const [y, item] of col.entries()) {
+      const shouldRemove = items.some((i) => i.id === item.id);
+      if (!shouldRemove) newCol.push(item);
+    }
+    distributedItems.value![x] = newCol;
+  }
 };
 
 const setCols = () => {

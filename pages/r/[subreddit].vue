@@ -7,6 +7,7 @@ import { RouteLocationNormalizedLoaded } from "vue-router";
 const route = useRoute();
 
 /// STATE ///
+const id = ref<boolean>(false);
 const store = useStore();
 const { addSubreddit } = store;
 const { images, title, query, sort } = storeToRefs(store);
@@ -101,6 +102,7 @@ const resetState = () => {
   images.value.key = getKey(route);
   images.value.after = "";
   images.value.data = [];
+  id.value = !id.value;
 };
 
 const getKey: (route: RouteLocationNormalizedLoaded) => string = (route) => {
@@ -145,7 +147,12 @@ definePageMeta({
       <ImageCard :image="image" />
     </Masonry>
 
-    <InfiniteLoading target="#scroller" :distance="300" @infinite="onInfinite">
+    <InfiniteLoading
+      target="#scroller"
+      :distance="300"
+      @infinite="onInfinite"
+      :key="`${images.key}-${sort}-${id}`"
+    >
       <template #idle="{ load }">
         <div p-5 grid place-content-center>
           <Button bg="purple-800 hover:purple-700" @click="load"
