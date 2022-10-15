@@ -65,22 +65,22 @@ export const Root: Component = () => {
         <Link rel="icon" href="/favicon.svg" />
       </Head>
       <Body>
-        <Suspense
-          fallback={
-            <div class="p-5 grid place-items-center">
-              <Spinner></Spinner>
-            </div>
-          }
-        >
-          <ErrorBoundary>
-            <Base>
+        <Base>
+          <Suspense
+            fallback={
+              <div class="p-5 grid place-items-center">
+                <Spinner></Spinner>
+              </div>
+            }
+          >
+            <ErrorBoundary>
               <Routes>
                 <FileRoutes />
               </Routes>
-            </Base>
-          </ErrorBoundary>
-        </Suspense>
-        <Scripts />
+            </ErrorBoundary>
+          </Suspense>
+          <Scripts />
+        </Base>
       </Body>
     </Html>
   );
