@@ -1,0 +1,49 @@
+import solid from "solid-start/vite";
+import { defineConfig } from "vite";
+import Unocss from "@unocss/vite";
+import {
+  presetUno,
+  presetIcons,
+  presetWebFonts,
+  presetAttributify,
+} from "unocss";
+import fs from "fs";
+import path from "path";
+
+const packageJson = fs.readFileSync("./package.json");
+const version = JSON.parse(packageJson.toString()).version;
+
+export default defineConfig({
+  define: {
+    __version__: JSON.stringify(version),
+  },
+  resolve: {
+    alias: {
+      "~": path.resolve(__dirname, "src"),
+      "@ui": path.resolve(__dirname, "../../packages/ui"),
+      "@api": path.resolve(__dirname, "../../apps/api/src"),
+      "@image-server": path.resolve(__dirname, "../../apps/image-server/src"),
+    },
+  },
+  plugins: [
+    solid({ ssr: false }),
+    Unocss({
+      presets: [
+        presetAttributify(),
+        presetWebFonts({
+          provider: "google",
+          fonts: {
+            sans: ["Roboto:400,500,600,700"],
+          },
+        }),
+        presetUno(),
+        presetIcons({
+          extraProperties: {
+            display: "inline-block",
+            "vertical-align": "middle",
+          },
+        }),
+      ],
+    }),
+  ],
+});

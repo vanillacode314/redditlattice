@@ -1,0 +1,33 @@
+{
+  "name": "image-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.cjs",
+  "types": "index.cjs",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@trpc/server": "10.0.0-proxy-beta.20",
+    "fastify": "^4.8.1",
+    "sharp": "^0.31.1",
+    "tsconfig": "workspace:*",
+    "undici": "^5.11.0",
+    "zod": "^3.19.1"
+  },
+  "scripts": {
+    "build": "node esbuild.config.cjs",
+    "dev": "nodemon --exec pnpm ts-node-esm src/server.ts",
+    "start": "node index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.12",
+    "@types/sharp": "^0.31.0",
+    "esbuild": "^0.15.11",
+    "esbuild-plugin-alias": "^0.2.1",
+    "nodemon": "^2.0.20",
+    "ts-node-esm": "^0.0.6"
+  }
+}

@@ -1,0 +1,17 @@
+export const IMAGE_EXTENSION_LIST = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".svg",
+  ".gif",
+  ".jpe",
+  ".jif",
+  ".webp",
+  ".tiff",
+  ".tif",
+  ".psd",
+  "avif",
+  ".bmp",
+  ".raw",
+  ".jp2",
+] as const;

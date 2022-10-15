@@ -1,0 +1,54 @@
+* {
+  max-height: 999999px;
+}
+
+:root {
+  --navbar-height: 64px;
+}
+
+body,
+html {
+  background-color: black;
+  color: white;
+  overscroll-behavior-y: none;
+  font-family: "Roboto", sans-serif;
+  height: 100%;
+}
+#__nuxt {
+  height: 100%;
+}
+
+.noscroll {
+  overscroll-behavior-y: none;
+  overflow: hidden;
+}
+
+#scroller {
+  overflow: overlay;
+  overflow: auto;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+}
+
+@media screen and (min-width: 768px) {
+  *::-webkit-scrollbar {
+    width: 10px;
+  }
+}
+*::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  background-color: rgb(255 255 255 / 20%);
+}
+
+img {
+  display: block;
+  width: 100%;
+  object-fit: contain;
+  block-size: auto;
+}
