@@ -19,6 +19,9 @@
     "unocss": "^0.45.29"
   },
   "dependencies": {
+    "@solid-primitives/keyed": "^1.1.2",
+    "@solid-primitives/map": "^0.2.2",
+    "@solid-primitives/set": "^0.2.2",
     "lodash": "^4.17.21",
     "solid-js": "^1.5.7",
     "solid-spring": "^0.0.7",

@@ -126,7 +126,9 @@ export default function Subreddit() {
   return (
     <div h-full max-h-full id="scroller">
       <Masonry items={masonryItems()} maxWidth={400}>
-        {(image, width) => <ImageCard width={width} image={image}></ImageCard>}
+        {(image, width) => (
+          <ImageCard width={width()} image={image}></ImageCard>
+        )}
       </Masonry>
       <InfiniteLoading
         onInfinite={onInfinite}

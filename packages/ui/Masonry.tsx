@@ -3,46 +3,51 @@ import {
   Component,
   createEffect,
   createMemo,
+  createRenderEffect,
   createSignal,
-  For,
-  Index,
   JSXElement,
   mergeProps,
   on,
   onCleanup,
   onMount,
+  Accessor,
 } from "solid-js";
-import { compareSet, compareMap, updateKey } from "@ui/utils";
+import { compareMap } from "@ui/utils";
+import { ReactiveSet } from "@solid-primitives/set";
+import { ReactiveMap } from "@solid-primitives/map";
+import { Entries } from "@solid-primitives/keyed";
 
 export interface Props<T = any> {
   items: Map<string, T>;
   maxWidth: number;
   gap?: number;
-  children: (item: T, width: number) => JSXElement;
+  children: (item: T, width: Accessor<number>) => JSXElement;
 }
 
 function diffMap<K = any, V = any>(
   map1: Map<K, V>,
   map2: Map<K, V>
 ): Map<K, V> {
-  return new Map([...map1.entries()].filter(([newId]) => !map2.has(newId)));
+  const diff = new Map<K, V>();
+  for (const [key1, val1] of map1) {
+    if (!map2.has(key1)) diff.set(key1, val1);
+  }
+  return diff;
 }
 
 export const Masonry: Component<Props> = (props) => {
+  let masonryEl: HTMLDivElement;
   type V = typeof props.items extends Map<any, infer I> ? I : never;
-  type Item = { id: string; data: V };
+  type K = typeof props.items extends Map<infer K, V> ? K : never;
   const merged = mergeProps({ gap: 0 }, props);
-  const [cols, setCols] = createSignal<number>(0);
-  const [distributedItems, setDistributedItems] = createSignal<Set<string>>(
-    new Set(),
-    { equals: (prev, next) => compareSet(prev, next) }
-  );
-  const [gridItems, setGridItems] = createSignal<Item[][]>([]);
+  const [width, setWidth] = createSignal<number>(1);
+  const cols = createMemo<number>(() => Math.ceil(width() / props.maxWidth));
+  const colWidth = createMemo<number>(() => width() / cols());
+  const distributedItems = new ReactiveSet<K>();
+  const columns = new ReactiveMap<number, ReactiveMap<K, V>>();
+  /* const [gridItems, setGridItems] = createSignal<Item[][]>([]); */
   const propItems = createMemo(() => props.items, props.items, {
     equals: (prev, next) => compareMap(prev, next, () => true),
-  });
-  const [heights, setHeights] = createSignal<Map<number, number>>(new Map(), {
-    equals: (prev, next) => compareMap(prev, next),
   });
 
   createEffect(
@@ -60,24 +65,11 @@ export const Masonry: Component<Props> = (props) => {
     })
   );
 
-  createEffect(
-    on(
-      cols,
-      () => {
-        resetDistribution();
-        setTimeout(() => {
-          addItems(props.items);
-        });
-      },
-      { defer: true }
-    )
-  );
-
   const getShortestColumnIndex: () => number = () => {
     let shortestColIndex = 0;
     let minHeight = Infinity;
     for (const n of new Array(cols()).keys()) {
-      const colEl = document.querySelector(`#masonry-col-${n + 1}`)!;
+      const colEl = document.getElementById("masonry-col-" + (n + 1))!;
       const { height } = colEl.getBoundingClientRect();
       if (height >= minHeight) continue;
       minHeight = height;
@@ -96,8 +88,8 @@ export const Masonry: Component<Props> = (props) => {
       requestAnimationFrame(function handler() {
         count++;
         const key = keys[count - 1];
-        const data = items.get(key);
-        addItem({ id: key, data });
+        const item = items.get(key);
+        addItem([key, item]);
         if (count < len) {
           requestAnimationFrame(handler);
         }
@@ -106,65 +98,59 @@ export const Masonry: Component<Props> = (props) => {
     });
   };
 
-  const addItem = (item: Item) => {
-    if (distributedItems().has(item.id)) return;
+  const addItem = ([id, val]: [K, V]) => {
+    if (distributedItems.has(id)) return;
     const idx = getShortestColumnIndex();
-    setHeights((_) => updateKey(new Map(_), idx, (val) => val + 1));
-    setDistributedItems((_) => _.add(item.id));
-    setGridItems((_) => {
-      _[idx] = [..._[idx], item];
-      return [..._];
-    });
+    distributedItems.add(id);
+    const map = columns.get(idx)!;
+    map.set(id, val);
+    columns.set(idx, map);
   };
 
-  const removeItems = (itemsToRemove: Map<string, V>) => {
+  const removeItems = (itemsToRemove: Map<K, V>) => {
     if (!itemsToRemove.size) return;
-    setDistributedItems((_) => {
-      for (const [id, __] of itemsToRemove) {
-        _.delete(id);
-      }
-      return new Set(_);
-    });
-    for (const [x, row] of gridItems().entries()) {
-      for (const item of row) {
-        const shouldRemove = itemsToRemove.has(item.id);
-        if (!shouldRemove) continue;
-        setGridItems((grid) => {
-          grid[x] = grid[x].filter((item) => !itemsToRemove.has(item.id));
-          return [...grid];
-        });
-        setHeights((_) => updateKey(new Map(_), x, (val) => val - 1));
+    for (const [id, __] of itemsToRemove) {
+      distributedItems.delete(id);
+    }
+    for (const [, items] of columns) {
+      for (const [key] of items) {
+        if (itemsToRemove.has(key)) items.delete(key);
       }
     }
   };
 
-  const updateCols = () => {
-    const n = Math.ceil(window.innerWidth / props.maxWidth);
-    if (cols() !== n) setCols(n);
-  };
-
   const resetDistribution = () => {
     batch(() => {
-      setHeights(new Map(Array.from(Array(cols()), (_, idx) => [idx, 0])));
-      setDistributedItems(new Set<string>());
-      setGridItems(Array.from(Array(cols()), () => []));
+      distributedItems.clear();
+      for (const n of Array(cols()).keys()) {
+        const oldMap = columns.get(n) || new ReactiveMap();
+        columns.set(n, oldMap);
+      }
     });
   };
+
+  createRenderEffect(
+    on(cols, () => {
+      resetDistribution();
+      addItems(props.items);
+    })
+  );
 
   let timer: any;
   const onResize = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => updateCols(), 500);
+    timer = setTimeout(() => setWidth(masonryEl.clientWidth), 100);
   };
 
   onMount(() => {
-    updateCols();
-    window.addEventListener("resize", onResize);
+    setWidth(masonryEl.clientWidth);
+    window.addEventListener("resize", onResize, { passive: true });
     onCleanup(() => window.removeEventListener("resize", onResize));
   });
 
   return (
     <div
+      ref={masonryEl!}
       class="grid items-start"
       style={{
         "grid-template-columns": `repeat(${cols()}, 1fr)`,
@@ -172,19 +158,19 @@ export const Masonry: Component<Props> = (props) => {
         "--col-count": cols(),
       }}
     >
-      <Index each={gridItems()}>
-        {(row, colIndex) => (
+      <Entries of={Object.fromEntries(columns)}>
+        {(key, items) => (
           <div
             class="flex flex-col"
-            id={`masonry-col-${colIndex + 1}`}
+            id={`masonry-col-${+key + 1}`}
             style={{ gap: `${merged.gap}px` }}
           >
-            <For each={row()}>
-              {({ data }) => props.children(data, window.innerWidth / cols())}
-            </For>
+            <Entries of={Object.fromEntries(items())}>
+              {(_, val) => props.children(val(), colWidth)}
+            </Entries>
           </div>
         )}
-      </Index>
+      </Entries>
     </div>
   );
 };

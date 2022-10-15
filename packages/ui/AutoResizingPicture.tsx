@@ -9,6 +9,7 @@ import {
   onMount,
   Component,
   createRenderEffect,
+  createEffect,
 } from "solid-js";
 import { animated, createSpring } from "solid-spring";
 import _ from "lodash";
@@ -43,7 +44,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
   const [count, setCount] = createSignal(0);
 
   const checkSize = _.throttle(() => {
-    setCount(count() + 1);
+    setCount((c) => c + 1);
     if (error()) return;
     if (!imgElement) return;
     if (imgElement.naturalHeight) {
@@ -59,14 +60,18 @@ export const AutoResizingPicture: Component<Props> = (props) => {
 
   const expand = createSpring(() => ({
     height: height(),
-    immediate: count() === 1,
+    immediate: count() === 1 && !hasImage(),
   }));
 
-  onMount(() => {
-    const onResize = () => checkSize();
-    window.addEventListener("resize", onResize);
-    onCleanup(() => window.removeEventListener("resize", onResize));
-  });
+  createEffect(
+    on(
+      () => props.width,
+      () =>
+        setHeight(
+          (imgElement.naturalHeight / imgElement.naturalWidth) * props.width
+        )
+    )
+  );
 
   return (
     <animated.div style={expand()} class="overflow-hidden relative">
@@ -84,7 +89,10 @@ export const AutoResizingPicture: Component<Props> = (props) => {
             imgElement = el;
             queueMicrotask(() => checkSize());
           }}
-          onError={() => merged.onError()}
+          onError={() => {
+            setError(true);
+            merged.onError();
+          }}
           alt={merged.alt}
         />
       </picture>

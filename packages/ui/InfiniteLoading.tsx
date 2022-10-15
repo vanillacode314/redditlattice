@@ -42,7 +42,21 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
 
   const load = (firstload: boolean = false) => {
     setState("loading");
-    merged.onInfinite((s) => setTimeout(() => setState(s), 100), firstload);
+    merged.onInfinite((s) => {
+      setTimeout(() => {
+        if (s === "idle") {
+          const scrollArea = document.querySelector(merged.target);
+          if (
+            scrollArea &&
+            scrollArea.scrollHeight === scrollArea.clientHeight
+          ) {
+            load();
+            return;
+          }
+        }
+        setState(s);
+      }, 1000);
+    }, firstload);
   };
 
   const setup = () => {
