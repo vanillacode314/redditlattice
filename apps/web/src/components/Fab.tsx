@@ -81,7 +81,7 @@ const Fab: Component<Props> = (props) => {
         >
           <TransitionStaggeredEnter
             length={props.actions.length}
-            duration={200}
+            duration={100}
           >
             <For each={open() ? props.actions : []}>
               {({ icon, id }, index) => (

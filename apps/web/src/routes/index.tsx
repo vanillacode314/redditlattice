@@ -129,6 +129,7 @@ export default function Home() {
           ring="focus:~ focus:blue"
           transition-colors
           shrink-0
+          style={{ "-webkit-tap-highlight-color": "transparent" }}
         >
           <div class="i-mdi-magnify"></div>
         </button>
