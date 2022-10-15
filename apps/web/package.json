@@ -25,6 +25,7 @@
     "solid-spring": "^0.0.7",
     "solid-start": "^0.1.6",
     "solid-start-node": "^0.1.6",
+    "solid-start-netlify": "^0.1.6",
     "ui": "workspace:*"
   },
   "devDependencies": {
@@ -37,7 +38,6 @@
     "@unocss/vite": "^0.45.29",
     "eslint": "7.32.0",
     "eslint-config-custom": "workspace:*",
-    "solid-start-netlify": "^0.1.6",
     "tsconfig": "workspace:*",
     "typescript": "^4.5.3",
     "unocss": "^0.45.29",

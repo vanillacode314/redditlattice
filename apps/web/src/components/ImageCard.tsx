@@ -122,18 +122,20 @@ export const ImageCard: Component<Props> = (props) => {
           }
           width={props.width}
           fallbackHeight={props.width}
-          use:longpress
+          ref={(el) => {
+            longpress(el, { callback: popupImage });
+          }}
           srcSets={getSources()}
           src={getProcessedImageURL(props.image.url, props.width)}
-          onLoad={() => merged.onLoad()}
-          onError={() => onError()}
+          onLoad={merged.onLoad}
+          onError={onError}
           alt={props.image.title}
         ></AutoResizingPicture>
       </Show>
       <Show when={popupVisible()}>
         <Portal mount={document.body}>
           <div
-            class="fixed inset-0 grid place-content-center"
+            class="fixed inset-0 grid content-center"
             classList={{ "pointer-events-none": !popupVisible() }}
           >
             <TransitionFade>
@@ -146,13 +148,15 @@ export const ImageCard: Component<Props> = (props) => {
               </Show>
             </TransitionFade>
             <animated.div
-              class="z-20 w-full flex flex-col pointer-events-none bg-black w-full"
+              onContextMenu={(e) => e.preventDefault()}
+              class="z-20 w-full flex flex-col bg-black relative"
               style={scale()}
             >
               <img
-                src={popupVisible() ? props.image.url : null}
+                src={popupVisible() ? props.image.url : undefined}
                 alt={props.image.title}
-              />
+              ></img>
+              <img />
               <span class="p-5 uppercase tracking-wide bg-black text-white font-bold">
                 {props.image.title}
               </span>

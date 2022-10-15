@@ -1,14 +1,14 @@
 type Pos = { x: number; y: number };
 import _ from "lodash";
 
-function distance(pos1: Pos, pos2: Pos): number {
-  return Math.sqrt(Math.pow(pos2.x - pos1.x, 2) + Math.pow(pos2.y - pos1.y, 2));
-}
-
-interface Options {
-  callback?: () => void;
+export interface Options {
+  callback?: () => any;
   duration?: number;
   moveCancelThreshold?: number;
+}
+
+function distance(pos1: Pos, pos2: Pos): number {
+  return Math.sqrt(Math.pow(pos2.x - pos1.x, 2) + Math.pow(pos2.y - pos1.y, 2));
 }
 
 export const longpress = (
