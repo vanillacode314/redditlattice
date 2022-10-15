@@ -1,0 +1,8 @@
+[build]
+  base = "apps/web"
+  command = "npx pnpm i --store=node_modules/.pnpm-store && npx pnpm run build"
+  publish = "netlify"
+
+[build.environment]
+  NODE_VERSION = "17"
+  NPM_FLAGS = "--version"
