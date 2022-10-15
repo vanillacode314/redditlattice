@@ -1,7 +1,15 @@
 import { IImage, useAppState, useUserState } from "~/stores";
 import { useParams, useSearchParams } from "solid-start";
-import { createEffect, createMemo, Match, Switch } from "solid-js";
-import { IAction, IPost } from "~/types";
+import {
+  onCleanup,
+  createEffect,
+  getOwner,
+  runWithOwner,
+  createMemo,
+  Match,
+  Switch,
+} from "solid-js";
+import { IAction } from "~/types";
 import ImageCard from "~/components/ImageCard";
 import { compareMap } from "~/utils";
 import Fab from "~/components/Fab";
@@ -18,7 +26,8 @@ const masonryItems = createMemo<Map<string, IImage>>(
   }
 );
 
-export default function () {
+export default function Subreddit() {
+  const componentOwner = getOwner()!;
   const [userState, setUserState] = useUserState();
   const [searchParams, _] = useSearchParams();
   const params = useParams();
@@ -78,29 +87,25 @@ export default function () {
     });
   });
 
-  function createSearchParams(): URLSearchParams {
-    const query = new URLSearchParams({
-      subreddit: params.subreddit,
-    });
-    if (searchParams.q) query.append("q", searchParams.q as string);
-    if (appState.images.after) query.append("after", appState.images.after);
-    query.append("sort", userState().sort.get(subreddit()) || "top");
-    return query;
-  }
-
   const onInfinite: InfiniteHandler = async (setState, firstload) => {
     if (firstload && appState.images.data.size > 0) {
       setState("idle");
       return;
     }
     try {
-      const { images: newImages, after } = await trpc.getImages.query({
-        q: searchParams.q,
-        after: appState.images.after,
-        subreddit: params.subreddit,
-        sort: userState().sort.get(subreddit()),
-      });
-
+      const ac = new AbortController();
+      runWithOwner(componentOwner, () => onCleanup(() => ac.abort()));
+      const { images: newImages, after } = await trpc.getImages.query(
+        {
+          q: searchParams.q,
+          after: appState.images.after,
+          subreddit: params.subreddit,
+          sort: userState().sort.get(subreddit()),
+        },
+        {
+          signal: ac.signal,
+        }
+      );
       setAppState("images", (images) => ({
         ...images,
         data: new Set([...images.data, ...newImages]),
