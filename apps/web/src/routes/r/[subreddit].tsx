@@ -1,4 +1,4 @@
-import { IImage, useAppState, useUserState } from '~/stores'
+import { useAppState, useUserState } from '~/stores'
 import { useParams, useSearchParams } from 'solid-start'
 import {
   onCleanup,
@@ -8,23 +8,16 @@ import {
   createMemo,
   Match,
   Switch,
+  on,
+  batch,
 } from 'solid-js'
 import { IAction } from '~/types'
 import ImageCard from '~/components/ImageCard'
-import { compareMap } from '~/utils'
 import Fab from '~/components/Fab'
 import { trpc } from '~/client'
 import { Spinner, Masonry, Button, InfiniteLoading, InfiniteHandler } from 'ui'
 
 const [appState, setAppState] = useAppState()
-const masonryItems = createMemo<Map<string, IImage>>(
-  () =>
-    new Map([...appState.images.data.entries()].map(([i, _]) => [i.name, i])),
-  new Map([...appState.images.data.entries()].map(([i, _]) => [i.name, i])),
-  {
-    equals: (prev, next) => compareMap(prev, next, () => true),
-  }
-)
 
 export default function Subreddit() {
   const componentOwner = getOwner()!
@@ -125,8 +118,14 @@ export default function Subreddit() {
 
   return (
     <div h-full max-h-full id="scroller">
-      <Masonry items={masonryItems()} maxWidth={400}>
-        {(image, width) => (
+      <Masonry
+        items={[...appState.images.data].map((image) => ({
+          id: image.name,
+          data: image,
+        }))}
+        maxWidth={400}
+      >
+        {(id, image, width) => (
           <ImageCard width={width()} image={image}></ImageCard>
         )}
       </Masonry>

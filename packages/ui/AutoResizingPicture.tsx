@@ -68,7 +68,6 @@ export const AutoResizingPicture: Component<Props> = (props) => {
     on(
       () => props.width,
       () => {
-        console.log('EFFECT')
         setCount(0)
         queueMicrotask(() => checkSize())
       }
