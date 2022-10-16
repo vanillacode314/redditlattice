@@ -134,6 +134,7 @@ export default function Settings() {
           Preffered Image Format
         </span>
         <select
+          value={userState()!.prefferedImageFormat}
           onChange={(e) => setImageFormat(e.currentTarget.value)}
           class="bg-black outline-none"
         >
