@@ -1,7 +1,6 @@
 import {
   createEffect,
   createSignal,
-  For,
   mergeProps,
   Component,
   Show,
@@ -15,6 +14,7 @@ import { IMAGE_SERVER_BASE_PATH } from "~/consts";
 import { TransitionFade } from "ui/transitions";
 import { AutoResizingPicture, Button } from "ui";
 import { useUserState } from "~/stores";
+import { IPost } from "~/types";
 
 interface Props {
   width: number;

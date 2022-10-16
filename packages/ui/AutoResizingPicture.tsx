@@ -10,6 +10,8 @@ import {
   Component,
   createRenderEffect,
   createEffect,
+  createMemo,
+  batch,
 } from "solid-js";
 import { animated, createSpring } from "solid-spring";
 import _ from "lodash";
@@ -38,13 +40,16 @@ export const AutoResizingPicture: Component<Props> = (props) => {
     },
     props
   );
+
   const [height, setHeight] = createSignal<number>(props.fallbackHeight);
   const [hasImage, setHasImage] = createSignal<boolean>(false);
   const [error, setError] = createSignal<boolean>(false);
   const [count, setCount] = createSignal(0);
+  const [animate, setAnimate] = createSignal<boolean>(false);
 
   const checkSize = _.throttle(() => {
     setCount((c) => c + 1);
+    if (count() > 1) setAnimate(true);
     if (error()) return;
     if (!imgElement) return;
     if (imgElement.naturalHeight) {
@@ -60,16 +65,17 @@ export const AutoResizingPicture: Component<Props> = (props) => {
 
   const expand = createSpring(() => ({
     height: height(),
-    immediate: count() === 1 && !hasImage(),
+    immediate: !animate(),
   }));
 
-  createEffect(
+  createRenderEffect(
     on(
       () => props.width,
-      () =>
-        setHeight(
-          (imgElement.naturalHeight / imgElement.naturalWidth) * props.width
-        )
+      () => {
+        console.log("EFFECT");
+        setCount(0);
+        queueMicrotask(() => checkSize());
+      }
     )
   );
 
@@ -90,7 +96,10 @@ export const AutoResizingPicture: Component<Props> = (props) => {
             queueMicrotask(() => checkSize());
           }}
           onError={() => {
-            setError(true);
+            batch(() => {
+              setError(true);
+              setHasImage(false);
+            });
             merged.onError();
           }}
           alt={merged.alt}

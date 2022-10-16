@@ -7,11 +7,8 @@ import {
   presetWebFonts,
   presetAttributify,
 } from "unocss";
-import fs from "fs";
 import path from "path";
-
-const packageJson = fs.readFileSync("./package.json");
-const version = JSON.parse(packageJson.toString()).version;
+import { version } from "./package.json" assert { type: "json" };
 
 export default defineConfig({
   define: {
