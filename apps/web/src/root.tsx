@@ -22,8 +22,8 @@ import { Spinner } from 'ui'
 import { DevtoolsOverlay } from '@solid-devtools/overlay'
 
 export const Root: Component = () => {
-  const [appState, setAppState] = useAppState()
-  const [userState, setUserState] = useUserState()
+  const [appState] = useAppState()
+  const [, setUserState] = useUserState()
 
   const importLegacyState = () => {
     const localSr = localStorage.getItem('subreddits')

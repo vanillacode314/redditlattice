@@ -2,7 +2,7 @@ import { useAppState } from '~/stores'
 import { onMount } from 'solid-js'
 
 export default function About() {
-  const [appState, setAppState] = useAppState()
+  const [, setAppState] = useAppState()
   onMount(() => setAppState('title', 'About'))
 
   return (

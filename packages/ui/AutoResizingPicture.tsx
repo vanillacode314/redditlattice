@@ -5,12 +5,8 @@ import {
   on,
   For,
   mergeProps,
-  onCleanup,
-  onMount,
   Component,
   createRenderEffect,
-  createEffect,
-  createMemo,
   batch,
 } from 'solid-js'
 import { animated, createSpring } from 'solid-spring'

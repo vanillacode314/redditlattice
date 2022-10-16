@@ -3,7 +3,7 @@ export function getKeys<
   Key extends keyof T = any
 >(obj: T, keys: readonly Key[]): Pick<T, typeof keys[number]> {
   return Object.fromEntries(
-    keys.map((key) => [key, obj[key]]).filter(([key, val]) => Boolean(val))
+    keys.map((key) => [key, obj[key]]).filter(([, val]) => Boolean(val))
   )
 }
 

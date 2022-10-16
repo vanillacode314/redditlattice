@@ -7,7 +7,7 @@ import { Button } from 'ui'
 
 export default function Settings() {
   let filesInput: HTMLInputElement
-  const [appState, setAppState] = useAppState()
+  const [, setAppState] = useAppState()
   const [userState, setUserState] = useUserState()
   const [usageStats, setUsageStats] = createStore<{
     total: number

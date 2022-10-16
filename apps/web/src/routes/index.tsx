@@ -14,7 +14,7 @@ import { useAppState, useUserState } from '~/stores'
 
 export default function Home() {
   const [userState, setUserState] = useUserState()
-  const [appState, setAppState] = useAppState()
+  const [, setAppState] = useAppState()
 
   onMount(() => setAppState('title', ''))
 

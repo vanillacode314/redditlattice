@@ -11,7 +11,6 @@ import { useLocation } from 'solid-start'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
 import { animated, createSpring } from 'solid-spring'
-import _ from 'lodash'
 import { createConnectivitySignal } from '@solid-primitives/connectivity'
 import { useAppState } from '~/stores'
 
@@ -23,7 +22,7 @@ export const BaseLayout: Component<Props> = (props) => {
   const location = useLocation()
   const [offset, setOffset] = createSignal(0)
   const [down, setDown] = createSignal<boolean>(false)
-  const [appState, setAppState] = useAppState()
+  const [, setAppState] = useAppState()
   const threshold = 300
 
   createEffect(

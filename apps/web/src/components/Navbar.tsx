@@ -14,7 +14,7 @@ import { createSpring, animated } from 'solid-spring'
 import { TransitionFade } from 'ui/transitions'
 import _ from 'lodash'
 
-export const Navbar: Component = (props) => {
+export const Navbar: Component = () => {
   const [mounted, setMounted] = createSignal<boolean>(false)
   const [height, setHeight] = createSignal<number>(0)
   const [appState, setAppState] = useAppState()
@@ -22,7 +22,7 @@ export const Navbar: Component = (props) => {
 
   const navigate = useNavigate()
   const location = useLocation()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [, setSearchParams] = useSearchParams()
 
   const showBack = createMemo<boolean>(() =>
     location.pathname.startsWith('/r/')

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "solid-start dev",
     "build": "solid-start build && workbox generateSW workbox-config.cjs",
-    "start": "solid-start start"
+    "start": "solid-start start",
+    "lint": "eslint 'src/**/*(*.tsx|*.ts|*.js|*.jsx)'"
   },
   "dependencies": {
     "@solid-devtools/overlay": "^0.0.3",

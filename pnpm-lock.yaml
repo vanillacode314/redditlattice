@@ -136,8 +136,10 @@ importers:
       eslint: ^7.23.0
       eslint-config-prettier: ^8.3.0
       eslint-config-turbo: latest
+      eslint-plugin-css: ^0.6.0
       eslint-plugin-react: 7.31.8
       eslint-plugin-solid: ^0.7.3
+      eslint-plugin-unused-imports: ^2.0.0
       typescript: ^4.7.4
     dependencies:
       eslint: 7.32.0
@@ -148,6 +150,8 @@ importers:
     devDependencies:
       '@typescript-eslint/eslint-plugin': 5.40.0_bjgutjmzwoxcmti7ime6tsylke
       '@typescript-eslint/parser': 5.40.0_3rubbgt5ekhqrcgx4uwls3neim
+      eslint-plugin-css: 0.6.0_eslint@7.32.0
+      eslint-plugin-unused-imports: 2.0.0_ttg2d5wq6re2hoon7qqrzeqqxy
       typescript: 4.8.4
 
   packages/tsconfig:
@@ -3150,6 +3154,10 @@ packages:
       color-string: 1.9.1
     dev: false
 
+  /colord/2.9.3:
+    resolution: {integrity: sha512-jeC1axXpnb0/2nn/Y1LPuLdgXBLH7aDcHu4KEKfqw3CUhX7ZpfBSlPKyqXE6btIgEzfWtrX3/tyBCaCvXvMkOw==}
+    dev: true
+
   /colorette/2.0.19:
     resolution: {integrity: sha512-3tlv/dIP7FWvj3BsbHrGLJ6l/oKh1O3TcgBqMn+yyCagOxc23fyzDS6HypQbgxWbkpDnf52p1LuR4eWDQ/K9WQ==}
     dev: true
@@ -3985,6 +3993,19 @@ packages:
       eslint-plugin-turbo: 0.0.4_eslint@7.32.0
     dev: false
 
+  /eslint-plugin-css/0.6.0_eslint@7.32.0:
+    resolution: {integrity: sha512-cQ+FsHNmVVSfMhiZnhhBvvdmzNF2oDvuY9oSpfGGMJctwDQiKtZ1rdALb0psHfobg8nBPwkgHg4i8JQhI8lXJQ==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      eslint: '>=7.0.0'
+    dependencies:
+      colord: 2.9.3
+      eslint: 7.32.0
+      eslint-utils: 3.0.0_eslint@7.32.0
+      known-css-properties: 0.24.0
+      postcss-value-parser: 4.2.0
+    dev: true
+
   /eslint-plugin-react/7.31.8_eslint@7.32.0:
     resolution: {integrity: sha512-5lBTZmgQmARLLSYiwI71tiGVTLUuqXantZM6vlSY39OaDSV0M7+32K5DnLkmFrwTe+Ksz0ffuLUC91RUviVZfw==}
     engines: {node: '>=4'}
@@ -4033,6 +4054,26 @@ packages:
     dependencies:
       eslint: 7.32.0
     dev: false
+
+  /eslint-plugin-unused-imports/2.0.0_ttg2d5wq6re2hoon7qqrzeqqxy:
+    resolution: {integrity: sha512-3APeS/tQlTrFa167ThtP0Zm0vctjr4M44HMpeg1P4bK6wItarumq0Ma82xorMKdFsWpphQBlRPzw/pxiVELX1A==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      '@typescript-eslint/eslint-plugin': ^5.0.0
+      eslint: ^8.0.0
+    peerDependenciesMeta:
+      '@typescript-eslint/eslint-plugin':
+        optional: true
+    dependencies:
+      '@typescript-eslint/eslint-plugin': 5.40.0_bjgutjmzwoxcmti7ime6tsylke
+      eslint: 7.32.0
+      eslint-rule-composer: 0.3.0
+    dev: true
+
+  /eslint-rule-composer/0.3.0:
+    resolution: {integrity: sha512-bt+Sh8CtDmn2OajxvNO+BX7Wn4CIWMpTRm3MaiKPCQcnnlm0CS2mhui6QaoeQugs+3Kj2ESKEEGJUdVafwhiCg==}
+    engines: {node: '>=4.0.0'}
+    dev: true
 
   /eslint-scope/5.1.1:
     resolution: {integrity: sha512-2NxwbF/hZ0KpepYN0cNbo+FN6XoK7GaHlQhgx/hIZl6Va0bF45RQOOwhLIy8lQDbuCiadSLCBnH2CFYquit5bw==}
@@ -5118,7 +5159,6 @@ packages:
 
   /known-css-properties/0.24.0:
     resolution: {integrity: sha512-RTSoaUAfLvpR357vWzAz/50Q/BmHfmE6ETSWfutT0AJiw10e6CmcdYRQJlLRd95B53D0Y2aD1jSxD3V3ySF+PA==}
-    dev: false
 
   /kolorist/1.6.0:
     resolution: {integrity: sha512-dLkz37Ab97HWMx9KTes3Tbi3D1ln9fCAy2zr2YVExJasDRPGRaKcoE4fycWNtnCAJfjFqe0cnY+f8KT2JePEXQ==}
@@ -5815,6 +5855,10 @@ packages:
       '@polka/url': 1.0.0-next.21
       trouter: 3.2.0
     dev: false
+
+  /postcss-value-parser/4.2.0:
+    resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
+    dev: true
 
   /postcss/8.4.18:
     resolution: {integrity: sha512-Wi8mWhncLJm11GATDaQKobXSNEYGUHeQLiQqDFG1qQ5UTDPTEvKw0Xt5NsTpktGTwLps3ByrWsBrG0rB8YQ9oA==}

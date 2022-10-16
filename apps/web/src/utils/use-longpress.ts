@@ -43,7 +43,7 @@ export const longpress = (
     }
   }, duration / 4)
 
-  const onTouchEnd = (e: TouchEvent) => {
+  const onTouchEnd = () => {
     touchId = -1
     clearTimeout(timer)
   }

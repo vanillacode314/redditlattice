@@ -8,7 +8,6 @@ import {
 import { Portal } from 'solid-js/web'
 import { animated, createSpring } from 'solid-spring'
 import { useLocation, useNavigate } from 'solid-start'
-import _ from 'lodash'
 import { longpress } from '~/utils/use-longpress'
 import { IMAGE_SERVER_BASE_PATH } from '~/consts'
 import { TransitionFade } from 'ui/transitions'
