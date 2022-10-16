@@ -1,14 +1,14 @@
-import { Component, mergeProps, Show } from "solid-js";
+import { Component, mergeProps, Show } from 'solid-js'
 
 interface Props {
-  onClick: (e?: Event) => void;
-  onRemove?: (e?: Event) => void;
-  focusable?: boolean;
-  children: Element | string;
+  onClick: (e?: Event) => void
+  onRemove?: (e?: Event) => void
+  focusable?: boolean
+  children: Element | string
 }
 
 export const ListItem: Component<Props> = (props) => {
-  const merged = mergeProps({ focusable: true }, props);
+  const merged = mergeProps({ focusable: true }, props)
   return (
     <div
       bg="hover:gray-800 focus-within:gray-800"
@@ -33,13 +33,13 @@ export const ListItem: Component<Props> = (props) => {
           text="gray-700 hover:white focus:white xl"
           transition-colors
           onClick={(e) => {
-            e.stopPropagation();
-            props.onRemove();
+            e.stopPropagation()
+            props.onRemove()
           }}
         ></button>
       </Show>
     </div>
-  );
-};
+  )
+}
 
-export default ListItem;
+export default ListItem

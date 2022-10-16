@@ -1,25 +1,25 @@
-import { Show, For, Component } from "solid-js";
-import ListItem from "./ListItem";
+import { Show, For, Component } from 'solid-js'
+import ListItem from './ListItem'
 
 interface Item {
-  id: string;
-  title: string;
+  id: string
+  title: string
 }
 
 interface Props {
-  onClick: (id: Item["id"]) => void;
-  onRemove?: (id: Item["id"]) => void;
-  title?: string;
-  items: Item[];
-  reverse?: boolean;
-  focusable?: boolean;
+  onClick: (id: Item['id']) => void
+  onRemove?: (id: Item['id']) => void
+  title?: string
+  items: Item[]
+  reverse?: boolean
+  focusable?: boolean
 }
 
 export const List: Component<Props> = (props) => {
   return (
     <div
       class="flex flex-col gap-2"
-      classList={{ "flex-col-reverse": props.reverse }}
+      classList={{ 'flex-col-reverse': props.reverse }}
     >
       <Show when={props.title}>
         <span class="px-5 text-xs text-gray-500 font-bold tracking-wide uppercase">
@@ -28,7 +28,7 @@ export const List: Component<Props> = (props) => {
       </Show>
       <ul
         class="flex flex-col"
-        classList={{ "flex-col-reverse": props.reverse }}
+        classList={{ 'flex-col-reverse': props.reverse }}
       >
         <For each={props.items}>
           {({ id, title }) => (
@@ -45,7 +45,7 @@ export const List: Component<Props> = (props) => {
         </For>
       </ul>
     </div>
-  );
-};
+  )
+}
 
-export default List;
+export default List

@@ -1,9 +1,9 @@
-import { Options } from "./use-longpress.ts";
+import { Options } from './use-longpress.ts'
 
-declare module "solid-js" {
+declare module 'solid-js' {
   namespace JSX {
     interface Directives {
-      longpress: Options;
+      longpress: Options
     }
   }
 }

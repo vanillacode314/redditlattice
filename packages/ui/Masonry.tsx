@@ -11,151 +11,151 @@ import {
   onCleanup,
   onMount,
   Accessor,
-} from "solid-js";
-import { compareMap } from "@ui/utils";
-import { ReactiveSet } from "@solid-primitives/set";
-import { ReactiveMap } from "@solid-primitives/map";
-import { Entries } from "@solid-primitives/keyed";
+} from 'solid-js'
+import { compareMap } from '@ui/utils'
+import { ReactiveSet } from '@solid-primitives/set'
+import { ReactiveMap } from '@solid-primitives/map'
+import { Entries } from '@solid-primitives/keyed'
 
 export interface Props<T = any> {
-  items: Map<string, T>;
-  maxWidth: number;
-  gap?: number;
-  children: (item: T, width: Accessor<number>) => JSXElement;
+  items: Map<string, T>
+  maxWidth: number
+  gap?: number
+  children: (item: T, width: Accessor<number>) => JSXElement
 }
 
 function diffMap<K = any, V = any>(
   map1: Map<K, V>,
   map2: Map<K, V>
 ): Map<K, V> {
-  const diff = new Map<K, V>();
+  const diff = new Map<K, V>()
   for (const [key1, val1] of map1) {
-    if (!map2.has(key1)) diff.set(key1, val1);
+    if (!map2.has(key1)) diff.set(key1, val1)
   }
-  return diff;
+  return diff
 }
 
 export const Masonry: Component<Props> = (props) => {
-  let masonryEl: HTMLDivElement;
-  type V = typeof props.items extends Map<any, infer I> ? I : never;
-  type K = typeof props.items extends Map<infer K, V> ? K : never;
-  const merged = mergeProps({ gap: 0 }, props);
-  const [width, setWidth] = createSignal<number>(1);
-  const cols = createMemo<number>(() => Math.ceil(width() / props.maxWidth));
-  const colWidth = createMemo<number>(() => width() / cols());
-  const distributedItems = new ReactiveSet<K>();
-  const columns = new ReactiveMap<number, ReactiveMap<K, V>>();
+  let masonryEl: HTMLDivElement
+  type V = typeof props.items extends Map<any, infer I> ? I : never
+  type K = typeof props.items extends Map<infer K, V> ? K : never
+  const merged = mergeProps({ gap: 0 }, props)
+  const [width, setWidth] = createSignal<number>(1)
+  const cols = createMemo<number>(() => Math.ceil(width() / props.maxWidth))
+  const colWidth = createMemo<number>(() => width() / cols())
+  const distributedItems = new ReactiveSet<K>()
+  const columns = new ReactiveMap<number, ReactiveMap<K, V>>()
   /* const [gridItems, setGridItems] = createSignal<Item[][]>([]); */
   const propItems = createMemo(() => props.items, props.items, {
     equals: (prev, next) => compareMap(prev, next, () => true),
-  });
+  })
 
   createEffect(
     on(propItems, (newItems, oldItems) => {
-      if (!oldItems) oldItems = new Map();
+      if (!oldItems) oldItems = new Map()
       let addedItems = diffMap(newItems, oldItems),
-        deletedItems = diffMap(oldItems, newItems);
+        deletedItems = diffMap(oldItems, newItems)
       /* console.group(); */
       /* console.log("NEW", newItems); */
       /* console.log("OLD", oldItems); */
       /* console.log("ADDED", addedItems); */
       /* console.log("DELETED", deletedItems); */
       /* console.groupEnd(); */
-      addItems(addedItems).then(() => removeItems(deletedItems));
+      addItems(addedItems).then(() => removeItems(deletedItems))
     })
-  );
+  )
 
   const getShortestColumnIndex: () => number = () => {
-    let shortestColIndex = 0;
-    let minHeight = Infinity;
+    let shortestColIndex = 0
+    let minHeight = Infinity
     for (const n of new Array(cols()).keys()) {
-      const colEl = document.getElementById("masonry-col-" + (n + 1))!;
-      const { height } = colEl.getBoundingClientRect();
-      if (height >= minHeight) continue;
-      minHeight = height;
-      shortestColIndex = n;
+      const colEl = document.getElementById('masonry-col-' + (n + 1))!
+      const { height } = colEl.getBoundingClientRect()
+      if (height >= minHeight) continue
+      minHeight = height
+      shortestColIndex = n
     }
-    return shortestColIndex;
-  };
+    return shortestColIndex
+  }
 
   const addItems = async (items: Map<string, V>) => {
-    if (!items.size) return;
-    const keys = [...items.keys()];
+    if (!items.size) return
+    const keys = [...items.keys()]
     return await new Promise<void>((resolve) => {
-      let count = 0;
-      const len = keys.length;
+      let count = 0
+      const len = keys.length
 
       requestAnimationFrame(function handler() {
-        count++;
-        const key = keys[count - 1];
-        const item = items.get(key);
-        addItem([key, item]);
+        count++
+        const key = keys[count - 1]
+        const item = items.get(key)
+        addItem([key, item])
         if (count < len) {
-          requestAnimationFrame(handler);
+          requestAnimationFrame(handler)
         }
-        resolve();
-      });
-    });
-  };
+        resolve()
+      })
+    })
+  }
 
   const addItem = ([id, val]: [K, V]) => {
-    if (distributedItems.has(id)) return;
-    const idx = getShortestColumnIndex();
-    distributedItems.add(id);
-    const map = columns.get(idx)!;
-    map.set(id, val);
-    columns.set(idx, map);
-  };
+    if (distributedItems.has(id)) return
+    const idx = getShortestColumnIndex()
+    distributedItems.add(id)
+    const map = columns.get(idx)!
+    map.set(id, val)
+    columns.set(idx, map)
+  }
 
   const removeItems = (itemsToRemove: Map<K, V>) => {
-    if (!itemsToRemove.size) return;
+    if (!itemsToRemove.size) return
     for (const [id, __] of itemsToRemove) {
-      distributedItems.delete(id);
+      distributedItems.delete(id)
     }
     for (const [, items] of columns) {
       for (const [key] of items) {
-        if (itemsToRemove.has(key)) items.delete(key);
+        if (itemsToRemove.has(key)) items.delete(key)
       }
     }
-  };
+  }
 
   const resetDistribution = () => {
     batch(() => {
-      distributedItems.clear();
+      distributedItems.clear()
       for (const n of Array(cols()).keys()) {
-        const oldMap = columns.get(n) || new ReactiveMap();
-        columns.set(n, oldMap);
+        const oldMap = columns.get(n) || new ReactiveMap()
+        columns.set(n, oldMap)
       }
-    });
-  };
+    })
+  }
 
   createRenderEffect(
     on(cols, () => {
-      resetDistribution();
-      addItems(props.items);
+      resetDistribution()
+      addItems(props.items)
     })
-  );
+  )
 
-  let timer: any;
+  let timer: any
   const onResize = () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => setWidth(masonryEl.clientWidth), 100);
-  };
+    clearTimeout(timer)
+    timer = setTimeout(() => setWidth(masonryEl.clientWidth), 100)
+  }
 
   onMount(() => {
-    setWidth(masonryEl.clientWidth);
-    window.addEventListener("resize", onResize, { passive: true });
-    onCleanup(() => window.removeEventListener("resize", onResize));
-  });
+    setWidth(masonryEl.clientWidth)
+    window.addEventListener('resize', onResize, { passive: true })
+    onCleanup(() => window.removeEventListener('resize', onResize))
+  })
 
   return (
     <div
       ref={masonryEl!}
       class="grid items-start"
       style={{
-        "grid-template-columns": `repeat(${cols()}, 1fr)`,
+        'grid-template-columns': `repeat(${cols()}, 1fr)`,
         gap: `${props.gap}px`,
-        "--col-count": cols(),
+        '--col-count': cols(),
       }}
     >
       <Entries of={Object.fromEntries(columns)}>
@@ -172,7 +172,7 @@ export const Masonry: Component<Props> = (props) => {
         )}
       </Entries>
     </div>
-  );
-};
+  )
+}
 
-export default Masonry;
+export default Masonry

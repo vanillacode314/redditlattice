@@ -1,7 +1,7 @@
-import { mount, StartClient } from "solid-start/entry-client";
+import { mount, StartClient } from 'solid-start/entry-client'
 
-mount(() => <StartClient />, document);
+mount(() => <StartClient />, document)
 
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js", { scope: "/" });
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js', { scope: '/' })
 }

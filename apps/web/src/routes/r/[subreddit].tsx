@@ -1,5 +1,5 @@
-import { IImage, useAppState, useUserState } from "~/stores";
-import { useParams, useSearchParams } from "solid-start";
+import { IImage, useAppState, useUserState } from '~/stores'
+import { useParams, useSearchParams } from 'solid-start'
 import {
   onCleanup,
   createEffect,
@@ -8,15 +8,15 @@ import {
   createMemo,
   Match,
   Switch,
-} from "solid-js";
-import { IAction } from "~/types";
-import ImageCard from "~/components/ImageCard";
-import { compareMap } from "~/utils";
-import Fab from "~/components/Fab";
-import { trpc } from "~/client";
-import { Spinner, Masonry, Button, InfiniteLoading, InfiniteHandler } from "ui";
+} from 'solid-js'
+import { IAction } from '~/types'
+import ImageCard from '~/components/ImageCard'
+import { compareMap } from '~/utils'
+import Fab from '~/components/Fab'
+import { trpc } from '~/client'
+import { Spinner, Masonry, Button, InfiniteLoading, InfiniteHandler } from 'ui'
 
-const [appState, setAppState] = useAppState();
+const [appState, setAppState] = useAppState()
 const masonryItems = createMemo<Map<string, IImage>>(
   () =>
     new Map([...appState.images.data.entries()].map(([i, _]) => [i.name, i])),
@@ -24,77 +24,77 @@ const masonryItems = createMemo<Map<string, IImage>>(
   {
     equals: (prev, next) => compareMap(prev, next, () => true),
   }
-);
+)
 
 export default function Subreddit() {
-  const componentOwner = getOwner()!;
-  const [userState, setUserState] = useUserState();
-  const [searchParams, _] = useSearchParams();
-  const params = useParams();
-  const subreddit = () => params.subreddit.toLowerCase();
+  const componentOwner = getOwner()!
+  const [userState, setUserState] = useUserState()
+  const [searchParams, _] = useSearchParams()
+  const params = useParams()
+  const subreddit = () => params.subreddit.toLowerCase()
   const fabActions: IAction[] = [
     {
-      id: "top",
-      icon: "i-mdi-arrow-up-bold",
+      id: 'top',
+      icon: 'i-mdi-arrow-up-bold',
     },
     {
-      id: "hot",
-      icon: "i-mdi-fire",
+      id: 'hot',
+      icon: 'i-mdi-fire',
     },
     {
-      id: "new",
-      icon: "i-mdi-new-box",
+      id: 'new',
+      icon: 'i-mdi-new-box',
     },
-  ];
+  ]
 
-  const sort = createMemo(() => userState().sort.get(subreddit()) || "top");
+  const sort = createMemo(() => userState().sort.get(subreddit()) || 'top')
 
   const setSort = (sort: string) => {
     setUserState((state) => {
-      state.sort.set(subreddit(), sort);
-      return { ...state };
-    });
-  };
+      state.sort.set(subreddit(), sort)
+      return { ...state }
+    })
+  }
 
-  const key = createMemo(() => `${subreddit()}-${searchParams.q}-${sort()}`);
+  const key = createMemo(() => `${subreddit()}-${searchParams.q}-${sort()}`)
 
   const resetState = () => {
     setAppState(
-      "title",
+      'title',
       searchParams.q
         ? `${searchParams.q} - /r/${subreddit()}`
         : `/r/${subreddit()}`
-    );
+    )
     setAppState({
       images: {
         key: key(),
-        after: "",
+        after: '',
         data: new Set(),
       },
-    });
-  };
+    })
+  }
 
   createEffect(() => {
-    if (appState.images.key !== key()) resetState();
-  });
+    if (appState.images.key !== key()) resetState()
+  })
 
   createEffect(() => {
     setUserState((state) => {
-      state.subreddits.add(subreddit());
+      state.subreddits.add(subreddit())
       if (searchParams.q)
-        state.searchTerms.set(searchParams.q.toLowerCase(), subreddit());
-      return { ...state };
-    });
-  });
+        state.searchTerms.set(searchParams.q.toLowerCase(), subreddit())
+      return { ...state }
+    })
+  })
 
   const onInfinite: InfiniteHandler = async (setState, firstload) => {
     if (firstload && appState.images.data.size > 0) {
-      setState("idle");
-      return;
+      setState('idle')
+      return
     }
     try {
-      const ac = new AbortController();
-      runWithOwner(componentOwner, () => onCleanup(() => ac.abort()));
+      const ac = new AbortController()
+      runWithOwner(componentOwner, () => onCleanup(() => ac.abort()))
       const { images: newImages, after } = await trpc.getImages.query(
         {
           q: searchParams.q,
@@ -105,23 +105,23 @@ export default function Subreddit() {
         {
           signal: ac.signal,
         }
-      );
-      setAppState("images", (images) => ({
+      )
+      setAppState('images', (images) => ({
         ...images,
         data: new Set([...images.data, ...newImages]),
-      }));
+      }))
 
       if (after) {
-        setAppState("images", { after });
-        setState("idle");
-        return;
+        setAppState('images', { after })
+        setState('idle')
+        return
       }
-      setState("completed");
+      setState('completed')
     } catch (e) {
-      setState("error");
-      throw e;
+      setState('error')
+      throw e
     }
-  };
+  }
 
   return (
     <div h-full max-h-full id="scroller">
@@ -139,7 +139,7 @@ export default function Subreddit() {
         {(state, load) => (
           <div class="grid p-5 place-content-center">
             <Switch>
-              <Match when={state === "idle"}>
+              <Match when={state === 'idle'}>
                 <Button
                   class="bg-purple-800 hover:bg-purple-700"
                   onClick={() => load()}
@@ -147,12 +147,12 @@ export default function Subreddit() {
                   Load More
                 </Button>
               </Match>
-              <Match when={state === "completed"}>
+              <Match when={state === 'completed'}>
                 <span uppercase font-bold>
-                  {appState.images.data.size > 0 ? "END" : "NO IMAGES FOUND"}
+                  {appState.images.data.size > 0 ? 'END' : 'NO IMAGES FOUND'}
                 </span>
               </Match>
-              <Match when={state === "error"}>
+              <Match when={state === 'error'}>
                 <Button
                   onClick={() => load()}
                   class="bg-red-800 hover:bg-red-700"
@@ -160,7 +160,7 @@ export default function Subreddit() {
                   Retry
                 </Button>
               </Match>
-              <Match when={state === "loading"}>
+              <Match when={state === 'loading'}>
                 <Spinner />
               </Match>
             </Switch>
@@ -174,5 +174,5 @@ export default function Subreddit() {
         onSelect={(id) => setSort(id)}
       ></Fab>
     </div>
-  );
+  )
 }

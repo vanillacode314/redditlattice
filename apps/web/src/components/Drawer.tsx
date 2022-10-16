@@ -5,74 +5,74 @@ import {
   For,
   Show,
   Component,
-} from "solid-js";
-import { A, useLocation, useNavigate } from "solid-start";
-import { DragGesture } from "@use-gesture/vanilla";
-import { createSpring, animated } from "solid-spring";
-import { useAppState } from "~/stores";
+} from 'solid-js'
+import { A, useLocation, useNavigate } from 'solid-start'
+import { DragGesture } from '@use-gesture/vanilla'
+import { createSpring, animated } from 'solid-spring'
+import { useAppState } from '~/stores'
 
 interface ILink {
-  title: string;
-  icon?: string;
-  href: string;
+  title: string
+  icon?: string
+  href: string
 }
 
 const links: ILink[] = [
   {
-    title: "Home",
-    icon: "i-mdi-home",
-    href: "/",
+    title: 'Home',
+    icon: 'i-mdi-home',
+    href: '/',
   },
   {
-    title: "Settings",
-    icon: "i-mdi-cog",
-    href: "/settings",
+    title: 'Settings',
+    icon: 'i-mdi-cog',
+    href: '/settings',
   },
   {
-    title: "About",
-    icon: "i-mdi-about",
-    href: "/about",
+    title: 'About',
+    icon: 'i-mdi-about',
+    href: '/about',
   },
-];
+]
 
 export const Drawer: Component = () => {
-  const [appState, setAppState] = useAppState();
-  const open = createMemo(() => appState.drawerVisible);
+  const [appState, setAppState] = useAppState()
+  const open = createMemo(() => appState.drawerVisible)
   const setOpen = (value: boolean) => {
     setAppState({
       drawerVisible: value,
-    });
-  };
-  const navigate = useNavigate();
-  const location = useLocation();
-  createEffect(() => setAnimate(open()));
+    })
+  }
+  const navigate = useNavigate()
+  const location = useLocation()
+  createEffect(() => setAnimate(open()))
   createEffect(() =>
     animate()
-      ? navigate(location.pathname + "#drawer", { resolve: false })
-      : location.hash === "#drawer" &&
+      ? navigate(location.pathname + '#drawer', { resolve: false })
+      : location.hash === '#drawer' &&
         navigate(location.pathname, { resolve: false })
-  );
-  createEffect(() => location.hash !== "#drawer" && setAnimate(false));
+  )
+  createEffect(() => location.hash !== '#drawer' && setAnimate(false))
 
-  const [animate, setAnimate] = createSignal(false);
+  const [animate, setAnimate] = createSignal(false)
   const slide = createSpring(() => ({
     from: { transform: `translateX(-100%)` },
     to: { transform: `translateX(0%)` },
     reverse: !animate(),
     onRest: () => setOpen(animate()),
-  }));
+  }))
 
   const fade = createSpring(() => ({
     from: { opacity: 0 },
     to: { opacity: 1 },
     reverse: !animate(),
     onRest: () => setOpen(animate()),
-  }));
+  }))
 
   const toggleDrawer = () => {
-    if (!open()) setOpen(true);
-    else setAnimate(false);
-  };
+    if (!open()) setOpen(true)
+    else setAnimate(false)
+  }
 
   return (
     <>
@@ -81,7 +81,7 @@ export const Drawer: Component = () => {
           new DragGesture(
             el,
             ({ swipe: [swipeX] }) => swipeX === 1 && setOpen(true)
-          );
+          )
         }}
         class="fixed left-0 h-40 w-15 top-20 touch-pan-right"
       ></div>
@@ -133,7 +133,7 @@ export const Drawer: Component = () => {
         </animated.div>
       </Show>
     </>
-  );
-};
+  )
+}
 
-export default Drawer;
+export default Drawer

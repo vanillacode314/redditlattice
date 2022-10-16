@@ -1,9 +1,9 @@
-import { useAppState } from "~/stores";
-import { onMount } from "solid-js";
+import { useAppState } from '~/stores'
+import { onMount } from 'solid-js'
 
 export default function About() {
-  const [appState, setAppState] = useAppState();
-  onMount(() => setAppState("title", "About"));
+  const [appState, setAppState] = useAppState()
+  onMount(() => setAppState('title', 'About'))
 
   return (
     <div flex flex-col-reverse gap-5 py-5 h-full id="scroller">
@@ -65,5 +65,5 @@ export default function About() {
         </ul>
       </div>
     </div>
-  );
+  )
 }

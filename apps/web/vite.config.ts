@@ -1,14 +1,14 @@
-import solid from "solid-start/vite";
-import { defineConfig } from "vite";
-import Unocss from "@unocss/vite";
+import solid from 'solid-start/vite'
+import { defineConfig } from 'vite'
+import Unocss from '@unocss/vite'
 import {
   presetUno,
   presetIcons,
   presetWebFonts,
   presetAttributify,
-} from "unocss";
-import path from "path";
-import { version } from "./package.json" assert { type: "json" };
+} from 'unocss'
+import path from 'path'
+import { version } from './package.json' assert { type: 'json' }
 
 export default defineConfig({
   define: {
@@ -16,10 +16,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "~": path.resolve(__dirname, "src"),
-      "@ui": path.resolve(__dirname, "../../packages/ui"),
-      "@api": path.resolve(__dirname, "../../apps/api/src"),
-      "@image-server": path.resolve(__dirname, "../../apps/image-server/src"),
+      '~': path.resolve(__dirname, 'src'),
+      '@ui': path.resolve(__dirname, '../../packages/ui'),
+      '@api': path.resolve(__dirname, '../../apps/api/src'),
+      '@image-server': path.resolve(__dirname, '../../apps/image-server/src'),
     },
   },
   plugins: [
@@ -28,19 +28,19 @@ export default defineConfig({
       presets: [
         presetAttributify(),
         presetWebFonts({
-          provider: "google",
+          provider: 'google',
           fonts: {
-            sans: ["Roboto:400,500,600,700"],
+            sans: ['Roboto:400,500,600,700'],
           },
         }),
         presetUno(),
         presetIcons({
           extraProperties: {
-            display: "inline-block",
-            "vertical-align": "middle",
+            display: 'inline-block',
+            'vertical-align': 'middle',
           },
         }),
       ],
     }),
   ],
-});
+})

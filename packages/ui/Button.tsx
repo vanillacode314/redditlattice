@@ -1,7 +1,7 @@
-import { Component, JSX, JSXElement } from "solid-js";
+import { Component, JSX, JSXElement } from 'solid-js'
 
 interface Props extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: JSXElement;
+  children: JSXElement
 }
 
 export const Button: Component<Props> = (props) => {
@@ -20,7 +20,7 @@ export const Button: Component<Props> = (props) => {
     >
       {props.children}
     </button>
-  );
-};
+  )
+}
 
-export default Button;
+export default Button

@@ -1,90 +1,90 @@
-import { batch, For, onMount } from "solid-js";
-import { createStore } from "solid-js/store";
-import { formatBytes } from "~/utils";
-import { useUserState, useAppState } from "~/stores";
-import { stringify, parse } from "devalue";
-import { Button } from "ui";
+import { batch, For, onMount } from 'solid-js'
+import { createStore } from 'solid-js/store'
+import { formatBytes } from '~/utils'
+import { useUserState, useAppState } from '~/stores'
+import { stringify, parse } from 'devalue'
+import { Button } from 'ui'
 
 export default function Settings() {
-  let filesInput: HTMLInputElement;
-  const [appState, setAppState] = useAppState();
-  const [userState, setUserState] = useUserState();
+  let filesInput: HTMLInputElement
+  const [appState, setAppState] = useAppState()
+  const [userState, setUserState] = useUserState()
   const [usageStats, setUsageStats] = createStore<{
-    total: number;
-    used: number;
-  }>({ total: 1, used: 0 });
+    total: number
+    used: number
+  }>({ total: 1, used: 0 })
 
   const getUsageStats = async () => {
-    const { quota, usage } = await navigator.storage.estimate();
+    const { quota, usage } = await navigator.storage.estimate()
     return {
       total: quota || 1,
       used: usage || 0,
-    };
-  };
+    }
+  }
 
   const clearCache = async () => {
-    await caches.delete("images-assets");
-    setUsageStats(await getUsageStats());
-  };
+    await caches.delete('images-assets')
+    setUsageStats(await getUsageStats())
+  }
 
   const handleImport = async () => {
-    const file = filesInput.files[0];
+    const file = filesInput.files[0]
     if (!file) {
-      alert("Please select a file to import");
-      return;
+      alert('Please select a file to import')
+      return
     }
     try {
-      const content = await file.text();
-      const data = parse(content) as ReturnType<typeof userState>;
-      const { subreddits, sort, searchTerms } = data;
+      const content = await file.text()
+      const data = parse(content) as ReturnType<typeof userState>
+      const { subreddits, sort, searchTerms } = data
       batch(() => {
         if (subreddits) {
-          const x = new Set([...subreddits, ...userState().subreddits]);
-          setUserState((state) => ({ ...state, subreddits: x }));
+          const x = new Set([...subreddits, ...userState().subreddits])
+          setUserState((state) => ({ ...state, subreddits: x }))
         }
         if (sort) {
-          const x = new Map([...sort, ...userState().sort]);
-          setUserState((state) => ({ ...state, sort: x }));
+          const x = new Map([...sort, ...userState().sort])
+          setUserState((state) => ({ ...state, sort: x }))
         }
         if (searchTerms) {
-          const x = new Map([...searchTerms, ...userState().searchTerms]);
-          setUserState((state) => ({ ...state, searchTerms: x }));
+          const x = new Map([...searchTerms, ...userState().searchTerms])
+          setUserState((state) => ({ ...state, searchTerms: x }))
         }
-      });
+      })
     } catch (e) {
-      alert("Selected file contains invalid data");
+      alert('Selected file contains invalid data')
     }
-  };
+  }
 
   const exportData = async () => {
-    const data = stringify(userState());
-    const a = document.createElement("a");
-    a.href = `data:text/plain;charset=utf-8,${encodeURIComponent(data)}`;
-    a.download = `redditlattice-${new Date().toLocaleDateString()}.dat`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  };
+    const data = stringify(userState())
+    const a = document.createElement('a')
+    a.href = `data:text/plain;charset=utf-8,${encodeURIComponent(data)}`
+    a.download = `redditlattice-${new Date().toLocaleDateString()}.dat`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+  }
 
   onMount(async () => {
-    setUsageStats(await getUsageStats());
-  });
+    setUsageStats(await getUsageStats())
+  })
 
-  onMount(() => setAppState("title", "Settings"));
+  onMount(() => setAppState('title', 'Settings'))
 
   const setImageSizeMultiplier = (n: number) => {
     setUserState((_) => {
-      _.imageSizeMultiplier = n;
-      return { ..._ };
-    });
-  };
+      _.imageSizeMultiplier = n
+      return { ..._ }
+    })
+  }
 
   const setImageFormat = (format: string) => {
     setUserState((_) => {
-      _.prefferedImageFormat = format;
-      return { ..._ };
-    });
-  };
+      _.prefferedImageFormat = format
+      return { ..._ }
+    })
+  }
 
   return (
     <div p-5 flex flex-col-reverse h-full gap-5 id="scroller">
@@ -137,7 +137,7 @@ export default function Settings() {
           onChange={(e) => setImageFormat(e.currentTarget.value)}
           class="bg-black outline-none"
         >
-          <For each={["webp", "avif", "jpeg", "png"]}>
+          <For each={['webp', 'avif', 'jpeg', 'png']}>
             {(val) => <option>{val}</option>}
           </For>
         </select>
@@ -149,5 +149,5 @@ export default function Settings() {
         ref={filesInput!}
       />
     </div>
-  );
+  )
 }

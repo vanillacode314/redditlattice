@@ -6,104 +6,104 @@ import {
   createSignal,
   Component,
   JSXElement,
-} from "solid-js";
-import { useLocation } from "solid-start";
-import Drawer from "~/components/Drawer";
-import Navbar from "~/components/Navbar";
-import { animated, createSpring } from "solid-spring";
-import _ from "lodash";
-import { createConnectivitySignal } from "@solid-primitives/connectivity";
-import { useAppState } from "~/stores";
+} from 'solid-js'
+import { useLocation } from 'solid-start'
+import Drawer from '~/components/Drawer'
+import Navbar from '~/components/Navbar'
+import { animated, createSpring } from 'solid-spring'
+import _ from 'lodash'
+import { createConnectivitySignal } from '@solid-primitives/connectivity'
+import { useAppState } from '~/stores'
 
 interface Props {
-  children: JSXElement;
+  children: JSXElement
 }
 export const BaseLayout: Component<Props> = (props) => {
-  const isOnline = createConnectivitySignal;
-  const location = useLocation();
-  const [offset, setOffset] = createSignal(0);
-  const [down, setDown] = createSignal<boolean>(false);
-  const [appState, setAppState] = useAppState();
-  const threshold = 300;
+  const isOnline = createConnectivitySignal
+  const location = useLocation()
+  const [offset, setOffset] = createSignal(0)
+  const [down, setDown] = createSignal<boolean>(false)
+  const [appState, setAppState] = useAppState()
+  const threshold = 300
 
   createEffect(
     on(
       () => location.pathname,
       () => {
-        const scroller = document.getElementById("scroller");
-        let startY: number = 0;
-        let touchId: number = -1;
-        let shouldRefresh: boolean = false;
-        if (!scroller) return;
+        const scroller = document.getElementById('scroller')
+        let startY: number = 0
+        let touchId: number = -1
+        let shouldRefresh: boolean = false
+        if (!scroller) return
 
         const onTouchStart = (e: TouchEvent) => {
-          if (touchId > -1) return;
-          const touch = e.changedTouches[0];
-          let scrollPos = scroller.scrollTop;
+          if (touchId > -1) return
+          const touch = e.changedTouches[0]
+          let scrollPos = scroller.scrollTop
           if (scrollPos < 0)
-            scrollPos += scroller.scrollHeight - scroller.clientHeight;
-          startY = touch.screenY + scrollPos;
-          touchId = touch.identifier;
-          setDown(true);
-        };
+            scrollPos += scroller.scrollHeight - scroller.clientHeight
+          startY = touch.screenY + scrollPos
+          touchId = touch.identifier
+          setDown(true)
+        }
 
-        let ticking: boolean = false;
+        let ticking: boolean = false
         const onTouchMove = (e: TouchEvent) => {
-          if (ticking) return;
+          if (ticking) return
           requestAnimationFrame(() => {
             if (touchId < 0) {
-              ticking = false;
-              return;
+              ticking = false
+              return
             }
-            const touch = e.changedTouches[0];
+            const touch = e.changedTouches[0]
             if (touchId != touch.identifier) {
-              ticking = false;
-              return;
+              ticking = false
+              return
             }
-            let scrollPos = scroller.scrollTop;
+            let scrollPos = scroller.scrollTop
             if (scrollPos < 0)
-              scrollPos += scroller.scrollHeight - scroller.clientHeight;
+              scrollPos += scroller.scrollHeight - scroller.clientHeight
             /* console.log({ scrollPos, startY }); */
-            const distance = touch.screenY - startY - scrollPos;
-            shouldRefresh = scroller.scrollTop < 2 && distance >= threshold;
-            setOffset(Math.min(threshold, distance));
-            ticking = false;
-          });
-          ticking = true;
-        };
+            const distance = touch.screenY - startY - scrollPos
+            shouldRefresh = scroller.scrollTop < 2 && distance >= threshold
+            setOffset(Math.min(threshold, distance))
+            ticking = false
+          })
+          ticking = true
+        }
 
         const onTouchEnd = (e: TouchEvent) => {
-          if (touchId < 0) return;
-          const touch = e.changedTouches[0];
-          if (!touch) return;
-          if (touchId != touch.identifier) return;
-          touchId = -1;
+          if (touchId < 0) return
+          const touch = e.changedTouches[0]
+          if (!touch) return
+          if (touchId != touch.identifier) return
+          touchId = -1
           if (shouldRefresh) {
-            shouldRefresh = false;
-            setAppState("images", {
-              key: "",
-              after: "",
+            shouldRefresh = false
+            setAppState('images', {
+              key: '',
+              after: '',
               data: new Set(),
-            });
+            })
           }
-          setDown(false);
-          setOffset(0);
-        };
-        scroller.addEventListener("touchstart", onTouchStart, {
+          setDown(false)
+          setOffset(0)
+        }
+        scroller.addEventListener('touchstart', onTouchStart, {
           passive: true,
-        });
-        scroller.addEventListener("touchmove", onTouchMove, { passive: true });
-        scroller.addEventListener("touchend", onTouchEnd, { passive: true });
-        scroller.addEventListener("touchcancel", onTouchEnd, { passive: true });
+        })
+        scroller.addEventListener('touchmove', onTouchMove, { passive: true })
+        scroller.addEventListener('touchend', onTouchEnd, { passive: true })
+        scroller.addEventListener('touchcancel', onTouchEnd, { passive: true })
         onCleanup(() => {
-          scroller.removeEventListener("touchstart", onTouchStart);
-          scroller.removeEventListener("touchmove", onTouchMove);
-          scroller.removeEventListener("touchend", onTouchEnd);
-          scroller.removeEventListener("touchcancel", onTouchEnd);
-        });
+          scroller.removeEventListener('touchstart', onTouchStart)
+          scroller.removeEventListener('touchmove', onTouchMove)
+          scroller.removeEventListener('touchend', onTouchEnd)
+          scroller.removeEventListener('touchcancel', onTouchEnd)
+        })
       }
     )
-  );
+  )
 
   const move = createSpring(() => ({
     from: {
@@ -113,7 +113,7 @@ export const BaseLayout: Component<Props> = (props) => {
       transform: `translateY(${offset() - 200}%) rotate(${offset()}deg)`,
     },
     immediate: down(),
-  }));
+  }))
 
   return (
     <div flex="~ col" h-full max-h-full relative>
@@ -144,7 +144,7 @@ export const BaseLayout: Component<Props> = (props) => {
         {props.children}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default BaseLayout;
+export default BaseLayout

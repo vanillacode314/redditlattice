@@ -5,56 +5,56 @@ import {
   createSignal,
   Show,
   Suspense,
-} from "solid-js";
-import { useNavigate } from "solid-start";
-import { trpc } from "~/client";
-import { AsyncList, List, Spinner } from "ui";
-import { TransitionFade } from "ui/transitions";
-import { useAppState, useUserState } from "~/stores";
+} from 'solid-js'
+import { useNavigate } from 'solid-start'
+import { trpc } from '~/client'
+import { AsyncList, List, Spinner } from 'ui'
+import { TransitionFade } from 'ui/transitions'
+import { useAppState, useUserState } from '~/stores'
 
 export default function Home() {
-  const [userState, setUserState] = useUserState();
-  const [appState, setAppState] = useAppState();
+  const [userState, setUserState] = useUserState()
+  const [appState, setAppState] = useAppState()
 
-  onMount(() => setAppState("title", ""));
+  onMount(() => setAppState('title', ''))
 
-  const [subreddit, setSubreddit] = createSignal<string>("");
-  const [searchTerm, setSearchTerm] = createSignal<string>("");
-  const [focused, setFocused] = createSignal<boolean>(false);
+  const [subreddit, setSubreddit] = createSignal<string>('')
+  const [searchTerm, setSearchTerm] = createSignal<string>('')
+  const [focused, setFocused] = createSignal<boolean>(false)
 
   const query = createMemo<string>(() => {
-    if (!subreddit()) return "";
+    if (!subreddit()) return ''
     if (searchTerm()) {
-      return `${subreddit().toLowerCase()}?${searchTerm().toLowerCase()}`;
+      return `${subreddit().toLowerCase()}?${searchTerm().toLowerCase()}`
     }
-    return `${subreddit().toLowerCase()}`;
-  });
+    return `${subreddit().toLowerCase()}`
+  })
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   function onSubmit(e: SubmitEvent) {
-    e.preventDefault();
-    if (!query().trim()) return;
-    if (query().startsWith("?")) return;
+    e.preventDefault()
+    if (!query().trim()) return
+    if (query().startsWith('?')) return
     if (searchTerm()) {
-      navigate(`/r/${subreddit()}?q=${searchTerm()}`);
+      navigate(`/r/${subreddit()}?q=${searchTerm()}`)
     } else {
-      navigate(`/r/${query()}`);
+      navigate(`/r/${query()}`)
     }
   }
 
   function removeSubreddit(id: string) {
     setUserState((state) => {
-      state.subreddits.delete(id);
-      return { ...state };
-    });
+      state.subreddits.delete(id)
+      return { ...state }
+    })
   }
 
   function removeSearchTerm(id: string) {
     setUserState((state) => {
-      state.searchTerms.delete(id);
-      return { ...state };
-    });
+      state.searchTerms.delete(id)
+      return { ...state }
+    })
   }
 
   return (
@@ -84,11 +84,11 @@ export default function Home() {
           <input
             value={query()}
             onInput={(e) => {
-              const [sr, q] = e.currentTarget.value.split("?");
+              const [sr, q] = e.currentTarget.value.split('?')
               batch(() => {
-                setSubreddit(sr || "");
-                setSearchTerm(q || "");
-              });
+                setSubreddit(sr || '')
+                setSearchTerm(q || '')
+              })
             }}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
@@ -105,9 +105,9 @@ export default function Home() {
                 type="button"
                 onClick={() => {
                   batch(() => {
-                    setSubreddit("");
-                    setSearchTerm("");
-                  });
+                    setSubreddit('')
+                    setSearchTerm('')
+                  })
                 }}
                 onFocus={(e) => e.relatedTarget?.focus()}
                 class="i-mdi-close-circle text-xl"
@@ -129,7 +129,7 @@ export default function Home() {
           ring="focus:~ focus:blue"
           transition-colors
           shrink-0
-          style={{ "-webkit-tap-highlight-color": "transparent" }}
+          style={{ '-webkit-tap-highlight-color': 'transparent' }}
         >
           <div class="i-mdi-magnify"></div>
         </button>
@@ -156,9 +156,9 @@ export default function Home() {
               <AsyncList
                 onClick={(id) => {
                   batch(() => {
-                    setSubreddit(id);
-                    setSearchTerm("");
-                  });
+                    setSubreddit(id)
+                    setSearchTerm('')
+                  })
                 }}
                 focusable={false}
                 reverse
@@ -193,12 +193,12 @@ export default function Home() {
           <div border="b gray-800"></div>
           <List
             onClick={(id) => {
-              const sr = subreddit() || userState().searchTerms.get(id);
+              const sr = subreddit() || userState().searchTerms.get(id)
               if (sr) {
                 batch(() => {
-                  setSubreddit(sr);
-                  setSearchTerm(id);
-                });
+                  setSubreddit(sr)
+                  setSearchTerm(id)
+                })
               }
             }}
             onRemove={(id) => removeSearchTerm(id)}
@@ -212,5 +212,5 @@ export default function Home() {
         </Show>
       </div>
     </main>
-  );
+  )
 }

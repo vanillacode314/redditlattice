@@ -4,86 +4,86 @@ import {
   mergeProps,
   Component,
   Show,
-} from "solid-js";
-import { Portal } from "solid-js/web";
-import { animated, createSpring } from "solid-spring";
-import { useLocation, useNavigate } from "solid-start";
-import _ from "lodash";
-import { longpress } from "~/utils/use-longpress";
-import { IMAGE_SERVER_BASE_PATH } from "~/consts";
-import { TransitionFade } from "ui/transitions";
-import { AutoResizingPicture, Button } from "ui";
-import { useUserState } from "~/stores";
-import { IPost } from "~/types";
+} from 'solid-js'
+import { Portal } from 'solid-js/web'
+import { animated, createSpring } from 'solid-spring'
+import { useLocation, useNavigate } from 'solid-start'
+import _ from 'lodash'
+import { longpress } from '~/utils/use-longpress'
+import { IMAGE_SERVER_BASE_PATH } from '~/consts'
+import { TransitionFade } from 'ui/transitions'
+import { AutoResizingPicture, Button } from 'ui'
+import { useUserState } from '~/stores'
+import { IPost } from '~/types'
 
 interface Props {
-  width: number;
-  image: Pick<IPost, "name" | "url" | "title">;
-  onLoad?: () => void;
+  width: number
+  image: Pick<IPost, 'name' | 'url' | 'title'>
+  onLoad?: () => void
 }
 
 export const ImageCard: Component<Props> = (props) => {
-  const [userState, _] = useUserState();
-  const merged = mergeProps({ onLoad: () => {} }, props);
-  const [error, setError] = createSignal<boolean>(false);
-  const [popupVisible, setPopupVisible] = createSignal<boolean>(false);
-  const [animate, setAnimate] = createSignal<boolean>(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [userState, _] = useUserState()
+  const merged = mergeProps({ onLoad: () => {} }, props)
+  const [error, setError] = createSignal<boolean>(false)
+  const [popupVisible, setPopupVisible] = createSignal<boolean>(false)
+  const [animate, setAnimate] = createSignal<boolean>(false)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   createEffect(() =>
     popupVisible()
       ? navigate(
-          location.pathname + location.search + "#popup-" + props.image.name,
+          location.pathname + location.search + '#popup-' + props.image.name,
           {
             resolve: false,
           }
         )
-      : location.hash === "#popup-" + props.image.name &&
+      : location.hash === '#popup-' + props.image.name &&
         navigate(location.pathname + location.search, { resolve: false })
-  );
+  )
 
   const scale = createSpring(() => ({
     transform: `scale(${animate() ? 1 : 0})`,
     onRest: () => setPopupVisible(animate()),
-  }));
+  }))
 
   function getProcessedImageURL(
     url: string,
     width: number,
-    format: string = "webp"
+    format: string = 'webp'
   ): string {
-    return `${IMAGE_SERVER_BASE_PATH}/?url=${url}&width=${width}&format=${format}`;
+    return `${IMAGE_SERVER_BASE_PATH}/?url=${url}&width=${width}&format=${format}`
   }
 
   function getSources() {
     const width =
-      Math.round(props.width / 50) * 50 * userState()!.imageSizeMultiplier;
+      Math.round(props.width / 50) * 50 * userState()!.imageSizeMultiplier
     return new Map(
-      [...new Set([userState()!.prefferedImageFormat, "webp"])].map(
+      [...new Set([userState()!.prefferedImageFormat, 'webp'])].map(
         (format) => [
           `image/${format}`,
           getProcessedImageURL(props.image.url, width, format),
         ]
       )
-    );
+    )
   }
 
   function popupImage() {
-    setAnimate(true);
-    setPopupVisible(true);
+    setAnimate(true)
+    setPopupVisible(true)
   }
 
   function removePopupImage() {
-    setAnimate(false);
+    setAnimate(false)
   }
 
   async function retry() {
-    setError(false);
+    setError(false)
   }
 
   function onError() {
-    setError(true);
+    setError(true)
   }
 
   return (
@@ -119,7 +119,7 @@ export const ImageCard: Component<Props> = (props) => {
           width={props.width}
           fallbackHeight={props.width}
           ref={(el) => {
-            longpress(el, { callback: popupImage });
+            longpress(el, { callback: popupImage })
           }}
           srcSets={getSources()}
           src={getProcessedImageURL(props.image.url, props.width)}
@@ -132,7 +132,7 @@ export const ImageCard: Component<Props> = (props) => {
         <Portal mount={document.body}>
           <div
             class="fixed inset-0 grid content-center"
-            classList={{ "pointer-events-none": !popupVisible() }}
+            classList={{ 'pointer-events-none': !popupVisible() }}
           >
             <TransitionFade>
               <Show when={popupVisible()}>
@@ -161,7 +161,7 @@ export const ImageCard: Component<Props> = (props) => {
         </Portal>
       </Show>
     </>
-  );
-};
+  )
+}
 
-export default ImageCard;
+export default ImageCard

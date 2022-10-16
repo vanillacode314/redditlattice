@@ -1,5 +1,5 @@
 // @refresh reload
-import { Component, onMount, Suspense } from "solid-js";
+import { Component, onMount, Suspense } from 'solid-js'
 import {
   Body,
   ErrorBoundary,
@@ -11,46 +11,46 @@ import {
   Routes,
   Scripts,
   Title,
-} from "solid-start";
+} from 'solid-start'
 
-import "@unocss/reset/tailwind.css";
-import "uno.css";
-import "./root.css";
-import Base from "~/layouts/Base";
-import { useAppState, useUserState } from "~/stores";
-import { Spinner } from "ui";
-import { DevtoolsOverlay } from "@solid-devtools/overlay";
+import '@unocss/reset/tailwind.css'
+import 'uno.css'
+import './root.css'
+import Base from '~/layouts/Base'
+import { useAppState, useUserState } from '~/stores'
+import { Spinner } from 'ui'
+import { DevtoolsOverlay } from '@solid-devtools/overlay'
 
 export const Root: Component = () => {
-  const [appState, setAppState] = useAppState();
-  const [userState, setUserState] = useUserState();
+  const [appState, setAppState] = useAppState()
+  const [userState, setUserState] = useUserState()
 
   const importLegacyState = () => {
-    const localSr = localStorage.getItem("subreddits");
+    const localSr = localStorage.getItem('subreddits')
     if (localSr) {
-      const sr = JSON.parse(localSr);
+      const sr = JSON.parse(localSr)
       setUserState((_) => {
         for (const x of sr) {
-          _.subreddits.add(x);
+          _.subreddits.add(x)
         }
-        return { ..._ };
-      });
-      localStorage.removeItem("subreddits");
+        return { ..._ }
+      })
+      localStorage.removeItem('subreddits')
     }
-    const localSearches = localStorage.getItem("searches");
+    const localSearches = localStorage.getItem('searches')
     if (localSearches) {
-      const searches = JSON.parse(localSearches);
+      const searches = JSON.parse(localSearches)
       setUserState((_) => {
         for (const x of searches) {
-          _.searchTerms.set(x, "");
+          _.searchTerms.set(x, '')
         }
-        return { ..._ };
-      });
-      localStorage.removeItem("searches");
+        return { ..._ }
+      })
+      localStorage.removeItem('searches')
     }
-  };
+  }
 
-  onMount(() => importLegacyState());
+  onMount(() => importLegacyState())
 
   return (
     <Html lang="en">
@@ -85,7 +85,7 @@ export const Root: Component = () => {
         <DevtoolsOverlay />
       </Body>
     </Html>
-  );
-};
+  )
+}
 
-export default Root;
+export default Root

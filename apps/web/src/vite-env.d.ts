@@ -1,1 +1,1 @@
-declare const __version__: string;
+declare const __version__: string

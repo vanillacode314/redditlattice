@@ -1,5 +1,5 @@
-import type { IAction } from "~/types";
-import { createSpring, animated } from "solid-spring";
+import type { IAction } from '~/types'
+import { createSpring, animated } from 'solid-spring'
 import {
   For,
   createSignal,
@@ -7,73 +7,73 @@ import {
   onMount,
   Component,
   batch,
-} from "solid-js";
-import { TransitionStaggeredEnter } from "ui/transitions";
-import _ from "lodash";
+} from 'solid-js'
+import { TransitionStaggeredEnter } from 'ui/transitions'
+import _ from 'lodash'
 
 interface Props {
-  icon: string;
-  actions: IAction[];
-  selected: IAction["id"];
-  onSelect: (id: IAction["id"]) => void;
+  icon: string
+  actions: IAction[]
+  selected: IAction['id']
+  onSelect: (id: IAction['id']) => void
 }
 
 const Fab: Component<Props> = (props) => {
-  const [width, setWidth] = createSignal<number>(0);
-  const [open, setOpen] = createSignal<boolean>(false);
-  const [hidden, setHidden] = createSignal<boolean>(false);
+  const [width, setWidth] = createSignal<number>(0)
+  const [open, setOpen] = createSignal<boolean>(false)
+  const [hidden, setHidden] = createSignal<boolean>(false)
 
-  let last_known_scroll_position = 0;
-  const threshold = 30; // in pixels
+  let last_known_scroll_position = 0
+  const threshold = 30 // in pixels
   const onScroll = _.throttle((e: Event) => {
-    const el = e.currentTarget as HTMLElement;
-    if (!el) return;
-    const dy = el.scrollTop - last_known_scroll_position;
-    last_known_scroll_position = el.scrollTop;
+    const el = e.currentTarget as HTMLElement
+    if (!el) return
+    const dy = el.scrollTop - last_known_scroll_position
+    last_known_scroll_position = el.scrollTop
     batch(() => {
-      setOpen(false);
+      setOpen(false)
       if (Math.abs(dy) > threshold) {
         if (dy > 0) {
-          setHidden(true);
+          setHidden(true)
         } else {
-          setHidden(false);
+          setHidden(false)
         }
       }
-    });
-  }, 100);
+    })
+  }, 100)
 
   const slide = createSpring(() => ({
     to: { marginLeft: 0 },
     from: { marginLeft: -2 * width() },
     reverse: hidden(),
-  }));
+  }))
 
   onMount(() => {
-    const scroller = document.getElementById("scroller");
+    const scroller = document.getElementById('scroller')
     if (scroller)
-      scroller.addEventListener("scroll", onScroll, { passive: true });
-  });
+      scroller.addEventListener('scroll', onScroll, { passive: true })
+  })
 
   onCleanup(() => {
-    const scroller = document.getElementById("scroller");
-    if (scroller) scroller.removeEventListener("scroll", onScroll);
-  });
+    const scroller = document.getElementById('scroller')
+    if (scroller) scroller.removeEventListener('scroll', onScroll)
+  })
 
   return (
     <div flex fixed bottom-0 right-0 overflow-hidden>
       <div p-5 grid gap-5>
         <div
           ref={(el) => {
-            if (width()) return;
+            if (width()) return
             requestAnimationFrame(function handler() {
-              const style = getComputedStyle(el);
-              const w = parseFloat(style.width);
+              const style = getComputedStyle(el)
+              const w = parseFloat(style.width)
               if (!w) {
-                requestAnimationFrame(handler);
-                return;
+                requestAnimationFrame(handler)
+                return
               }
-              setWidth(w);
-            });
+              setWidth(w)
+            })
           }}
           flex="~ col-reverse"
           items-center
@@ -97,16 +97,16 @@ const Fab: Component<Props> = (props) => {
                   shadow
                   class={
                     props.selected === id
-                      ? "bg-purple-800 hover:bg-purple-700 focus:bg-purple-700"
-                      : "bg-gray-900 hover:bg-gray-800 focus:bg-gray-800"
+                      ? 'bg-purple-800 hover:bg-purple-700 focus:bg-purple-700'
+                      : 'bg-gray-900 hover:bg-gray-800 focus:bg-gray-800'
                   }
                   style={{
                     transform: `translateY(100px)`,
                   }}
                   onClick={() => {
-                    if (props.selected === id) return;
-                    props?.onSelect(id);
-                    setOpen(false);
+                    if (props.selected === id) return
+                    props?.onSelect(id)
+                    setOpen(false)
                   }}
                 >
                   <div class={icon} />
@@ -117,10 +117,10 @@ const Fab: Component<Props> = (props) => {
         </div>
         <button
           classList={{
-            "rotate-90 bg-pink-800": open(),
-            "bg-gray-900": !open(),
+            'rotate-90 bg-pink-800': open(),
+            'bg-gray-900': !open(),
           }}
-          style={{ "-webkit-tap-highlight-color": "transparent" }}
+          style={{ '-webkit-tap-highlight-color': 'transparent' }}
           transition-transform
           transition-colors
           outline-none
@@ -130,12 +130,12 @@ const Fab: Component<Props> = (props) => {
           rounded-full
           onClick={() => setOpen(!open())}
         >
-          <div class={open() ? "i-mdi-close" : props.icon} text="2xl"></div>
+          <div class={open() ? 'i-mdi-close' : props.icon} text="2xl"></div>
         </button>
       </div>
       <animated.div style={slide()}></animated.div>
     </div>
-  );
-};
+  )
+}
 
-export default Fab;
+export default Fab
