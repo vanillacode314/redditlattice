@@ -1,6 +1,8 @@
 import { createStore } from "solid-js/store";
 import { createStorageSignal } from "@solid-primitives/storage";
 import { parse, stringify } from "devalue";
+import _ from "lodash";
+import { createRenderEffect } from "solid-js";
 
 export interface IImage {
   name: string;
@@ -24,6 +26,8 @@ export interface IUserState {
   subreddits: Set<string>;
   searchTerms: Map<string, string>;
   sort: Map<string, string>;
+  imageSizeMultiplier: number;
+  prefferedImageFormat: string;
 }
 
 const appStore = createStore<IAppState>({
@@ -38,13 +42,19 @@ const appStore = createStore<IAppState>({
   },
 });
 
-const userSignal = createStorageSignal<IUserState>(
-  "user-state",
-  {
+function GET_DEFAULT_USER_STATE(): IUserState {
+  return {
     subreddits: new Set(),
     searchTerms: new Map(),
     sort: new Map(),
-  },
+    imageSizeMultiplier: 2,
+    prefferedImageFormat: "webp",
+  };
+}
+
+const userSignal = createStorageSignal<IUserState>(
+  "user-state",
+  GET_DEFAULT_USER_STATE(),
   {
     serializer: stringify,
     deserializer: parse,
@@ -53,3 +63,12 @@ const userSignal = createStorageSignal<IUserState>(
 
 export const useAppState = () => appStore;
 export const useUserState = () => userSignal;
+
+const [, setUserState] = useUserState();
+
+createRenderEffect(() =>
+  setUserState((state) => {
+    state = _.merge(GET_DEFAULT_USER_STATE(), state);
+    return state;
+  })
+);

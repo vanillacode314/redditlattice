@@ -1,12 +1,8 @@
 import {
   createEffect,
   createSignal,
-  on,
-  createMemo,
   For,
   mergeProps,
-  onCleanup,
-  onMount,
   Component,
   Show,
 } from "solid-js";
@@ -14,12 +10,11 @@ import { Portal } from "solid-js/web";
 import { animated, createSpring } from "solid-spring";
 import { useLocation, useNavigate } from "solid-start";
 import _ from "lodash";
-import type { IPost } from "~/types";
 import { longpress } from "~/utils/use-longpress";
 import { IMAGE_SERVER_BASE_PATH } from "~/consts";
 import { TransitionFade } from "ui/transitions";
 import { AutoResizingPicture, Button } from "ui";
-import { imageTrpc } from "~/image-client";
+import { useUserState } from "~/stores";
 
 interface Props {
   width: number;
@@ -28,6 +23,7 @@ interface Props {
 }
 
 export const ImageCard: Component<Props> = (props) => {
+  const [userState, _] = useUserState();
   const merged = mergeProps({ onLoad: () => {} }, props);
   const [error, setError] = createSignal<boolean>(false);
   const [popupVisible, setPopupVisible] = createSignal<boolean>(false);
@@ -61,15 +57,15 @@ export const ImageCard: Component<Props> = (props) => {
   }
 
   function getSources() {
-    const width = Math.round(props.width / 50) * 50 * 2;
+    const width =
+      Math.round(props.width / 50) * 50 * userState()!.imageSizeMultiplier;
     return new Map(
-      [
-        /* "avif", */
-        "webp",
-      ].map((format) => [
-        `image/${format}`,
-        getProcessedImageURL(props.image.url, width, format),
-      ])
+      [...new Set([userState()!.prefferedImageFormat, "webp"])].map(
+        (format) => [
+          `image/${format}`,
+          getProcessedImageURL(props.image.url, width, format),
+        ]
+      )
     );
   }
 
