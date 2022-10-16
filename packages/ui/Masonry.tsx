@@ -4,9 +4,11 @@ import {
   Accessor,
   createSignal,
   createMemo,
-  Index,
+  createEffect,
+  on,
 } from 'solid-js'
-import { Key } from '@solid-primitives/keyed'
+import { createStore } from 'solid-js/store'
+import { Entries, Key } from '@solid-primitives/keyed'
 import { createElementSize } from '@solid-primitives/resize-observer'
 import _ from 'lodash'
 
@@ -23,6 +25,7 @@ export interface Props<T = any> {
 }
 
 export const Masonry: Component<Props> = (props) => {
+  type I = typeof props.items[number]
   const [el, setEl] = createSignal<HTMLElement>()
   const size = createElementSize(el)
   const cols = createMemo<number>(() =>
@@ -31,25 +34,65 @@ export const Masonry: Component<Props> = (props) => {
   const colWidth = createMemo<number>(() =>
     size.width ? size.width / cols() : 0
   )
-  const columns = createMemo<Item[][]>(() =>
-    _.chunk(props.items, Math.floor(props.items.length / cols()))
+  const [columns, setColumns] = createStore<Record<number, I[]>>()
+
+  createEffect(
+    on(
+      () => props.items,
+      (n, p) => {
+        /* console.log('ITEMS', { n, p }) */
+
+        const deletedItems = (p || []).filter(
+          (i) => !(n || []).some((j) => j.id === i.id)
+        )
+
+        const addedItems = n.filter(
+          (i) => !(p || []).some((j) => j.id === i.id)
+        )
+        console.log({ addedItems, deletedItems })
+        for (const [col, items] of Object.entries(columns)) {
+          for (const [idx, item] of items.entries()) {
+            if (deletedItems.some((i) => i.id === item.id)) items.splice(idx, 1)
+          }
+        }
+        for (const [idx, chunk] of _.chunk(
+          addedItems,
+          Math.floor(addedItems.length / cols())
+        ).entries()) {
+          console.log({ idx, chunk })
+          const old = columns[idx] || []
+          setColumns({ [idx]: [...old, ...chunk] })
+        }
+      }
+    )
+  )
+
+  createEffect(
+    on(cols, () => {
+      for (const [idx, chunk] of _.chunk(
+        props.items,
+        Math.floor(props.items.length / cols())
+      ).entries()) {
+        setColumns({ [idx]: chunk })
+      }
+    })
   )
 
   return (
     <div
       class="grid"
-      style={{ 'grid-template-columns': `repeat(${cols()}, 1fr)` }}
+      style={{ 'grid-template-columns': `repeat(${cols()},1fr)` }}
       ref={setEl}
     >
-      <Index each={Array(cols()).fill(0)}>
-        {(item, index) => (
+      <Entries of={columns}>
+        {(key, item) => (
           <div class="flex flex-col">
-            <Key each={columns()[index]} by="id">
+            <Key each={item()} by="id">
               {(item) => props.children(item().id, item().data, colWidth)}
             </Key>
           </div>
         )}
-      </Index>
+      </Entries>
     </div>
   )
 }

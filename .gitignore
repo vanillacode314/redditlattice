@@ -31,3 +31,5 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+apps/image-server-v2/target
