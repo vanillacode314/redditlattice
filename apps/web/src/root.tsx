@@ -19,6 +19,7 @@ import "./root.css";
 import Base from "~/layouts/Base";
 import { useAppState, useUserState } from "~/stores";
 import { Spinner } from "ui";
+import { DevtoolsOverlay } from "@solid-devtools/overlay";
 
 export const Root: Component = () => {
   const [appState, setAppState] = useAppState();
@@ -81,6 +82,7 @@ export const Root: Component = () => {
           </Suspense>
           <Scripts />
         </Base>
+        <DevtoolsOverlay />
       </Body>
     </Html>
   );
