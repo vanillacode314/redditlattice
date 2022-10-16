@@ -40,8 +40,6 @@ export const Masonry: Component<Props> = (props) => {
     on(
       () => props.items,
       (n, p) => {
-        /* console.log('ITEMS', { n, p }) */
-
         const deletedItems = (p || []).filter(
           (i) => !(n || []).some((j) => j.id === i.id)
         )
@@ -49,7 +47,6 @@ export const Masonry: Component<Props> = (props) => {
         const addedItems = n.filter(
           (i) => !(p || []).some((j) => j.id === i.id)
         )
-        console.log({ addedItems, deletedItems })
         for (const [col, items] of Object.entries(columns)) {
           for (const [idx, item] of items.entries()) {
             if (deletedItems.some((i) => i.id === item.id)) items.splice(idx, 1)
@@ -59,7 +56,6 @@ export const Masonry: Component<Props> = (props) => {
           addedItems,
           Math.floor(addedItems.length / cols())
         ).entries()) {
-          console.log({ idx, chunk })
           const old = columns[idx] || []
           setColumns({ [idx]: [...old, ...chunk] })
         }
