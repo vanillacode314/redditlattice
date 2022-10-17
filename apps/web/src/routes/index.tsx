@@ -163,10 +163,10 @@ export default function Home() {
                 focusable={false}
                 reverse
                 title="subreddits"
-                fetcher={async (query) =>
+                fetcher={async (query, ac) =>
                   query
                     ? await trpc.subredditAutocomplete
-                        .query(query)
+                        .query(query, { signal: ac.signal })
                         .then(({ subreddits }) =>
                           subreddits.map(({ name }) => ({
                             id: name,

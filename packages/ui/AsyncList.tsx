@@ -8,7 +8,7 @@ interface Item {
 
 interface Props<T = any> {
   key: T
-  fetcher: (key: T) => Promise<Item[]>
+  fetcher: (key: T, ac: AbortController) => Promise<Item[]>
   onClick: (id: Item['id']) => void
   onRemove?: (id: Item['id']) => void
   title?: string
@@ -17,11 +17,17 @@ interface Props<T = any> {
 }
 
 export const AsyncList: Component<Props> = (props) => {
+  let ac: AbortController
   type Params = typeof props.key
-  const [items] = createResource<
-    Awaited<ReturnType<typeof props.fetcher>>,
-    Params
-  >(() => props.key, props.fetcher)
+  type Item = Awaited<ReturnType<typeof props.fetcher>>[number]
+  const [items] = createResource<Item[], Params>(
+    () => props.key,
+    (key) => {
+      ac?.abort()
+      ac = new AbortController()
+      return props.fetcher(key, ac)
+    }
+  )
 
   return (
     <List
