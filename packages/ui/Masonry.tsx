@@ -6,7 +6,6 @@ import {
   createMemo,
   createEffect,
   on,
-  For,
 } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Entries, Key } from '@solid-primitives/keyed'
@@ -51,68 +50,67 @@ export const Masonry: Component<Props> = (props) => {
     return minIndex
   }
 
+  function addItems(...items: Item[]) {
+    let len = items.length
+    let i = 0
+    requestAnimationFrame(function handler() {
+      if (i === len) return
+      const item = items[i]
+      const idx = getShortestColumnIndex()
+      const old = columns[idx] || []
+      setColumns(idx, [...old, item])
+      i++
+      requestAnimationFrame(handler)
+    })
+  }
+
+  function deleteItems(...itemsToRemove: Item[]) {
+    for (const [idx, items] of Object.entries(columns)) {
+      const filteredItems = _.differenceBy(items, itemsToRemove, (v) => v.id)
+      setColumns({
+        [idx]: filteredItems.length ? filteredItems : undefined,
+      })
+    }
+  }
+
   createEffect(
     on(
       () => props.items,
       (n, p) => {
         p = p || []
-        const deletedItems = _.difference(p, n)
-        const addedItems = _.difference(n, p)
-        for (const [idx, items] of Object.entries(columns)) {
-          setColumns({
-            [idx]: items.filter((item) =>
-              deletedItems.some((i) => item.id === i.id)
-            ),
-          })
-        }
-
-        let len = addedItems.length
-        let i = 0
-        requestAnimationFrame(function handler() {
-          if (i === len) return
-          const item = addedItems[i]
-          const idx = getShortestColumnIndex()
-          const old = columns[idx] || []
-          setColumns({ [idx]: [...old, item] })
-          i++
-          requestAnimationFrame(handler)
-        })
+        const deletedItems = _.differenceBy(p, n, (v) => v.id)
+        const addedItems = _.differenceBy(n, p, (v) => v.id)
+        deleteItems(...deletedItems)
+        addItems(...addedItems)
       }
     )
   )
 
   createEffect(
-    on(cols, () => {
-      for (const [idx, chunk] of _.chunk(
-        props.items,
-        Math.floor(props.items.length / cols())
-      ).entries()) {
-        setColumns({ [idx]: chunk })
-      }
-    })
+    on(
+      cols,
+      () => {
+        deleteItems(...props.items)
+        addItems(...props.items)
+      },
+      { defer: true }
+    )
   )
 
   return (
-    <div
-      class="grid"
-      style={{
-        'grid-template-columns': `repeat(${cols()},1fr)`,
-        'align-items': 'start',
-      }}
-      ref={setEl}
-    >
-      <Key each={Object.entries(columns)} by={([, v]) => v}>
-        {(value) => {
-          const [idx, items] = value()
+    <div class="flex flex-row-reverse items-start" ref={setEl}>
+      <Entries of={columns}>
+        {(key, items) => {
+          /* console.log('CHANGED', key) */
           return (
-            <div class="flex flex-col" id={`__masonry-col-${idx}`}>
-              <Key each={items} by="id">
+            <div class="flex flex-col w-full" id={`__masonry-col-${key}`}>
+              <Key each={items()} by="id">
                 {(item) => props.children(item().id, item().data, colWidth)}
               </Key>
             </div>
           )
         }}
-      </Key>
+      </Entries>
     </div>
   )
 }
