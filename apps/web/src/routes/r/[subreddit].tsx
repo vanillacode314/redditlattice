@@ -8,8 +8,6 @@ import {
   createMemo,
   Match,
   Switch,
-  on,
-  batch,
 } from 'solid-js'
 import { IAction } from '~/types'
 import ImageCard from '~/components/ImageCard'

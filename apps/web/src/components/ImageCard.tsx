@@ -107,7 +107,7 @@ export const ImageCard: Component<Props> = (props) => {
           fallback={
             <div class="grid place-items-center h-full">
               <div
-                class="bg-white/10"
+                class="bg-white/15"
                 animate-pulse
                 h-10
                 w-10
