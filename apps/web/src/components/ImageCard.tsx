@@ -1,8 +1,9 @@
 import {
-  createEffect,
+  createComputed,
   createSignal,
   mergeProps,
   Component,
+  createMemo,
   Show,
 } from 'solid-js'
 import { Portal } from 'solid-js/web'
@@ -12,39 +13,44 @@ import { longpress } from '~/utils/use-longpress'
 import { IMAGE_SERVER_BASE_PATH } from '~/consts'
 import { TransitionFade } from 'ui/transitions'
 import { AutoResizingPicture, Button } from 'ui'
-import { useUserState } from '~/stores'
-import { IPost } from '~/types'
+import { IImage, useUserState } from '~/stores'
+import _ from 'lodash'
 
 interface Props {
   width: number
-  image: Pick<IPost, 'name' | 'url' | 'title'>
+  image: IImage
   onLoad?: () => void
 }
 
 export const ImageCard: Component<Props> = (props) => {
-  const [userState, _] = useUserState()
+  const [userState] = useUserState()
   const merged = mergeProps({ onLoad: () => {} }, props)
   const [error, setError] = createSignal<boolean>(false)
-  const [popupVisible, setPopupVisible] = createSignal<boolean>(false)
   const [animate, setAnimate] = createSignal<boolean>(false)
   const navigate = useNavigate()
   const location = useLocation()
 
-  createEffect(() =>
-    popupVisible()
-      ? navigate(
-          location.pathname + location.search + '#popup-' + props.image.name,
-          {
-            resolve: false,
-          }
-        )
-      : location.hash === '#popup-' + props.image.name &&
-        navigate(location.pathname + location.search, { resolve: false })
+  const popupVisible = createMemo<boolean>(
+    () => location.hash === '#popup-' + props.image.name
   )
+
+  createComputed<'open' | 'closed' | undefined>((prevState) => {
+    if (!popupVisible() && animate()) {
+      navigate(
+        location.pathname + location.search + '#popup-' + props.image.name
+      )
+      setAnimate(false)
+      return 'closed'
+    }
+    if (popupVisible() && !animate() && prevState !== 'closed') {
+      setAnimate(true)
+      return 'open'
+    }
+  }, 'open')
 
   const scale = createSpring(() => ({
     transform: `scale(${animate() ? 1 : 0})`,
-    onRest: () => setPopupVisible(animate()),
+    onRest: () => !animate() && history.go(-1),
   }))
 
   function getProcessedImageURL(
@@ -58,23 +64,21 @@ export const ImageCard: Component<Props> = (props) => {
   function getSources() {
     const width =
       Math.round(props.width / 50) * 50 * userState()!.imageSizeMultiplier
+    const formats = _.uniq([userState()!.prefferedImageFormat, 'webp'])
     return new Map(
-      [...new Set([userState()!.prefferedImageFormat, 'webp'])].map(
-        (format) => [
-          `image/${format}`,
-          getProcessedImageURL(props.image.url, width, format),
-        ]
-      )
+      formats.map((format) => [
+        `image/${format}`,
+        getProcessedImageURL(props.image.url, width, format),
+      ])
     )
   }
 
   function popupImage() {
-    setAnimate(true)
-    setPopupVisible(true)
+    navigate(location.pathname + location.search + '#popup-' + props.image.name)
   }
 
   function removePopupImage() {
-    setAnimate(false)
+    history.go(-1)
   }
 
   async function retry() {
@@ -128,8 +132,9 @@ export const ImageCard: Component<Props> = (props) => {
         ></AutoResizingPicture>
       </Show>
       <Show when={popupVisible()}>
-        <Portal mount={document.body}>
+        <Portal mount={document.documentElement}>
           <div
+            id={`popup-${props.image.name}`}
             class="fixed inset-0 grid content-center"
             classList={{ 'pointer-events-none': !popupVisible() }}
           >
@@ -147,10 +152,7 @@ export const ImageCard: Component<Props> = (props) => {
               class="z-20 w-full flex flex-col bg-black relative"
               style={scale()}
             >
-              <img
-                src={popupVisible() ? props.image.url : undefined}
-                alt={props.image.title}
-              ></img>
+              <img src={props.image.url} alt={props.image.title}></img>
               <img />
               <span class="p-5 uppercase tracking-wide bg-black text-white font-bold">
                 {props.image.title}

@@ -21,7 +21,7 @@ interface Props {
   onHasHeight?: (height: number) => void
   onLoad?: () => void
   onError?: () => void
-  ref?: HTMLElement
+  ref?: HTMLPictureElement | ((el: HTMLPictureElement) => void)
   fallback?: JSXElement
 }
 
