@@ -11,7 +11,7 @@ html {
   background-color: black;
   color: white;
   overscroll-behavior-y: none;
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
   height: 100%;
 }
 #__nuxt {
