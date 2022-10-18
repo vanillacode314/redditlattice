@@ -28,6 +28,7 @@ export interface IUserState {
   sort: Map<string, string>
   imageSizeMultiplier: number
   prefferedImageFormat: string
+  processImages: boolean
 }
 
 const appStore = createStore<IAppState>({
@@ -49,6 +50,7 @@ function GET_DEFAULT_USER_STATE(): IUserState {
     sort: new Map(),
     imageSizeMultiplier: 2,
     prefferedImageFormat: 'webp',
+    processImages: false,
   }
 }
 

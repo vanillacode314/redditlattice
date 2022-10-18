@@ -62,13 +62,15 @@ export const ImageCard: Component<Props> = (props) => {
   }
 
   function getSources() {
-    const width =
-      Math.round(props.width / 50) * 50 * userState()!.imageSizeMultiplier
+    const state = userState()!
+    const width = Math.round(props.width / 50) * 50 * state.imageSizeMultiplier
     const formats = _.uniq([userState()!.prefferedImageFormat, 'webp'])
     return new Map(
       formats.map((format) => [
         `image/${format}`,
-        getProcessedImageURL(props.image.url, width, format),
+        state.processImages
+          ? getProcessedImageURL(props.image.url, width, format)
+          : props.image.url,
       ])
     )
   }
@@ -125,7 +127,11 @@ export const ImageCard: Component<Props> = (props) => {
             longpress(el, { callback: popupImage })
           }}
           srcSets={getSources()}
-          src={getProcessedImageURL(props.image.url, props.width)}
+          src={
+            userState()!.processImages
+              ? getProcessedImageURL(props.image.url, props.width)
+              : props.image.url
+          }
           onLoad={merged.onLoad}
           onError={onError}
           alt={props.image.title}

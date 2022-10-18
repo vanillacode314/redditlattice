@@ -72,19 +72,12 @@ export default function Settings() {
 
   onMount(() => setAppState('title', 'Settings'))
 
-  const setImageSizeMultiplier = (n: number) => {
-    setUserState((_) => {
-      _.imageSizeMultiplier = n
-      return { ..._ }
-    })
-  }
-
-  const setImageFormat = (format: string) => {
-    setUserState((_) => {
-      _.prefferedImageFormat = format
-      return { ..._ }
-    })
-  }
+  const setImageSizeMultiplier = (n: number) =>
+    setUserState((_) => ({ ..._, imageSizeMultiplier: n }))
+  const setImageFormat = (format: string) =>
+    setUserState((_) => ({ ..._, prefferedImageFormat: format }))
+  const setProcessImages = (processImages: boolean) =>
+    setUserState((_) => ({ ..._, processImages }))
 
   return (
     <div p-5 flex flex-col-reverse h-full gap-5 id="scroller">
@@ -93,7 +86,7 @@ export default function Settings() {
         class="bg-green-800 hover:bg-green-700 transitions-colors"
       >
         Import Data
-      </Button>
+      </Button>{' '}
       <Button
         onClick={() => exportData()}
         class="bg-purple-800 hover:bg-purple-700 transitions-colors"
@@ -149,6 +142,16 @@ export default function Settings() {
         onInput={() => handleImport()}
         ref={filesInput!}
       />
+      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg flex items-center justify-between transition-colors">
+        <span class="uppercase text-sm tracking-wide font-bold text-gray-300">
+          Process Images
+        </span>
+        <input
+          type="checkbox"
+          checked={userState()!.processImages}
+          onChange={(e) => setProcessImages(e.currentTarget.checked)}
+        />
+      </label>
     </div>
   )
 }
