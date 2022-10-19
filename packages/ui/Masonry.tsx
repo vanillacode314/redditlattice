@@ -100,16 +100,13 @@ export const Masonry: Component<Props> = (props) => {
   return (
     <div class="flex flex-row-reverse items-start" ref={setEl}>
       <Entries of={columns}>
-        {(key, items) => {
-          /* console.log('CHANGED', key) */
-          return (
-            <div class="flex flex-col w-full" id={`__masonry-col-${key}`}>
-              <Key each={items()} by="id">
-                {(item) => props.children(item().id, item().data, colWidth)}
-              </Key>
-            </div>
-          )
-        }}
+        {(key, items) => (
+          <div class="flex flex-col w-full" id={`__masonry-col-${key}`}>
+            <Key each={items()} by="id">
+              {(item) => props.children(item().id, item().data, colWidth)}
+            </Key>
+          </div>
+        )}
       </Entries>
     </div>
   )

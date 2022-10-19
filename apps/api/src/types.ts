@@ -23,4 +23,5 @@ export interface IPost {
   name: string
   url: string
   title: string
+  over_18: boolean
 }

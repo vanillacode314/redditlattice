@@ -35,18 +35,21 @@ export const getImages: (fn: {
   sort?: string
   after?: string
   q?: string
+  nsfw?: boolean
 }) => Promise<{ images: Pick<IPost, ReturnKeys>[]; after: string }> = async ({
   subreddit,
   sort = 'top',
   after,
   q,
+  nsfw = false,
 }) => {
   const searchParams = new URLSearchParams({
-    nsfw: '1',
-    include_over_18: 'on',
     restrict_sr: 'true',
     t: 'all',
   })
+
+  searchParams.append('nsfw', `${nsfw ? 1 : 0}`)
+  searchParams.append('include_over_18', nsfw ? 'on' : 'off')
 
   if (after) searchParams.append('after', after)
   if (sort) searchParams.append('sort', sort)
@@ -66,6 +69,7 @@ export const getImages: (fn: {
         !post.is_self &&
         !post.is_video &&
         !post.media &&
+        !(post.over_18 && !nsfw) &&
         IMAGE_EXTENSION_LIST.some((e) => post.url?.endsWith(e))
     )
     .map((post) => getKeys(post, SELECT_KEYS))

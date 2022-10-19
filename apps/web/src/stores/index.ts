@@ -29,9 +29,10 @@ export interface IUserState {
   imageSizeMultiplier: number
   prefferedImageFormat: string
   processImages: boolean
+  hideNSFW: boolean
 }
 
-const appStore = createStore<IAppState>({
+const [appState, setAppState] = createStore<IAppState>({
   title: '',
   drawerVisible: false,
   navVisible: true,
@@ -51,10 +52,11 @@ function GET_DEFAULT_USER_STATE(): IUserState {
     imageSizeMultiplier: 2,
     prefferedImageFormat: 'webp',
     processImages: false,
+    hideNSFW: true,
   }
 }
 
-const userSignal = createStorageSignal<IUserState>(
+const [userState, setUserState] = createStorageSignal<IUserState>(
   'user-state',
   GET_DEFAULT_USER_STATE(),
   {
@@ -63,10 +65,8 @@ const userSignal = createStorageSignal<IUserState>(
   }
 )
 
-export const useAppState = () => appStore
-export const useUserState = () => userSignal
-
-const [, setUserState] = useUserState()
+export const useAppState = () => [appState, setAppState] as const
+export const useUserState = () => [userState, setUserState] as const
 
 createRenderEffect(() =>
   setUserState((state) => {

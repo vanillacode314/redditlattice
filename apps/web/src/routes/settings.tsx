@@ -1,4 +1,4 @@
-import { batch, For, onMount } from 'solid-js'
+import { batch, For, onMount, onCleanup } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { formatBytes } from '~/utils'
 import { useUserState, useAppState } from '~/stores'
@@ -78,6 +78,19 @@ export default function Settings() {
     setUserState((_) => ({ ..._, prefferedImageFormat: format }))
   const setProcessImages = (processImages: boolean) =>
     setUserState((_) => ({ ..._, processImages }))
+  const setHideNSFW = (hideNSFW: boolean) =>
+    setUserState((_) => ({ ..._, hideNSFW }))
+
+  const resetState = () =>
+    setAppState({
+      images: {
+        key: '',
+        after: '',
+        data: new Set(),
+      },
+    })
+
+  onCleanup(() => resetState())
 
   return (
     <div p-5 flex flex-col-reverse h-full gap-5 id="scroller">
@@ -150,6 +163,16 @@ export default function Settings() {
           type="checkbox"
           checked={userState()!.processImages}
           onChange={(e) => setProcessImages(e.currentTarget.checked)}
+        />
+      </label>
+      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg flex items-center justify-between transition-colors">
+        <span class="uppercase text-sm tracking-wide font-bold text-gray-300">
+          Hide NSFW
+        </span>
+        <input
+          type="checkbox"
+          checked={userState()!.hideNSFW}
+          onChange={(e) => setHideNSFW(e.currentTarget.checked)}
         />
       </label>
     </div>

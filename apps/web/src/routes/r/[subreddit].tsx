@@ -92,6 +92,7 @@ export default function Subreddit() {
           after: appState.images.after,
           subreddit: params.subreddit,
           sort: userState().sort.get(subreddit()),
+          nsfw: !userState().hideNSFW,
         },
         {
           signal: ac.signal,

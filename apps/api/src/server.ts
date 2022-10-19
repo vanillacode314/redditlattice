@@ -13,6 +13,7 @@ export const appRouter = t.router({
         q: z.string().optional(),
         after: z.string().optional(),
         sort: z.string().optional(),
+        nsfw: z.boolean().optional(),
       })
     )
     .query(({ input }) => getImages(input)),
