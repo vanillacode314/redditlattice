@@ -1,6 +1,6 @@
 import { batch, For, onMount, onCleanup } from 'solid-js'
 import { createStore } from 'solid-js/store'
-import { formatBytes } from '~/utils'
+import { download, formatBytes } from '~/utils'
 import { useUserState, useAppState } from '~/stores'
 import { stringify, parse } from 'devalue'
 import { Button } from 'ui'
@@ -58,12 +58,10 @@ export default function Settings() {
 
   const exportData = async () => {
     const data = stringify(userState())
-    const a = document.createElement('a')
-    a.href = `data:text/plain;charset=utf-8,${encodeURIComponent(data)}`
-    a.download = `redditlattice-${new Date().toLocaleDateString()}.dat`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
+    download(
+      `data:text/plain;charset=utf-8,${encodeURIComponent(data)}`,
+      `redditlattice-${new Date().toLocaleDateString()}.dat`
+    )
   }
 
   onMount(async () => {

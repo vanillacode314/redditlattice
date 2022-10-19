@@ -70,3 +70,22 @@ export function updateKey<K = any, V = any>(
   map.set(key, cb(val))
   return map
 }
+
+export function download(url: string, title = '') {
+  const a = document.createElement('a')
+  a.href = url
+  a.download = title
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+}
+
+export function blobToDataURL(blob: Blob): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (_e) => resolve(reader.result as string)
+    reader.onerror = (_e) => reject(reader.error)
+    reader.onabort = (_e) => reject(new Error('Read aborted'))
+    reader.readAsDataURL(blob)
+  })
+}

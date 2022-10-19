@@ -15,6 +15,7 @@ import { TransitionFade } from 'ui/transitions'
 import { AutoResizingPicture, Button } from 'ui'
 import { IImage, useUserState } from '~/stores'
 import _ from 'lodash'
+import { download, blobToDataURL } from '~/utils'
 
 interface Props {
   width: number
@@ -91,6 +92,13 @@ export const ImageCard: Component<Props> = (props) => {
     setError(true)
   }
 
+  async function downloadImage() {
+    const url = await fetch(props.image.url)
+      .then((res) => res.blob())
+      .then((blob) => blobToDataURL(blob))
+    download(url, props.image.title)
+  }
+
   return (
     <>
       <Show
@@ -160,8 +168,11 @@ export const ImageCard: Component<Props> = (props) => {
             >
               <img src={props.image.url} alt={props.image.title}></img>
               <img />
-              <span class="p-5 uppercase tracking-wide bg-black text-white font-bold">
+              <span class="p-5 uppercase tracking-wide bg-black text-white font-bold flex justify-between items-center">
                 {props.image.title}
+                <button onClick={() => downloadImage()}>
+                  <span class="text-2xl i-mdi-download"></span>
+                </button>
               </span>
             </animated.div>
           </div>
