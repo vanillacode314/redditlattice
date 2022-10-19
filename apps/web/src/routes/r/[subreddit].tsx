@@ -127,7 +127,7 @@ export default function Subreddit() {
         }))}
         maxWidth={400}
       >
-        {(id, image, width) => (
+        {(_, image, width) => (
           <ImageCard width={width()} image={image}></ImageCard>
         )}
       </Masonry>

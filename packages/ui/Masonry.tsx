@@ -17,14 +17,18 @@ interface Item<T = any> {
   data: T
 }
 
-export interface Props<T = any> {
+export interface Props<T> {
   items: Array<Item<T>>
   maxWidth: number
   gap?: number
-  children: (id: Item<T>['id'], data: T, width: Accessor<number>) => JSXElement
+  children: (
+    id: Item<T>['id'],
+    data: Props<T>['items'][number]['data'],
+    width: Accessor<number>
+  ) => JSXElement
 }
 
-export const Masonry: Component<Props> = (props) => {
+export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   type I = typeof props.items[number]
   const [el, setEl] = createSignal<HTMLElement>()
   const size = createElementSize(el)
@@ -103,7 +107,10 @@ export const Masonry: Component<Props> = (props) => {
         {(key, items) => (
           <div class="flex flex-col w-full" id={`__masonry-col-${key}`}>
             <Key each={items()} by="id">
-              {(item) => props.children(item().id, item().data, colWidth)}
+              {(item) => {
+                const i = item()
+                return props.children(i.id, i.data, colWidth)
+              }}
             </Key>
           </div>
         )}
