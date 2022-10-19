@@ -173,7 +173,11 @@ export default function Home() {
                             title: name,
                           }))
                         )
-                        .catch((err) => console.error(err))
+                        .catch(
+                          (err) =>
+                            err.cause.name !== 'ObservableAbortError' &&
+                            console.err(err)
+                        )
                     : []
                 }
                 key={query()}
