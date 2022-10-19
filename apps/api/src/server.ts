@@ -12,7 +12,7 @@ export const appRouter = t.router({
         subreddit: z.string(),
         q: z.string().optional(),
         after: z.string().optional(),
-        sort: z.string().optional(),
+        sort: z.string(),
         nsfw: z.boolean().optional(),
       })
     )

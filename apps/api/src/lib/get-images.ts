@@ -32,13 +32,13 @@ async function fetchPosts(url: string): Promise<IRemotePostsData> {
 
 export const getImages: (fn: {
   subreddit: string
-  sort?: string
+  sort: string
   after?: string
   q?: string
   nsfw?: boolean
 }) => Promise<{ images: Pick<IPost, ReturnKeys>[]; after: string }> = async ({
   subreddit,
-  sort = 'top',
+  sort,
   after,
   q,
   nsfw = false,

@@ -1,6 +1,7 @@
 import { useAppState, useUserState } from '~/stores'
 import { useParams, useSearchParams } from 'solid-start'
 import {
+  onMount,
   onCleanup,
   createEffect,
   getOwner,
@@ -38,7 +39,7 @@ export default function Subreddit() {
     },
   ]
 
-  const sort = createMemo(() => userState().sort.get(subreddit()) || 'top')
+  const sort = createMemo(() => userState().sort.get(subreddit()) || 'hot')
 
   const setSort = (sort: string) => {
     setUserState((state) => {
@@ -46,6 +47,8 @@ export default function Subreddit() {
       return { ...state }
     })
   }
+
+  onMount(() => setSort(sort()))
 
   const key = createMemo(() => `${subreddit()}-${searchParams.q}-${sort()}`)
 
