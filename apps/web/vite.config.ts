@@ -9,7 +9,6 @@ import {
 } from 'unocss'
 import path from 'path'
 import { version } from './package.json' assert { type: 'json' }
-import netlify from './node_modules/solid-start-netlify'
 
 export default defineConfig({
   define: {
@@ -24,7 +23,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    solid({ ssr: false, adapter: netlify({ edge: true }) }),
+    solid({ ssr: false }),
     Unocss({
       presets: [
         presetAttributify(),
