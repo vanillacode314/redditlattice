@@ -173,6 +173,7 @@ export default function Home() {
                             title: name,
                           }))
                         )
+                        .catch((err) => console.error(err))
                     : []
                 }
                 key={query()}
