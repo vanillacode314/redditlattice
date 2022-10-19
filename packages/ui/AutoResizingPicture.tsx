@@ -9,7 +9,7 @@ import {
   createRenderEffect,
   batch,
 } from 'solid-js'
-import { animated, createSpring } from 'solid-spring'
+import { config, animated, createSpring } from 'solid-spring'
 import _ from 'lodash'
 
 interface Props {
@@ -62,6 +62,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
   const expand = createSpring(() => ({
     height: height(),
     immediate: !animate(),
+    config: config.stiff,
   }))
 
   createRenderEffect(
