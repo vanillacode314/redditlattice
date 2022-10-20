@@ -1,4 +1,4 @@
-import { batch, For, onMount, onCleanup } from 'solid-js'
+import { Show, batch, For, onMount, onCleanup } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { download, formatBytes } from '~/utils'
 import { useUserState, useAppState } from '~/stores'
@@ -120,33 +120,35 @@ export default function Settings() {
           {formatBytes(usageStats.total)})
         </span>
       </Button>
-      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
-        <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
-          Image Size Multiplier (relative to width)
-        </span>
-        <input
-          class="bg-black outline-none"
-          min="1"
-          step="0.1"
-          type="number"
-          value={userState()!.imageSizeMultiplier}
-          onChange={(e) => setImageSizeMultiplier(+e.currentTarget.value)}
-        />
-      </label>
-      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
-        <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
-          Preffered Image Format
-        </span>
-        <select
-          value={userState()!.prefferedImageFormat}
-          onChange={(e) => setImageFormat(e.currentTarget.value)}
-          class="bg-black outline-none"
-        >
-          <For each={['webp', 'avif', 'jpeg', 'png']}>
-            {(val) => <option>{val}</option>}
-          </For>
-        </select>
-      </label>
+      <Show when={userState()!.processImages}>
+        <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
+          <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+            Image Size Multiplier (relative to width)
+          </span>
+          <input
+            class="bg-black outline-none"
+            min="1"
+            step="0.1"
+            type="number"
+            value={userState()!.imageSizeMultiplier}
+            onChange={(e) => setImageSizeMultiplier(+e.currentTarget.value)}
+          />
+        </label>
+        <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
+          <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+            Preffered Image Format
+          </span>
+          <select
+            value={userState()!.prefferedImageFormat}
+            onChange={(e) => setImageFormat(e.currentTarget.value)}
+            class="bg-black outline-none"
+          >
+            <For each={['webp', 'avif', 'jpeg', 'png']}>
+              {(val) => <option>{val}</option>}
+            </For>
+          </select>
+        </label>
+      </Show>
       <input
         class="hidden"
         type="file"
