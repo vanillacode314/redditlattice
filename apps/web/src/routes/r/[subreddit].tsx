@@ -9,6 +9,7 @@ import {
   createMemo,
   Match,
   Switch,
+  batch,
 } from 'solid-js'
 import { IAction } from '~/types'
 import ImageCard from '~/components/ImageCard'
@@ -41,45 +42,44 @@ export default function Subreddit() {
 
   const sort = createMemo(() => userState().sort.get(subreddit()) || 'hot')
 
-  const setSort = (sort: string) => {
+  const setSort = (sort: string) =>
     setUserState((state) => {
       state.sort.set(subreddit(), sort)
       return { ...state }
     })
-  }
 
   onMount(() => setSort(sort()))
 
   const key = createMemo(() => `${subreddit()}-${searchParams.q}-${sort()}`)
 
   const resetState = () => {
-    setAppState(
-      'title',
-      searchParams.q
-        ? `${searchParams.q} - /r/${subreddit()}`
-        : `/r/${subreddit()}`
-    )
-    setAppState({
-      images: {
-        key: key(),
-        after: '',
-        data: new Set(),
-      },
+    batch(() => {
+      setAppState(
+        'title',
+        searchParams.q
+          ? `${searchParams.q} - /r/${subreddit()}`
+          : `/r/${subreddit()}`
+      )
+      setAppState({
+        images: {
+          key: key(),
+          after: '',
+          data: new Set(),
+        },
+      })
     })
   }
 
-  createEffect(() => {
-    if (appState.images.key !== key()) resetState()
-  })
+  createEffect(() => appState.images.key !== key() && resetState())
 
-  createEffect(() => {
+  createEffect(() =>
     setUserState((state) => {
       state.subreddits.add(subreddit())
       if (searchParams.q)
         state.searchTerms.set(searchParams.q.toLowerCase(), subreddit())
       return { ...state }
     })
-  })
+  )
 
   const onInfinite: InfiniteHandler = async (setState, firstload) => {
     if (firstload && appState.images.data.size > 0) {

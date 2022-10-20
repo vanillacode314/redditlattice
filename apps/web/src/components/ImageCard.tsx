@@ -3,7 +3,6 @@ import {
   createSignal,
   mergeProps,
   Component,
-  createMemo,
   Show,
 } from 'solid-js'
 import { Portal } from 'solid-js/web'
@@ -31,9 +30,7 @@ export const ImageCard: Component<Props> = (props) => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const popupVisible = createMemo<boolean>(
-    () => location.hash === '#popup-' + props.image.name
-  )
+  const popupVisible = () => location.hash === '#popup-' + props.image.name
 
   createComputed<'open' | 'closed' | undefined>((prevState) => {
     if (!popupVisible() && animate()) {

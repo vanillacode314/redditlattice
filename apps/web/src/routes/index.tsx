@@ -1,11 +1,4 @@
-import {
-  onMount,
-  batch,
-  createMemo,
-  createSignal,
-  Show,
-  Suspense,
-} from 'solid-js'
+import { onMount, batch, createSignal, Show, Suspense } from 'solid-js'
 import { useNavigate } from 'solid-start'
 import { trpc } from '~/client'
 import { AsyncList, List, Spinner } from 'ui'
@@ -22,13 +15,13 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = createSignal<string>('')
   const [focused, setFocused] = createSignal<boolean>(false)
 
-  const query = createMemo<string>(() => {
+  const query = () => {
     if (!subreddit()) return ''
     if (searchTerm()) {
       return `${subreddit().toLowerCase()}?${searchTerm().toLowerCase()}`
     }
     return `${subreddit().toLowerCase()}`
-  })
+  }
 
   const navigate = useNavigate()
 

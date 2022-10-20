@@ -3,7 +3,6 @@ import { useSearchParams, useLocation, useNavigate } from 'solid-start'
 import {
   onMount,
   createEffect,
-  createMemo,
   createSignal,
   onCleanup,
   on,
@@ -24,9 +23,7 @@ export const Navbar: Component = () => {
   const location = useLocation()
   const [, setSearchParams] = useSearchParams()
 
-  const showBack = createMemo<boolean>(() =>
-    location.pathname.startsWith('/r/')
-  )
+  const showBack = () => location.pathname.startsWith('/r/')
 
   const toggleDrawer = () => {
     setAppState((_) => ({
@@ -34,7 +31,7 @@ export const Navbar: Component = () => {
     }))
   }
 
-  const navVisible = createMemo<boolean>(() => appState.navVisible)
+  const navVisible = () => appState.navVisible
   const setNavVisible = (val: boolean) => {
     setAppState({
       navVisible: val,
