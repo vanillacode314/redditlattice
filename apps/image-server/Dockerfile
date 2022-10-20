@@ -3,6 +3,8 @@ FROM ubuntu:22.04
 WORKDIR /bun
 
 RUN apt-get update
+RUN apt-get install libjemalloc1 && rm -rf /var/lib/apt/lists/*
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.1
 RUN apt-get install curl unzip -y
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get install curl unzip nodejs -y
