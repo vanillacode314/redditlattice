@@ -135,7 +135,7 @@ export default function Subreddit() {
       <InfiniteLoading
         onInfinite={onInfinite}
         target="#scroller"
-        distance={400}
+        distance={800}
         key={appState.images.key}
       >
         {(state, load) => (
