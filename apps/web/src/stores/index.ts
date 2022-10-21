@@ -31,6 +31,7 @@ export interface IUserState {
   processImages: boolean
   hideNSFW: boolean
   gap: number
+  borderRadius: number
 }
 
 const [appState, setAppState] = createStore<IAppState>({
@@ -55,6 +56,7 @@ function GET_DEFAULT_USER_STATE(): IUserState {
     processImages: false,
     hideNSFW: true,
     gap: 0,
+    borderRadius: 0,
   }
 }
 

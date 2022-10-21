@@ -8,11 +8,13 @@ import {
   Component,
   createRenderEffect,
   batch,
+  JSX,
+  splitProps,
 } from 'solid-js'
 import { config, animated, createSpring } from 'solid-spring'
 import * as _ from 'lodash-es'
 
-interface Props {
+interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   width: number
   fallbackHeight: number
   alt?: string
@@ -21,11 +23,23 @@ interface Props {
   onHasHeight?: (height: number) => void
   onLoad?: () => void
   onError?: () => void
-  ref?: HTMLPictureElement | ((el: HTMLPictureElement) => void)
   fallback?: JSXElement
 }
 
 export const AutoResizingPicture: Component<Props> = (props) => {
+  const [local, others] = splitProps(props, [
+    'width',
+    'fallbackHeight',
+    'alt',
+    'src',
+    'srcSets',
+    'onHasHeight',
+    'onLoad',
+    'onError',
+    'ref',
+    'fallback',
+    'style',
+  ])
   let imgElement: HTMLImageElement
   const merged = mergeProps(
     {
@@ -34,7 +48,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
       onError: () => {},
       srcSets: new Map(),
     },
-    props
+    local
   )
 
   const [height, setHeight] = createSignal<number>(props.fallbackHeight)
@@ -50,7 +64,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
     if (!imgElement) return
     if (imgElement.naturalHeight) {
       const height =
-        (imgElement.naturalHeight / imgElement.naturalWidth) * props.width
+        (imgElement.naturalHeight / imgElement.naturalWidth) * local.width
       setHeight(height)
       setHasImage(true)
       merged.onHasHeight(height)
@@ -76,11 +90,16 @@ export const AutoResizingPicture: Component<Props> = (props) => {
   )
 
   return (
-    <animated.div style={expand()} class="overflow-hidden relative">
+    <animated.div
+      style={{ ...local.style, ...expand() }}
+      class="overflow-hidden relative"
+      ref={props.ref}
+      {...others}
+    >
       <Show when={!hasImage() && count() > 1}>
         <div class="absolute inset-0">{props.fallback}</div>
       </Show>
-      <picture ref={props.ref}>
+      <picture>
         <For each={[...merged.srcSets]}>
           {([format, url]) => <source srcset={url} type={format} />}
         </For>

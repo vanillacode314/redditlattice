@@ -116,6 +116,7 @@ export const ImageCard: Component<Props> = (props) => {
         }
       >
         <AutoResizingPicture
+          style={{ 'border-radius': `${userState()!.borderRadius}px` }}
           fallback={
             <div class="grid place-items-center h-full">
               <div
