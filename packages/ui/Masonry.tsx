@@ -112,15 +112,18 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
         padding: `${props.gap}px`,
         'column-gap': `${props.gap}px`,
         'grid-template-columns': `repeat(${cols()},1fr)`,
-        direction: 'rtl',
       }}
     >
       <Entries of={columns}>
         {(key, items) => (
           <div
-            class="flex flex-col"
+            class="flex flex-col w-full"
             id={`__masonry-col-${key}`}
-            style={{ 'row-gap': `${props.gap}px` }}
+            style={{
+              'row-gap': `${props.gap}px`,
+              'grid-column': `${cols() - +key} / span 1`,
+              'grid-row': `1 / span 1`,
+            }}
           >
             <Key each={items()} by="id">
               {(item) => {
