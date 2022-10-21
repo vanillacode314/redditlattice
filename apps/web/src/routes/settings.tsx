@@ -72,6 +72,7 @@ export default function Settings() {
 
   const setImageSizeMultiplier = (n: number) =>
     setUserState((_) => ({ ..._, imageSizeMultiplier: n }))
+  const setGap = (n: number) => setUserState((_) => ({ ..._, gap: n }))
   const setImageFormat = (format: string) =>
     setUserState((_) => ({ ..._, prefferedImageFormat: format }))
   const setProcessImages = (processImages: boolean) =>
@@ -120,6 +121,19 @@ export default function Settings() {
           {formatBytes(usageStats.total)})
         </span>
       </Button>
+      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
+        <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+          Gaps (in pixels)
+        </span>
+        <input
+          class="bg-black outline-none"
+          min="0"
+          step="1"
+          type="number"
+          value={userState()!.gap}
+          onChange={(e) => setGap(+e.currentTarget.value)}
+        />
+      </label>
       <Show when={userState()!.processImages}>
         <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
           <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">

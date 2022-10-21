@@ -30,6 +30,7 @@ export interface IUserState {
   prefferedImageFormat: string
   processImages: boolean
   hideNSFW: boolean
+  gap: number
 }
 
 const [appState, setAppState] = createStore<IAppState>({
@@ -53,6 +54,7 @@ function GET_DEFAULT_USER_STATE(): IUserState {
     prefferedImageFormat: 'webp',
     processImages: false,
     hideNSFW: true,
+    gap: 0,
   }
 }
 

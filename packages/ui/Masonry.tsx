@@ -102,10 +102,18 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   )
 
   return (
-    <div class="flex flex-row-reverse items-start" ref={setEl}>
+    <div
+      class="flex flex-row-reverse items-start"
+      ref={setEl}
+      style={{ 'column-gap': `${props.gap}px` }}
+    >
       <Entries of={columns}>
         {(key, items) => (
-          <div class="flex flex-col w-full" id={`__masonry-col-${key}`}>
+          <div
+            class="flex flex-col w-full"
+            id={`__masonry-col-${key}`}
+            style={{ 'row-gap': `${props.gap}px` }}
+          >
             <Key each={items()} by="id">
               {(item) => {
                 const i = item()

@@ -126,6 +126,7 @@ export default function Subreddit() {
           data: image,
         }))}
         maxWidth={400}
+        gap={userState()!.gap}
       >
         {(_, image, width) => (
           <ImageCard width={width()} image={image}></ImageCard>
