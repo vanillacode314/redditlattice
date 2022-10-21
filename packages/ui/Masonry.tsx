@@ -106,14 +106,19 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
 
   return (
     <div
-      class="flex flex-row-reverse items-start"
+      class="grid place-items-start"
       ref={setEl}
-      style={{ padding: `${props.gap}px`, 'column-gap': `${props.gap}px` }}
+      style={{
+        padding: `${props.gap}px`,
+        'column-gap': `${props.gap}px`,
+        'grid-template-columns': `repeat(${cols()},1fr)`,
+        direction: 'rtl',
+      }}
     >
       <Entries of={columns}>
         {(key, items) => (
           <div
-            class="flex flex-col w-full"
+            class="flex flex-col"
             id={`__masonry-col-${key}`}
             style={{ 'row-gap': `${props.gap}px` }}
           >
