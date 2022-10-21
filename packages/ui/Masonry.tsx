@@ -1,6 +1,5 @@
 import {
   JSXElement,
-  Component,
   Accessor,
   createSignal,
   createMemo,
@@ -109,7 +108,6 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
       class="grid place-items-start"
       ref={setEl}
       style={{
-        padding: `${props.gap}px`,
         'column-gap': `${props.gap}px`,
         'grid-template-columns': `repeat(${cols()},1fr)`,
       }}

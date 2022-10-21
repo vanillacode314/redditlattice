@@ -119,7 +119,12 @@ export default function Subreddit() {
   }
 
   return (
-    <div h-full max-h-full id="scroller">
+    <div
+      h-full
+      max-h-full
+      id="scroller"
+      style={{ padding: `${userState()!.gap}px` }}
+    >
       <Masonry
         items={[...appState.images.data].map((image) => ({
           id: image.name,
