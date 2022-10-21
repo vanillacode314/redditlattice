@@ -32,7 +32,7 @@ export const ImageCard: Component<Props> = (props) => {
 
   const popupVisible = () => location.hash === '#popup-' + props.image.name
   const width = () =>
-    Math.round(props.width / 50) * 50 * userState()!.imageSizeMultiplier
+    Math.round(props.width / 100) * 100 * userState()!.imageSizeMultiplier
 
   createComputed<'open' | 'closed' | undefined>((prevState) => {
     if (!popupVisible() && animate()) {
