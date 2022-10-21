@@ -31,6 +31,8 @@ export const ImageCard: Component<Props> = (props) => {
   const location = useLocation()
 
   const popupVisible = () => location.hash === '#popup-' + props.image.name
+  const width = () =>
+    Math.round(props.width / 50) * 50 * userState()!.imageSizeMultiplier
 
   createComputed<'open' | 'closed' | undefined>((prevState) => {
     if (!popupVisible() && animate()) {
@@ -61,13 +63,12 @@ export const ImageCard: Component<Props> = (props) => {
 
   function getSources() {
     const state = userState()!
-    const width = Math.round(props.width / 50) * 50 * state.imageSizeMultiplier
-    const formats = _.uniq([userState()!.prefferedImageFormat, 'webp'])
+    const formats = _.uniq([state.prefferedImageFormat, 'webp'])
     return new Map(
       formats.map((format) => [
         `image/${format}`,
         state.processImages
-          ? getProcessedImageURL(props.image.url, width, format)
+          ? getProcessedImageURL(props.image.url, width(), format)
           : props.image.url,
       ])
     )
@@ -134,7 +135,7 @@ export const ImageCard: Component<Props> = (props) => {
           srcSets={getSources()}
           src={
             userState()!.processImages
-              ? getProcessedImageURL(props.image.url, props.width)
+              ? getProcessedImageURL(props.image.url, width())
               : props.image.url
           }
           onLoad={merged.onLoad}

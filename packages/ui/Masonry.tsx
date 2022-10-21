@@ -6,6 +6,7 @@ import {
   createMemo,
   createEffect,
   on,
+  mergeProps,
 } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Entries, Key } from '@solid-primitives/keyed'
@@ -29,14 +30,16 @@ export interface Props<T> {
 }
 
 export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
+  const merged = mergeProps({ gap: 0 }, props)
   type I = typeof props.items[number]
   const [el, setEl] = createSignal<HTMLElement>()
   const size = createElementSize(el)
   const cols = createMemo<number>(() =>
     size.width ? Math.ceil(size.width / props.maxWidth) : 1
   )
-  const colWidth = createMemo<number>(() =>
-    size.width ? size.width / cols() : 0
+  const colWidth = createMemo<number>(
+    () =>
+      (size.width ? size.width / cols() : 0) - (merged.gap * (cols() - 1)) / 2
   )
   const [columns, setColumns] = createStore<Record<number, I[]>>()
 
