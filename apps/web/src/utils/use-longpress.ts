@@ -1,5 +1,5 @@
 type Pos = { x: number; y: number }
-import _ from 'lodash'
+import * as _ from 'lodash-es'
 
 export interface Options {
   callback?: () => any

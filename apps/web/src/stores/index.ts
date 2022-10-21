@@ -1,7 +1,7 @@
 import { createStore } from 'solid-js/store'
 import { createStorageSignal } from '@solid-primitives/storage'
 import { parse, stringify } from 'devalue'
-import _ from 'lodash'
+import * as _ from 'lodash-es'
 import { createRenderEffect } from 'solid-js'
 
 export interface IImage {

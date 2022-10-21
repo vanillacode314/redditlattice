@@ -70,7 +70,7 @@ importers:
       '@solidjs/router': ^0.5.0
       '@trpc/client': 10.0.0-proxy-beta.20
       '@trpc/server': 10.0.0-proxy-beta.20
-      '@types/lodash': ^4.14.186
+      '@types/lodash-es': ^4.17.6
       '@types/node': ^17.0.12
       '@types/web': ^0.0.75
       '@unocss/preset-attributify': ^0.45.29
@@ -82,7 +82,7 @@ importers:
       eslint: 7.32.0
       eslint-config-custom: workspace:*
       image-server: workspace:*
-      lodash: ^4.17.21
+      lodash-es: ^4.17.21
       solid-js: ^1.5.7
       solid-spring: ^0.0.7
       solid-start: ^0.1.6
@@ -110,7 +110,6 @@ importers:
       api: link:../api
       devalue: 4.0.0
       image-server: link:../image-server
-      lodash: 4.17.21
       solid-js: 1.5.7
       solid-spring: 0.0.7_solid-js@1.5.7
       solid-start: 0.1.6_3c2wxe5giaavn7kxcvquai6bbu
@@ -121,13 +120,14 @@ importers:
       '@babel/core': 7.19.3
       '@iconify-json/mdi': 1.1.34
       '@solid-devtools/overlay': 0.0.5_solid-js@1.5.7+vite@3.1.8
-      '@types/lodash': 4.14.186
+      '@types/lodash-es': 4.17.6
       '@types/node': 17.0.45
       '@types/web': 0.0.75
       '@unocss/preset-attributify': 0.45.29
       '@unocss/vite': 0.45.29_vite@3.1.8
       eslint: 7.32.0
       eslint-config-custom: link:../../packages/eslint-config-custom
+      lodash-es: 4.17.21
       tsconfig: link:../../packages/tsconfig
       typescript: 4.8.4
       unocss: 0.45.29_vite@3.1.8
@@ -170,12 +170,12 @@ importers:
       '@solid-primitives/map': ^0.2.2
       '@solid-primitives/resize-observer': ^2.0.4
       '@solid-primitives/set': ^0.2.2
-      '@types/lodash': ^4.14.186
+      '@types/lodash-es': ^4.17.6
       '@types/web': ^0.0.75
       '@unocss/vite': ^0.45.29
       eslint: ^7.32.0
       eslint-config-custom: workspace:*
-      lodash: ^4.17.21
+      lodash-es: ^4.17.21
       solid-js: ^1.5.7
       solid-spring: ^0.0.7
       solid-start: ^0.1.6
@@ -188,14 +188,14 @@ importers:
       '@solid-primitives/map': 0.2.2_solid-js@1.5.7
       '@solid-primitives/resize-observer': 2.0.4_solid-js@1.5.7
       '@solid-primitives/set': 0.2.2_solid-js@1.5.7
-      lodash: 4.17.21
+      lodash-es: 4.17.21
       solid-js: 1.5.7
       solid-spring: 0.0.7_solid-js@1.5.7
       solid-start: 0.1.6_solid-js@1.5.7
       solid-transition-group: 0.0.11_solid-js@1.5.7
     devDependencies:
       '@iconify-json/mdi': 1.1.34
-      '@types/lodash': 4.14.186
+      '@types/lodash-es': 4.17.6
       '@types/web': 0.0.75
       '@unocss/vite': 0.45.29
       eslint: 7.32.0
@@ -2165,6 +2165,12 @@ packages:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
       '@types/node': 17.0.45
+    dev: true
+
+  /@types/lodash-es/4.17.6:
+    resolution: {integrity: sha512-R+zTeVUKDdfoRxpAryaQNRKk3105Rrgx2CFRClIgRGaqDTdjsm8h6IYA8ir584W3ePzkZfst5xIgDwYrlh9HLg==}
+    dependencies:
+      '@types/lodash': 4.14.186
     dev: true
 
   /@types/lodash/4.14.186:
@@ -5226,6 +5232,9 @@ packages:
     dependencies:
       p-locate: 5.0.0
     dev: true
+
+  /lodash-es/4.17.21:
+    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
 
   /lodash.debounce/4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}

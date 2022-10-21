@@ -10,7 +10,7 @@ import {
   batch,
 } from 'solid-js'
 import { config, animated, createSpring } from 'solid-spring'
-import _ from 'lodash'
+import * as _ from 'lodash-es'
 
 interface Props {
   width: number

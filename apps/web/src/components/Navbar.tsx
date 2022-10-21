@@ -11,7 +11,7 @@ import {
 } from 'solid-js'
 import { createSpring, animated } from 'solid-spring'
 import { TransitionFade } from 'ui/transitions'
-import _ from 'lodash'
+import * as _ from 'lodash-es'
 
 export const Navbar: Component = () => {
   const [mounted, setMounted] = createSignal<boolean>(false)

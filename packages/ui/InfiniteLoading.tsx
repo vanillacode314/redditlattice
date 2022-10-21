@@ -13,7 +13,7 @@ export type InfiniteHandler = (
   setState: (state: State) => void,
   firstload: boolean
 ) => void
-import _ from 'lodash'
+import * as _ from 'lodash-es'
 
 interface Props {
   children: (state: State, load: (firstload?: boolean) => void) => JSXElement

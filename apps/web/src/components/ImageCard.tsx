@@ -13,8 +13,8 @@ import { IMAGE_SERVER_BASE_PATH } from '~/consts'
 import { TransitionFade } from 'ui/transitions'
 import { AutoResizingPicture, Button } from 'ui'
 import { IImage, useUserState } from '~/stores'
-import _ from 'lodash'
 import { download, blobToDataURL } from '~/utils'
+import * as _ from 'lodash-es'
 
 interface Props {
   width: number

@@ -11,7 +11,7 @@ import {
 import { createStore } from 'solid-js/store'
 import { Entries, Key } from '@solid-primitives/keyed'
 import { createElementSize } from '@solid-primitives/resize-observer'
-import _, { range } from 'lodash'
+import * as _ from 'lodash-es'
 
 interface Item<T = any> {
   id: string
@@ -46,7 +46,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   function getShortestColumnIndex(): number {
     let minIndex = 0
     let minHeight = Infinity
-    for (const x of range(cols())) {
+    for (const x of _.range(cols())) {
       const colEl = document.getElementById(`__masonry-col-${x}`)
       const { height } = colEl ? colEl.getBoundingClientRect() : { height: 0 }
       if (height <= minHeight) {
