@@ -53,7 +53,7 @@ export const Drawer: Component = () => {
             ({ swipe: [swipeX] }) => swipeX === 1 && setOpen(true)
           )
         }}
-        class="fixed left-0 h-40 w-15 top-20 touch-pan-right"
+        class="fixed left-0 h-40 w-15 top-20 touch-pan-right z-20"
       ></div>
       <Animate
         when={open()}
