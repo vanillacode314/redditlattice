@@ -8,6 +8,7 @@ import {
   presetAttributify,
 } from 'unocss'
 import path from 'path'
+import netlify from 'solid-start-netlify'
 import { version } from './package.json' assert { type: 'json' }
 
 export default defineConfig({
@@ -23,7 +24,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    solid({ ssr: false }),
+    solid({ adapter: netlify({ edge: true }) }),
     Unocss({
       presets: [
         presetAttributify(),

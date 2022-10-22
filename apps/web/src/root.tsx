@@ -64,9 +64,6 @@ export const Root: Component = () => {
         <Meta name="viewport" content="width=device-width, initial-scale=1" />
         <Link rel="manifest" href="/manifest.webmanifest"></Link>
         <Link rel="icon" href="/favicon.svg" />
-        <script
-          textContent={`if ('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js', { scope: '/' }) }`}
-        ></script>
       </Head>
       <Body>
         <Base>
