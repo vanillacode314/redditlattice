@@ -24,7 +24,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    solid({ adapter: netlify({ edge: true }) }),
+    solid({ adapter: netlify() }),
     Unocss({
       presets: [
         presetAttributify(),
