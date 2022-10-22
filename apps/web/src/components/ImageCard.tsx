@@ -56,8 +56,17 @@ export const ImageCard: Component<Props> = (props) => {
   function getProcessedImageURL(
     url: string,
     width: number,
-    format: string = 'webp'
+    {
+      passthrough = false,
+      format = 'webp',
+    }: {
+      format?: string
+      passthrough?: boolean
+    } = {}
   ): string {
+    if (passthrough) {
+      return `${IMAGE_SERVER_BASE_PATH}/?passthrough=true`
+    }
     return `${IMAGE_SERVER_BASE_PATH}/?url=${url}&width=${width}&format=${format}`
   }
 
@@ -68,7 +77,7 @@ export const ImageCard: Component<Props> = (props) => {
       formats.map((format) => [
         `image/${format}`,
         state.processImages
-          ? getProcessedImageURL(props.image.url, width(), format)
+          ? getProcessedImageURL(props.image.url, width(), { format })
           : props.image.url,
       ])
     )
@@ -91,7 +100,9 @@ export const ImageCard: Component<Props> = (props) => {
   }
 
   async function downloadImage() {
-    const url = await fetch(props.image.url)
+    const url = await fetch(
+      getProcessedImageURL(props.image.url, 0, { passthrough: true })
+    )
       .then((res) => res.blob())
       .then((blob) => blobToDataURL(blob))
     download(url, props.image.title)
