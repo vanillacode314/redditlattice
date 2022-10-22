@@ -24,7 +24,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    solid({ adapter: netlify() }),
+    solid({ ssr: false, adapter: netlify() }),
     Unocss({
       presets: [
         presetAttributify(),
