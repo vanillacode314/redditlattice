@@ -55,8 +55,8 @@ function GET_DEFAULT_USER_STATE(): IUserState {
     prefferedImageFormat: 'webp',
     processImages: false,
     hideNSFW: true,
-    gap: 0,
-    borderRadius: 0,
+    gap: 10,
+    borderRadius: 10,
   }
 }
 
