@@ -155,7 +155,7 @@ export const Navbar: Component = () => {
               'i-mdi-menu': !showBack(),
               'i-mdi-arrow-left': showBack(),
             }}
-            onClick={() => (showBack() ? navigate('..') : toggleDrawer())}
+            onClick={() => (showBack() ? history.go(-1) : toggleDrawer())}
           ></button>
           <span text="xl" truncate>
             {appState.title || 'RedditLattice'}

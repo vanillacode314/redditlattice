@@ -17,6 +17,11 @@ const links: ILink[] = [
     href: '/',
   },
   {
+    title: 'Collections',
+    icon: 'i-mdi-view-grid',
+    href: '/collections',
+  },
+  {
     title: 'Settings',
     icon: 'i-mdi-cog',
     href: '/settings',

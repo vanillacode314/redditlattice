@@ -32,6 +32,7 @@ export interface IUserState {
   hideNSFW: boolean
   gap: number
   borderRadius: number
+  collections: Map<string, string> /// sr+sr?q+q -> nickname
 }
 
 const [appState, setAppState] = createStore<IAppState>({
@@ -57,6 +58,7 @@ function GET_DEFAULT_USER_STATE(): IUserState {
     hideNSFW: true,
     gap: 10,
     borderRadius: 10,
+    collections: new Map(),
   }
 }
 

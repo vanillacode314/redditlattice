@@ -1,5 +1,5 @@
 import { useAppState, useUserState } from '~/stores'
-import { useParams, useSearchParams } from 'solid-start'
+import { useParams, useLocation } from 'solid-start'
 import {
   onMount,
   onCleanup,
@@ -22,9 +22,10 @@ const [appState, setAppState] = useAppState()
 export default function Subreddit() {
   const componentOwner = getOwner()!
   const [userState, setUserState] = useUserState()
-  const [searchParams, _] = useSearchParams()
+  const location = useLocation()
+  const q = () => new URLSearchParams(location.search.toLowerCase()).getAll('q')
   const params = useParams()
-  const subreddit = () => params.subreddit.toLowerCase()
+  const subreddits = () => params.subreddit.toLowerCase().split('+')
   const fabActions: IAction[] = [
     {
       id: 'top',
@@ -40,25 +41,26 @@ export default function Subreddit() {
     },
   ]
 
-  const sort = createMemo(() => userState().sort.get(subreddit()) || 'hot')
+  const sort = createMemo(() => userState()!.sort.get(subreddits()[0]) || 'hot')
 
   const setSort = (sort: string) =>
     setUserState((state) => {
-      state.sort.set(subreddit(), sort)
-      return { ...state }
+      state!.sort.set(subreddits().sort().join('+'), sort)
+      return { ...state! }
     })
 
   onMount(() => setSort(sort()))
 
-  const key = createMemo(() => `${subreddit()}-${searchParams.q}-${sort()}`)
+  const key = createMemo(() => `${subreddits()}-${q().join('+')}-${sort()}`)
+  createEffect(() => console.log(q()))
 
   const resetState = () => {
     batch(() => {
       setAppState(
         'title',
-        searchParams.q
-          ? `${searchParams.q} - /r/${subreddit()}`
-          : `/r/${subreddit()}`
+        q()
+          ? `${q().join('+')} - /r/${subreddits().join('+')}`
+          : `/r/${subreddits()}`
       )
       setAppState({
         images: {
@@ -72,14 +74,16 @@ export default function Subreddit() {
 
   createEffect(() => appState.images.key !== key() && resetState())
 
-  createEffect(() =>
+  createEffect(() => {
+    if (subreddits().length > 1) return
+    if (q().length > 1) return
     setUserState((state) => {
-      state.subreddits.add(subreddit())
-      if (searchParams.q)
-        state.searchTerms.set(searchParams.q.toLowerCase(), subreddit())
-      return { ...state }
+      state!.subreddits.add(subreddits()[0])
+      if (q().length > 0)
+        state!.searchTerms.set(q()[0].toLowerCase(), subreddits()[0])
+      return { ...state! }
     })
-  )
+  })
 
   const onInfinite: InfiniteHandler = async (setState, firstload) => {
     if (firstload && appState.images.data.size > 0) {
@@ -91,11 +95,11 @@ export default function Subreddit() {
       runWithOwner(componentOwner, () => onCleanup(() => ac.abort()))
       const { images: newImages, after } = await trpc.getImages.query(
         {
-          q: searchParams.q,
+          q: q(),
           after: appState.images.after,
-          subreddit: params.subreddit,
-          sort: userState().sort.get(subreddit()),
-          nsfw: !userState().hideNSFW,
+          subreddits: subreddits(),
+          sort: userState()!.sort.get(subreddits().sort().join('+')),
+          nsfw: !userState()!.hideNSFW,
         },
         {
           signal: ac.signal,

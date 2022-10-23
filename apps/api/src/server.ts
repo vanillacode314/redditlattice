@@ -9,8 +9,8 @@ export const appRouter = t.router({
   getImages: t.procedure
     .input(
       z.object({
-        subreddit: z.string(),
-        q: z.string().optional(),
+        subreddits: z.array(z.string()),
+        q: z.array(z.string()).optional(),
         after: z.string().optional(),
         sort: z.string(),
         nsfw: z.boolean().optional(),

@@ -11,42 +11,44 @@ export default function Home() {
 
   onMount(() => setAppState('title', ''))
 
-  const [subreddit, setSubreddit] = createSignal<string>('')
-  const [searchTerm, setSearchTerm] = createSignal<string>('')
   const [focused, setFocused] = createSignal<boolean>(false)
-
-  const query = () => {
-    if (!subreddit()) return ''
-    if (searchTerm()) {
-      return `${subreddit().toLowerCase()}?${searchTerm().toLowerCase()}`
-    }
-    return `${subreddit().toLowerCase()}`
-  }
+  const [query, setQuery] = createSignal<string>('')
 
   const navigate = useNavigate()
 
   function onSubmit(e: SubmitEvent) {
     e.preventDefault()
-    if (!query().trim()) return
+    if (!query()) return
     if (query().startsWith('?')) return
-    if (searchTerm()) {
-      navigate(`/r/${subreddit()}?q=${searchTerm()}`)
+    let [sr, q] = query().toLowerCase().split('?')
+    sr = sr.split('+').sort().join('+')
+    q = q ? q.split('+').sort().join('+') : ''
+    let id = sr
+    if (q) id += '?' + q
+    if (!userState()!.collections.has(id)) setCollection(id, id)
+    if (q) {
+      navigate(
+        `/r/${sr}?${q
+          .split('+')
+          .map((query) => `q=${query}`)
+          .join('&')}`
+      )
     } else {
-      navigate(`/r/${query()}`)
+      navigate(`/r/${sr}`)
     }
   }
 
-  function removeSubreddit(id: string) {
+  function removeCollection(id: string) {
     setUserState((state) => {
-      state.subreddits.delete(id)
-      return { ...state }
+      state!.collections.delete(id)
+      return { ...state! }
     })
   }
 
-  function removeSearchTerm(id: string) {
+  function setCollection(id: string, value: string) {
     setUserState((state) => {
-      state.searchTerms.delete(id)
-      return { ...state }
+      state!.collections.set(id, value)
+      return { ...state! }
     })
   }
 
@@ -62,7 +64,7 @@ export default function Home() {
         <div
           ring="~ pink-800 hover:pink-700 focus:pink-700"
           transition-colors
-          class="grid grid-cols-[auto_1fr_auto]"
+          class="grid grid-cols-[auto_1fr_auto_auto]"
           gap-3
           bg-black
           outline-none
@@ -76,13 +78,7 @@ export default function Home() {
           </span>
           <input
             value={query()}
-            onInput={(e) => {
-              const [sr, q] = e.currentTarget.value.split('?')
-              batch(() => {
-                setSubreddit(sr || '')
-                setSearchTerm(q || '')
-              })
-            }}
+            onInput={(e) => setQuery(e.currentTarget.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             type="text"
@@ -97,11 +93,25 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => {
-                  batch(() => {
-                    setSubreddit('')
-                    setSearchTerm('')
-                  })
+                  const name = prompt('Enter a nickname for the collection')
+                  if (!name) return
+                  const [sr, q] = query().toLowerCase().split('?')
+                  let id = sr.split('+').sort().join('+')
+                  if (q) id += `?${q.split('+').sort().join('+')}`
+                  setCollection(id, name)
                 }}
+                onFocus={(e) => e.relatedTarget?.focus()}
+                class="i-mdi-edit text-xl"
+              >
+                /r/
+              </button>
+            </Show>
+          </TransitionFade>
+          <TransitionFade blur duration={100}>
+            <Show when={query()}>
+              <button
+                type="button"
+                onClick={() => setQuery('')}
                 onFocus={(e) => e.relatedTarget?.focus()}
                 class="i-mdi-close-circle text-xl"
               >
@@ -148,10 +158,10 @@ export default function Home() {
             >
               <AsyncList
                 onClick={(id) => {
-                  batch(() => {
-                    setSubreddit(id)
-                    setSearchTerm('')
-                  })
+                  id = id.toLowerCase()
+                  let [sr, q] = query().toLowerCase().split('?')
+                  if (sr.split('+').includes(id)) return
+                  setQuery(q ? `${sr}+${id}?q=${q}` : `${sr}+${id}`)
                 }}
                 focusable={false}
                 reverse
@@ -179,32 +189,13 @@ export default function Home() {
           }
         >
           <List
-            onClick={(id) => setSubreddit(id)}
-            onRemove={(id) => removeSubreddit(id)}
+            onClick={(id) => setQuery(id)}
+            onRemove={(id) => removeCollection(id)}
             reverse
-            title="subreddits"
-            items={[...userState().subreddits].sort().map((sr) => ({
-              id: sr,
-              title: sr,
-            }))}
-          ></List>
-          <div border="b gray-800"></div>
-          <List
-            onClick={(id) => {
-              const sr = subreddit() || userState().searchTerms.get(id)
-              if (sr) {
-                batch(() => {
-                  setSubreddit(sr)
-                  setSearchTerm(id)
-                })
-              }
-            }}
-            onRemove={(id) => removeSearchTerm(id)}
-            reverse
-            title="searches"
-            items={[...userState().searchTerms.keys()].sort().map((q) => ({
-              id: q,
-              title: q,
+            title="collections"
+            items={[...userState()!.collections].sort().map(([key, value]) => ({
+              id: key,
+              title: value,
             }))}
           ></List>
         </Show>

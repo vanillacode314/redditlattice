@@ -30,17 +30,21 @@ async function fetchPosts(url: string): Promise<IRemotePostsData> {
   return getKeys(data.data, ['children', 'after'])
 }
 
-export const getImages: (fn: {
-  subreddit: string
+interface Options {
+  subreddits: string[]
   sort: string
   after?: string
-  q?: string
+  q?: string[]
   nsfw?: boolean
-}) => Promise<{ images: Pick<IPost, ReturnKeys>[]; after: string }> = async ({
-  subreddit,
+}
+
+export const getImages: (
+  fn: Options
+) => Promise<{ images: Pick<IPost, ReturnKeys>[]; after: string }> = async ({
+  subreddits,
   sort,
   after,
-  q,
+  q = [],
   nsfw = false,
 }) => {
   const searchParams = new URLSearchParams({
@@ -53,11 +57,19 @@ export const getImages: (fn: {
 
   if (after) searchParams.append('after', after)
   if (sort) searchParams.append('sort', sort)
-  if (q) searchParams.append('q', q)
+  if (q.length > 0)
+    searchParams.append('q', q.map((query) => `(${query})`).join(' OR '))
 
-  const url = q
-    ? `https://www.reddit.com/r/${subreddit}/search.json?${searchParams.toString()}`
-    : `https://www.reddit.com/r/${subreddit}/${sort}.json?${searchParams.toString()}`
+  const url =
+    q.length > 0
+      ? `https://www.reddit.com/r/${subreddits.join(
+          '+'
+        )}/search.json?${searchParams.toString()}`
+      : `https://www.reddit.com/r/${subreddits.join(
+          '+'
+        )}/${sort}.json?${searchParams.toString()}`
+
+  console.log(url)
 
   const { children, after: newAfter } = await fetchPosts(url)
 
