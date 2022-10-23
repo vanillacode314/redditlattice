@@ -81,6 +81,8 @@ export default function Home() {
             onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
+            placeholder="e.g. wallpapers+earthporn?nature+landscape"
+            class="placeholder:text-gray-500"
             type="text"
             id="search"
             name="subreddit"
@@ -147,7 +149,7 @@ export default function Home() {
         p="t-[70%]"
       >
         <Show
-          when={!query() || !focused()}
+          when={!query() || !(focused() && !query().includes('?'))}
           fallback={
             <Suspense
               fallback={
@@ -161,7 +163,9 @@ export default function Home() {
                   id = id.toLowerCase()
                   let [sr, q] = query().toLowerCase().split('?')
                   if (sr.split('+').includes(id)) return
-                  setQuery(q ? `${sr}+${id}?q=${q}` : `${sr}+${id}`)
+                  const x = sr.split('+')
+                  x[x.length - 1] = id
+                  setQuery(q ? x.join('+') + `?q=${q}` : x.join('+'))
                 }}
                 focusable={false}
                 reverse
@@ -183,7 +187,7 @@ export default function Home() {
                         )
                     : []
                 }
-                key={query()}
+                key={query().split('+').at(-1)}
               ></AsyncList>
             </Suspense>
           }

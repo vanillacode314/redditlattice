@@ -86,6 +86,8 @@ export default function Home() {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             type="text"
+            placeholder="e.g. wallpapers?red"
+            class="placeholder:text-gray-500"
             id="search"
             name="subreddit"
             min-w-0
@@ -137,7 +139,7 @@ export default function Home() {
         p="t-[70%]"
       >
         <Show
-          when={!query() || !focused()}
+          when={!query() || !(focused() && !query().includes('?'))}
           fallback={
             <Suspense
               fallback={

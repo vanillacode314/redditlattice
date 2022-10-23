@@ -58,7 +58,7 @@ export default function Subreddit() {
     batch(() => {
       setAppState(
         'title',
-        q()
+        q().length > 0
           ? `${q().join('+')} - /r/${subreddits().join('+')}`
           : `/r/${subreddits()}`
       )
