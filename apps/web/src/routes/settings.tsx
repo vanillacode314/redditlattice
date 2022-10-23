@@ -28,7 +28,7 @@ export default function Settings() {
   }
 
   const handleImport = async () => {
-    const file = filesInput.files[0]
+    const file = filesInput.files?.[0]
     if (!file) {
       alert('Please select a file to import')
       return
@@ -36,19 +36,27 @@ export default function Settings() {
     try {
       const content = await file.text()
       const data = parse(content) as ReturnType<typeof userState>
-      const { subreddits, sort, searchTerms } = data
+      const { collections, subreddits, sort, searchTerms } = data!
       batch(() => {
         if (subreddits) {
-          const x = new Set([...subreddits, ...userState().subreddits])
-          setUserState((state) => ({ ...state, subreddits: x }))
+          const x = new Set([...subreddits, ...userState()!.subreddits])
+          setUserState((state) => ({ ...state!, subreddits: x }))
         }
         if (sort) {
-          const x = new Map([...sort, ...userState().sort])
-          setUserState((state) => ({ ...state, sort: x }))
+          const x = new Map([...sort, ...userState()!.sort])
+          setUserState((state) => ({ ...state!, sort: x }))
+        }
+        if (sort) {
+          const x = new Map([...sort, ...userState()!.sort])
+          setUserState((state) => ({ ...state!, sort: x }))
         }
         if (searchTerms) {
-          const x = new Map([...searchTerms, ...userState().searchTerms])
-          setUserState((state) => ({ ...state, searchTerms: x }))
+          const x = new Map([...searchTerms, ...userState()!.searchTerms])
+          setUserState((state) => ({ ...state!, searchTerms: x }))
+        }
+        if (collections) {
+          const x = new Map([...collections, ...userState()!.collections])
+          setUserState((state) => ({ ...state!, collections: x }))
         }
       })
     } catch (e) {
