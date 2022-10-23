@@ -65,7 +65,7 @@ export const ImageCard: Component<Props> = (props) => {
     } = {}
   ): string {
     if (passthrough) {
-      return `${IMAGE_SERVER_BASE_PATH}/?passthrough=true`
+      return `${IMAGE_SERVER_BASE_PATH}/?passthrough=true&url=${url}&width=0`
     }
     return `${IMAGE_SERVER_BASE_PATH}/?url=${url}&width=${width}&format=${format}`
   }
