@@ -6,7 +6,7 @@ import {
   Show,
 } from 'solid-js'
 import { Portal } from 'solid-js/web'
-import { animated, createSpring } from 'solid-spring'
+import { config, animated, createSpring } from 'solid-spring'
 import { useLocation, useNavigate } from 'solid-start'
 import { longpress } from '~/utils/use-longpress'
 import { IMAGE_SERVER_BASE_PATH } from '~/consts'
@@ -26,7 +26,6 @@ export const ImageCard: Component<Props> = (props) => {
   const [userState] = useUserState()
   const merged = mergeProps({ onLoad: () => {} }, props)
   const [error, setError] = createSignal<boolean>(false)
-  const [animate, setAnimate] = createSignal<boolean>(false)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -34,23 +33,9 @@ export const ImageCard: Component<Props> = (props) => {
   const width = () =>
     Math.round(props.width / 100) * 100 * userState()!.imageSizeMultiplier
 
-  createComputed<'open' | 'closed' | undefined>((prevState) => {
-    if (!popupVisible() && animate()) {
-      navigate(
-        location.pathname + location.search + '#popup-' + props.image.name
-      )
-      setAnimate(false)
-      return 'closed'
-    }
-    if (popupVisible() && !animate() && prevState !== 'closed') {
-      setAnimate(true)
-      return 'open'
-    }
-  }, 'open')
-
   const scale = createSpring(() => ({
-    transform: `scale(${animate() ? 1 : 0})`,
-    onRest: () => !animate() && history.go(-1),
+    transform: `scale(${popupVisible() ? 1 : 0})`,
+    config: config.stiff,
   }))
 
   function getProcessedImageURL(
