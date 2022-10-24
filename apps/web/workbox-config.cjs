@@ -29,9 +29,11 @@ const options = {
                 const oldAsset = oldUrl.searchParams.get('url');
                 const newAsset = newUrl.searchParams.get('url');
                 if (oldAsset !== newAsset) continue;
+
                 const oldWidth = +oldUrl.searchParams.get('width');
                 const newWidth = +newUrl.searchParams.get('width');
-                if (newWidth < oldWidth) return new Request(oldUrl);
+                if (newWidth <= oldWidth) return new Request(oldUrl);
+                else await cache.delete(response);
               }
 
               return request;
