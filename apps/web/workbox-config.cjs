@@ -21,18 +21,19 @@ const options = {
           {
             cacheKeyWillBeUsed: async ({ request }) => {
               const cache = await caches.open('images-assets');
-              const response = await cache.match(request.url, {
-                ignoreSearch: true,
-              });
+              const keys = await cache.keys();
 
-              console.log(response);
-              if (!response) return request;
+              for (const response of keys) {
+                const oldUrl = new URL(response.url);
+                const newUrl = new URL(request.url);
+                const oldAsset = oldUrl.searchParams.get('url');
+                const newAsset = newUrl.searchParams.get('url');
+                if (oldAsset !== newAsset) continue;
+                const oldWidth = +oldUrl.searchParams.get('width');
+                const newWidth = +newUrl.searchParams.get('width');
+                if (newWidth < oldWidth) return new Request(oldUrl);
+              }
 
-              const oldUrl = new URL(response.url);
-              const newUrl = new URL(request.url);
-              const oldWidth = +oldUrl.searchParams.get('width');
-              const newWidth = +newUrl.searchParams.get('width');
-              if (newWidth < oldWidth) return new Request(oldUrl);
               return request;
             },
           },
