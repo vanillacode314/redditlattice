@@ -1,41 +1,41 @@
-import { IMAGE_EXTENSION_LIST } from '@api/consts'
-import { getKeys, isEmpty } from '@api/utils'
-import { IRemotePostsData, IPost } from '@api/types'
+import { IMAGE_EXTENSION_LIST } from '@api/consts';
+import { getKeys, isEmpty } from '@api/utils';
+import { IRemotePostsData, IPost } from '@api/types';
 
-const SELECT_KEYS = ['name', 'url', 'title'] as const
-type ReturnKeys = typeof SELECT_KEYS[number]
+const SELECT_KEYS = ['name', 'url', 'title'] as const;
+type ReturnKeys = typeof SELECT_KEYS[number];
 
 function expandGallery(post: IPost): IPost[] {
   if (
     !post.url.startsWith(`https://www.reddit.com/gallery/`) ||
     isEmpty(post.media_metadata || {})
   )
-    return [post]
+    return [post];
   return Array.from(
     Object.values(post.media_metadata).map(({ id, m: mime }) => {
-      const fileExtension = mime.replace('image/', '')
+      const fileExtension = mime.replace('image/', '');
       return {
         ...post,
         name: `${post.name}-${id}`,
         url: `https://i.redd.it/${id}.${fileExtension}`,
         title: post.title,
-      }
+      };
     })
-  )
+  );
 }
 
 async function fetchPosts(url: string): Promise<IRemotePostsData> {
-  const res = await fetch(url, { redirect: 'error' })
-  const data = await res.json()
-  return getKeys(data.data, ['children', 'after'])
+  const res = await fetch(url, { redirect: 'error' });
+  const data = await res.json();
+  return getKeys(data.data, ['children', 'after']);
 }
 
 interface Options {
-  subreddits: string[]
-  sort: string
-  after?: string
-  q?: string[]
-  nsfw?: boolean
+  subreddits: string[];
+  sort: string;
+  after?: string;
+  q?: string[];
+  nsfw?: boolean;
 }
 
 export const getImages: (
@@ -50,15 +50,15 @@ export const getImages: (
   const searchParams = new URLSearchParams({
     restrict_sr: 'true',
     t: 'all',
-  })
+  });
 
-  searchParams.append('nsfw', `${nsfw ? 1 : 0}`)
-  searchParams.append('include_over_18', nsfw ? 'on' : 'off')
+  searchParams.append('nsfw', `${nsfw ? 1 : 0}`);
+  searchParams.append('include_over_18', nsfw ? 'on' : 'off');
 
-  if (after) searchParams.append('after', after)
-  if (sort) searchParams.append('sort', sort)
+  if (after) searchParams.append('after', after);
+  if (sort) searchParams.append('sort', sort);
   if (q.length > 0)
-    searchParams.append('q', q.map((query) => `(${query})`).join(' OR '))
+    searchParams.append('q', q.map((query) => `(${query})`).join(' OR '));
 
   const url =
     q.length > 0
@@ -67,11 +67,9 @@ export const getImages: (
         )}/search.json?${searchParams.toString()}`
       : `https://www.reddit.com/r/${subreddits.join(
           '+'
-        )}/${sort}.json?${searchParams.toString()}`
+        )}/${sort}.json?${searchParams.toString()}`;
 
-  console.log(url)
-
-  const { children, after: newAfter } = await fetchPosts(url)
+  const { children, after: newAfter } = await fetchPosts(url);
 
   const images = children
     .map((c) => c.data)
@@ -84,7 +82,7 @@ export const getImages: (
         !(post.over_18 && !nsfw) &&
         IMAGE_EXTENSION_LIST.some((e) => post.url?.endsWith(e))
     )
-    .map((post) => getKeys(post, SELECT_KEYS))
+    .map((post) => getKeys(post, SELECT_KEYS));
 
-  return { images, after: newAfter }
-}
+  return { images, after: newAfter };
+};

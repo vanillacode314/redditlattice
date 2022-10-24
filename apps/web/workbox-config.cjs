@@ -1,21 +1,44 @@
 /** @type {Parameters<import('workbox-build').generateSW>[0]} */
 const options = {
   skipWaiting: true,
-  globDirectory: "netlify",
+  globDirectory: 'netlify',
   globPatterns: [
-    "**/*.{js,webmanifest,mjs,css,ttf,svg,eot,woff,woff2,html,png,json}",
+    '**/*.{js,webmanifest,mjs,css,ttf,svg,eot,woff,woff2,html,png,json}',
   ],
-  swDest: "netlify/sw.js",
+  swDest: 'netlify/sw.js',
   dontCacheBustURLsMatching: /\..*\./,
   ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
   runtimeCaching: [
     {
       urlPattern: ({ request, url }) =>
-        request.destination === "image" &&
-        url.origin === "https://redditlattice-server-production.up.railway.app",
-      handler: "CacheFirst",
+        request.destination === 'image' &&
+        url.origin === 'https://redditlattice-server-production.up.railway.app',
+      handler: 'CacheFirst',
+
       options: {
-        cacheName: "images-assets",
+        cacheName: 'images-assets',
+        plugins: [
+          {
+            cacheKeyWillBeUsed: async ({ request }) => {
+              console.log('CKWBU');
+              const cache = await caches.open('images-assets');
+              const response = await cache.match(request.url, {
+                ignoreSearch: true,
+              });
+
+              console.log(response);
+              if (!response) return request;
+
+              const oldUrl = new URL(response.url);
+              const newUrl = new URL(request.url);
+              const oldWidth = +oldUrl.searchParams.get('width');
+              const newWidth = +newUrl.searchParams.get('width');
+              if (oldWidth > newWidth) request.url = oldUrl.toString();
+              console.log(request);
+              return request;
+            },
+          },
+        ],
         cacheableResponse: {
           statuses: [200],
         },
@@ -24,7 +47,7 @@ const options = {
           maxAgeSeconds: 30 * 24 * 60 * 60,
         },
         fetchOptions: {
-          mode: "cors",
+          mode: 'cors',
         },
       },
     },
