@@ -158,23 +158,29 @@ export default function Home() {
                 focusable={false}
                 reverse
                 title="subreddits"
-                fetcher={async (query, ac) =>
-                  query
-                    ? await trpc.subredditAutocomplete
-                        .query(query, { signal: ac.signal })
-                        .then(({ subreddits }) =>
-                          subreddits.map(({ name }) => ({
-                            id: name,
-                            title: name,
-                          }))
+                fetcher={async (query, ac) => {
+                  if (!query) return []
+                  try {
+                    const { schema, subreddits } =
+                      await trpc.subredditAutocomplete.query(query, {
+                        signal: ac.signal,
+                      })
+                    return subreddits
+                      .map((sr) =>
+                        sr.reduce(
+                          (acc, val, idx) => ({
+                            ...acc,
+                            [schema[idx]]: val,
+                          }),
+                          {}
                         )
-                        .catch(
-                          (err) =>
-                            err.cause.name !== 'ObservableAbortError' &&
-                            console.error(err)
-                        )
-                    : []
-                }
+                      )
+                      .map(({ id, name }) => ({ id: name, title: name }))
+                  } catch (err) {
+                    err.cause.name !== 'ObservableAbortError' &&
+                      console.error(err)
+                  }
+                }}
                 key={query()}
               ></AsyncList>
             </Suspense>

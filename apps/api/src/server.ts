@@ -16,10 +16,25 @@ export const appRouter = t.router({
         nsfw: z.boolean().optional(),
       })
     )
-    .query(({ input }) => getImages(input)),
+    .query(async ({ input }) => {
+      const { images, after } = await getImages(input)
+      return {
+        schema: ['name', 'url', 'title'] as const,
+        images: images.map(
+          ({ name, url, title }) => [name, url, title] as const
+        ),
+        after,
+      }
+    }),
   subredditAutocomplete: t.procedure
     .input(z.string())
-    .query(({ input }) => getAutocompleteSubreddits(input)),
+    .query(async ({ input }) => {
+      const { subreddits } = await getAutocompleteSubreddits(input)
+      return {
+        schema: ['id', 'name'] as const,
+        subreddits: subreddits.map(({ id, name }) => [id, name] as const),
+      }
+    }),
 })
 
 export type AppRouter = typeof appRouter
