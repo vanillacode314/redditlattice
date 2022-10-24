@@ -1,14 +1,17 @@
 import {
-  createComputed,
+  onCleanup,
+  batch,
   createSignal,
   mergeProps,
   Component,
   Show,
 } from 'solid-js'
+import { createStore } from 'solid-js/store'
 import { Portal } from 'solid-js/web'
 import { config, animated, createSpring } from 'solid-spring'
 import { useLocation, useNavigate } from 'solid-start'
 import { longpress } from '~/utils/use-longpress'
+import { outsideclick } from '~/utils/use-outsideclick'
 import { IMAGE_SERVER_BASE_PATH } from '~/consts'
 import { TransitionFade } from 'ui/transitions'
 import { AutoResizingPicture, Button } from 'ui'
@@ -25,6 +28,12 @@ interface Props {
 export const ImageCard: Component<Props> = (props) => {
   const [userState] = useUserState()
   const merged = mergeProps({ onLoad: () => {} }, props)
+
+  const [menu, setMenu] = createSignal<boolean>(false)
+  const [menuPos, setMenuPos] = createStore<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  })
   const [error, setError] = createSignal<boolean>(false)
   const navigate = useNavigate()
   const location = useLocation()
@@ -133,6 +142,13 @@ export const ImageCard: Component<Props> = (props) => {
           ref={(el) => {
             longpress(el, { callback: popupImage })
           }}
+          onContextMenu={(e: MouseEvent) => {
+            e.preventDefault()
+            batch(() => {
+              setMenuPos(() => ({ x: e.clientX, y: e.clientY }))
+              setMenu(true)
+            })
+          }}
           srcSets={getSources()}
           src={
             userState()!.processImages
@@ -167,15 +183,58 @@ export const ImageCard: Component<Props> = (props) => {
             >
               <img src={props.image.url} alt={props.image.title}></img>
               <img />
-              <span class="p-5 uppercase tracking-wide bg-black text-white font-bold flex justify-between items-center">
-                {props.image.title}
-                <button onClick={() => downloadImage()}>
+              <span class="uppercase tracking-wide bg-black text-white font-bold flex gap-5 items-center px-5">
+                <span class="py-5 grow">{props.image.title}</span>
+                <button
+                  class="py-5"
+                  onClick={() => window.open(props.image.url, '_blank')}
+                  type="button"
+                >
+                  <span class="text-2xl i-mdi-open-in-new"></span>
+                </button>
+                <button
+                  class="py-5"
+                  onClick={() => downloadImage()}
+                  type="button"
+                >
                   <span class="text-2xl i-mdi-download"></span>
                 </button>
               </span>
             </animated.div>
           </div>
         </Portal>
+      </Show>
+      <Show when={menu()}>
+        <ul
+          class="fixed rounded-lg bg-gray-900 p-2 flex flex-col z-10"
+          style={{
+            left: menuPos.x + 'px',
+            top: menuPos.y + 'px',
+          }}
+          ref={(el) => {
+            const dispose = outsideclick(el, () => setMenu(false))
+            onCleanup(dispose)
+          }}
+        >
+          <li class="contents">
+            <button
+              type="button"
+              onClick={() => window.open(props.image.url, '_blank')}
+              class="rounded hover:bg-gray-800 px-2 py-1 text-xs uppercase font-bold text-left"
+            >
+              Open in New Tab
+            </button>
+          </li>
+          <li class="contents">
+            <button
+              type="button"
+              onClick={() => downloadImage()}
+              class="rounded hover:bg-gray-800 px-2 py-1 text-xs uppercase font-bold text-left"
+            >
+              Download
+            </button>
+          </li>
+        </ul>
       </Show>
     </>
   )
