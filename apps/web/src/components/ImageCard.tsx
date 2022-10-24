@@ -85,12 +85,16 @@ export const ImageCard: Component<Props> = (props) => {
   }
 
   async function downloadImage() {
+    const format = new URL(props.image.url).pathname.split('.').at(-1)
     const url = await fetch(
       getProcessedImageURL(props.image.url, 0, { passthrough: true })
     )
       .then((res) => res.blob())
       .then((blob) => blobToDataURL(blob))
-    download(url, props.image.title)
+    download(
+      url,
+      props.image.title.replaceAll(' ', '-').toLowerCase() + '.' + format
+    )
   }
 
   return (
