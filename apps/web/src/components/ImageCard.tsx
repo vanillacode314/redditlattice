@@ -143,6 +143,7 @@ export const ImageCard: Component<Props> = (props) => {
             longpress(el, { callback: popupImage })
           }}
           onContextMenu={(e: MouseEvent) => {
+            if (e.pointerType === 'touch') return
             e.preventDefault()
             batch(() => {
               setMenuPos(() => ({ x: e.clientX, y: e.clientY }))
