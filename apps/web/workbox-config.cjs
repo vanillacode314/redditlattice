@@ -33,7 +33,7 @@ const options = {
                 const oldWidth = +oldUrl.searchParams.get('width');
                 const newWidth = +newUrl.searchParams.get('width');
                 if (newWidth <= oldWidth) return new Request(oldUrl);
-                else await cache.delete(response);
+                cache.delete(oldUrl);
               }
 
               return request;
