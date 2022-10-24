@@ -20,7 +20,6 @@ const options = {
         plugins: [
           {
             cacheKeyWillBeUsed: async ({ request }) => {
-              console.log('CKWBU');
               const cache = await caches.open('images-assets');
               const response = await cache.match(request.url, {
                 ignoreSearch: true,
@@ -33,8 +32,7 @@ const options = {
               const newUrl = new URL(request.url);
               const oldWidth = +oldUrl.searchParams.get('width');
               const newWidth = +newUrl.searchParams.get('width');
-              if (oldWidth > newWidth) request.url = oldUrl.toString();
-              console.log(request);
+              if (newWidth < oldWidth) return new Request(oldUrl);
               return request;
             },
           },
