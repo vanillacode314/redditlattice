@@ -140,7 +140,8 @@ export const ImageCard: Component<Props> = (props) => {
           width={props.width}
           fallbackHeight={props.width}
           ref={(el) => {
-            longpress(el, { callback: popupImage })
+            const dispose = longpress(el, { callback: popupImage })
+            onCleanup(dispose)
           }}
           onContextMenu={(e: MouseEvent) => {
             if (e.pointerType === 'touch') return

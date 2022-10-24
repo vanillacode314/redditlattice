@@ -57,4 +57,12 @@ export const longpress = (
   el.addEventListener('touchmove', onTouchMove, { passive: true })
   el.addEventListener('touchend', onTouchEnd, { passive: true })
   el.addEventListener('touchcancel', onTouchEnd, { passive: true })
+
+  return () => {
+    el.removeEventListener('contextmenu', onContextMenu)
+    el.removeEventListener('touchstart', onTouchStart)
+    el.removeEventListener('touchmove', onTouchMove)
+    el.removeEventListener('touchend', onTouchEnd)
+    el.removeEventListener('touchcancel', onTouchEnd)
+  }
 }
