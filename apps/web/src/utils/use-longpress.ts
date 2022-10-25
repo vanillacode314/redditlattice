@@ -1,5 +1,5 @@
 type Pos = { x: number; y: number }
-import * as _ from 'lodash-es'
+import { throttle } from 'lodash-es'
 
 export interface Options {
   callback?: () => any
@@ -31,7 +31,7 @@ export const longpress = (
     timer = setTimeout(() => callback(), duration)
   }
 
-  const onTouchMove = _.throttle((e: TouchEvent) => {
+  const onTouchMove = throttle((e: TouchEvent) => {
     if (touchId < 0) return
     const touch = e.changedTouches[0]
     if (touchId != touch.identifier) return

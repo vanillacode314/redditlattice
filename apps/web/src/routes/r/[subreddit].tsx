@@ -16,6 +16,8 @@ import ImageCard from '~/components/ImageCard'
 import Fab from '~/components/Fab'
 import { trpc } from '~/client'
 import { Spinner, Masonry, Button, InfiniteLoading, InfiniteHandler } from 'ui'
+import { parseSchema } from '~/utils'
+import { TRPCClientError } from '@trpc/client'
 
 const [appState, setAppState] = useAppState()
 
@@ -92,26 +94,27 @@ export default function Subreddit() {
     try {
       const ac = new AbortController()
       runWithOwner(componentOwner, () => onCleanup(() => ac.abort()))
-      let {
-        schema,
-        images: newImages,
-        after,
-      } = await trpc.getImages.query(
-        {
-          q: q(),
-          after: appState.images.after,
-          subreddits: subreddits(),
-          sort: userState()!.sort.get(subreddits().sort().join('+')),
-          nsfw: !userState()!.hideNSFW,
-        },
-        {
-          signal: ac.signal,
-        }
-      )
+      const { newImages, after } = await trpc.getImages
+        .query(
+          {
+            q: q(),
+            after: appState.images.after,
+            subreddits: subreddits(),
+            sort: userState()!.sort.get(subreddits().sort().join('+')),
+            nsfw: !userState()!.hideNSFW,
+          },
+          {
+            signal: ac.signal,
+          }
+        )
+        .then(({ schema, images, after }) => ({
+          newImages: parseSchema<{ name: string; title: string; url: string }>(
+            schema,
+            images
+          ),
+          after,
+        }))
 
-      newImages = newImages.map((item) =>
-        item.reduce((acc, val, idx) => ({ ...acc, [schema[idx]]: val }), {})
-      )
       setAppState('images', (images) => ({
         ...images,
         data: new Set([...images.data, ...newImages]),
@@ -124,6 +127,13 @@ export default function Subreddit() {
       }
       setState('completed')
     } catch (e) {
+      if (e instanceof TRPCClientError) {
+        if (e.cause?.name !== 'ObservableAbortError') {
+          setState('error')
+          throw e
+        }
+        return
+      }
       setState('error')
       throw e
     }

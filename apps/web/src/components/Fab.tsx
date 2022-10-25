@@ -9,7 +9,7 @@ import {
   batch,
 } from 'solid-js'
 import { TransitionStaggeredEnter } from 'ui/transitions'
-import * as _ from 'lodash-es'
+import { throttle } from 'lodash-es'
 
 interface Props {
   icon: string
@@ -25,7 +25,7 @@ const Fab: Component<Props> = (props) => {
 
   let last_known_scroll_position = 0
   const threshold = 30 // in pixels
-  const onScroll = _.throttle((e: Event) => {
+  const onScroll = throttle((e: Event) => {
     const el = e.currentTarget as HTMLElement
     if (!el) return
     const dy = el.scrollTop - last_known_scroll_position

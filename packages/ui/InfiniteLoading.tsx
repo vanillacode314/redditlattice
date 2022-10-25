@@ -13,7 +13,7 @@ export type InfiniteHandler = (
   setState: (state: State) => void,
   firstload: boolean
 ) => void
-import * as _ from 'lodash-es'
+import { throttle } from 'lodash-es'
 
 interface Props {
   children: (state: State, load: (firstload?: boolean) => void) => JSXElement
@@ -31,7 +31,7 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
   )
   const [state, setState] = createSignal<State>('idle')
 
-  const onScroll = _.throttle((e: Event) => {
+  const onScroll = throttle((e: Event) => {
     if (state() !== 'idle') return
     const scrollArea = e.currentTarget as HTMLElement
     if (!scrollArea) return

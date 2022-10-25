@@ -1,7 +1,7 @@
 import { createStore } from 'solid-js/store'
 import { createStorageSignal } from '@solid-primitives/storage'
 import { parse, stringify } from 'devalue'
-import * as _ from 'lodash-es'
+import { merge } from 'lodash-es'
 import { createRenderEffect } from 'solid-js'
 
 export interface IImage {
@@ -76,7 +76,7 @@ export const useUserState = () => [userState, setUserState] as const
 
 createRenderEffect(() =>
   setUserState((state) => {
-    state = _.merge(GET_DEFAULT_USER_STATE(), state)
+    state = merge(GET_DEFAULT_USER_STATE(), state)
     return state
   })
 )

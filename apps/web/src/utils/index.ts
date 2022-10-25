@@ -48,7 +48,7 @@ export function compareMap<K = any, V = any>(
   if (map1.size !== map2.size) return false
   for (const [key, val] of map1) {
     if (!map2.has(key)) return false
-    if (!equals(val, map2.get(key))) return false
+    if (!equals(val, map2.get(key)!)) return false
   }
   return true
 }
@@ -64,7 +64,7 @@ export function compareSet<V = any>(set1: Set<V>, set2: Set<V>): boolean {
 export function updateKey<K = any, V = any>(
   map: Map<K, V>,
   key: K,
-  cb: (val: V) => V
+  cb: (val: V | undefined) => V
 ) {
   const val = map.get(key)
   map.set(key, cb(val))
@@ -88,4 +88,16 @@ export function blobToDataURL(blob: Blob): Promise<string> {
     reader.onabort = (_e) => reject(new Error('Read aborted'))
     reader.readAsDataURL(blob)
   })
+}
+
+export function parseSchema<R extends {}, S extends keyof R = keyof R>(
+  schema: readonly S[],
+  data: readonly R[S][][]
+): R[] {
+  return data.map((item) =>
+    schema.reduce<R>(
+      (obj, fieldName, idx) => ({ ...obj, [fieldName]: item[idx] }),
+      {} as R
+    )
+  )
 }

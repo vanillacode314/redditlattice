@@ -4,6 +4,8 @@ import { trpc } from '~/client'
 import { AsyncList, List, Spinner } from 'ui'
 import { TransitionFade } from 'ui/transitions'
 import { useAppState, useUserState } from '~/stores'
+import { parseSchema } from '~/utils'
+import { TRPCClientError } from '@trpc/client'
 
 export default function Home() {
   const [userState, setUserState] = useUserState()
@@ -38,15 +40,15 @@ export default function Home() {
 
   function removeSubreddit(id: string) {
     setUserState((state) => {
-      state.subreddits.delete(id)
-      return { ...state }
+      state!.subreddits.delete(id)
+      return { ...state! }
     })
   }
 
   function removeSearchTerm(id: string) {
     setUserState((state) => {
-      state.searchTerms.delete(id)
-      return { ...state }
+      state!.searchTerms.delete(id)
+      return { ...state! }
     })
   }
 
@@ -165,21 +167,17 @@ export default function Home() {
                       await trpc.subredditAutocomplete.query(query, {
                         signal: ac.signal,
                       })
-                    return subreddits
-                      .map((sr) =>
-                        sr.reduce(
-                          (acc, val, idx) => ({
-                            ...acc,
-                            [schema[idx]]: val,
-                          }),
-                          {}
-                        )
-                      )
-                      .map(({ id, name }) => ({ id: name, title: name }))
+                    return parseSchema<{ id: string; name: string }>(
+                      schema,
+                      subreddits
+                    ).map(({ name }) => ({ id: name, title: name }))
                   } catch (err) {
-                    err.cause.name !== 'ObservableAbortError' &&
-                      console.error(err)
+                    if (err instanceof TRPCClientError) {
+                      err.cause?.name !== 'ObservableAbortError' &&
+                        console.error(err)
+                    }
                   }
+                  return []
                 }}
                 key={query()}
               ></AsyncList>

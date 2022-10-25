@@ -1,2 +1,2 @@
-export { appRouter } from '@api/server'
-export type { AppRouter } from '@api/server'
+export { appRouter } from '@api/router'
+export type { AppRouter } from '@api/router'

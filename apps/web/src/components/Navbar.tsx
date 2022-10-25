@@ -11,7 +11,7 @@ import {
 } from 'solid-js'
 import { createSpring, animated } from 'solid-spring'
 import { TransitionFade } from 'ui/transitions'
-import * as _ from 'lodash-es'
+import { throttle } from 'lodash-es'
 
 export const Navbar: Component = () => {
   const [mounted, setMounted] = createSignal<boolean>(false)
@@ -47,7 +47,7 @@ export const Navbar: Component = () => {
 
   let last_known_scroll_position = 0
   const threshold = 30 // in pixels
-  const onScroll = _.throttle((e: Event) => {
+  const onScroll = throttle((e: Event) => {
     const el = e.currentTarget as HTMLElement
     if (!el) return
     const dy = el.scrollTop - last_known_scroll_position

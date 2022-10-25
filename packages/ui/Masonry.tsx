@@ -6,11 +6,12 @@ import {
   createEffect,
   on,
   mergeProps,
+  batch,
 } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Entries, Key } from '@solid-primitives/keyed'
 import { createElementSize } from '@solid-primitives/resize-observer'
-import * as _ from 'lodash-es'
+import { range, differenceBy } from 'lodash-es'
 
 interface Item<T = any> {
   id: string
@@ -45,7 +46,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   function getShortestColumnIndex(): number {
     let minIndex = 0
     let minHeight = Infinity
-    for (const x of _.range(cols())) {
+    for (const x of range(cols())) {
       const colEl = document.getElementById(`__masonry-col-${x}`)
       const { height } = colEl ? colEl.getBoundingClientRect() : { height: 0 }
       if (height <= minHeight) {
@@ -71,12 +72,14 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   }
 
   function deleteItems(...itemsToRemove: Item[]) {
-    for (const [idx, items] of Object.entries(columns)) {
-      const filteredItems = _.differenceBy(items, itemsToRemove, (v) => v.id)
-      setColumns({
-        [idx]: filteredItems.length ? filteredItems : undefined,
-      })
-    }
+    batch(() => {
+      for (const [idx, items] of Object.entries(columns)) {
+        const filteredItems = differenceBy(items, itemsToRemove, (v) => v.id)
+        setColumns({
+          [idx]: filteredItems.length ? filteredItems : undefined,
+        })
+      }
+    })
   }
 
   createEffect(
@@ -84,8 +87,8 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
       () => props.items,
       (n, p) => {
         p = p || []
-        const deletedItems = _.differenceBy(p, n, (v) => v.id)
-        const addedItems = _.differenceBy(n, p, (v) => v.id)
+        const deletedItems = differenceBy(p, n, (v) => v.id)
+        const addedItems = differenceBy(n, p, (v) => v.id)
         deleteItems(...deletedItems)
         addItems(...addedItems)
       }

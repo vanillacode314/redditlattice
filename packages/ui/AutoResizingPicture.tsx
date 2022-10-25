@@ -12,7 +12,7 @@ import {
   splitProps,
 } from 'solid-js'
 import { config, animated, createSpring } from 'solid-spring'
-import * as _ from 'lodash-es'
+import { throttle } from 'lodash-es'
 
 interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   width: number
@@ -57,7 +57,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
   const [count, setCount] = createSignal(0)
   const [animate, setAnimate] = createSignal<boolean>(false)
 
-  const checkSize = _.throttle(() => {
+  const checkSize = throttle(() => {
     setCount((c) => c + 1)
     if (count() > 1) setAnimate(true)
     if (error()) return

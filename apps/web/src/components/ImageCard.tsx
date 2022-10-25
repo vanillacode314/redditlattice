@@ -17,7 +17,7 @@ import { TransitionFade } from 'ui/transitions'
 import { AutoResizingPicture, Button } from 'ui'
 import { IImage, useUserState } from '~/stores'
 import { download, blobToDataURL } from '~/utils'
-import * as _ from 'lodash-es'
+import { uniq } from 'lodash-es'
 
 interface Props {
   width: number
@@ -66,7 +66,7 @@ export const ImageCard: Component<Props> = (props) => {
 
   function getSources() {
     const state = userState()!
-    const formats = _.uniq([state.prefferedImageFormat, 'webp'])
+    const formats = uniq([state.prefferedImageFormat, 'webp'])
     return new Map(
       formats.map((format) => [
         `image/${format}`,

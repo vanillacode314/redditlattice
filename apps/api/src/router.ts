@@ -5,6 +5,13 @@ import { getAutocompleteSubreddits } from '@api/lib/get-autocomplete-subreddits'
 
 const t = initTRPC.create()
 
+export function buildFromSchema<R extends {} = {}, S extends keyof R = keyof R>(
+  schema: readonly S[],
+  data: readonly R[]
+): Array<Array<R[keyof R]>> {
+  return data.map((item) => schema.map((fieldName) => item[fieldName]))
+}
+
 export const appRouter = t.router({
   getImages: t.procedure
     .input(
@@ -18,11 +25,10 @@ export const appRouter = t.router({
     )
     .query(async ({ input }) => {
       const { images, after } = await getImages(input)
+      const schema = ['name', 'url', 'title'] as const
       return {
-        schema: ['name', 'url', 'title'] as const,
-        images: images.map(
-          ({ name, url, title }) => [name, url, title] as const
-        ),
+        schema,
+        images: buildFromSchema(schema, images),
         after,
       }
     }),
@@ -30,9 +36,10 @@ export const appRouter = t.router({
     .input(z.string())
     .query(async ({ input }) => {
       const { subreddits } = await getAutocompleteSubreddits(input)
+      const schema = ['id', 'name'] as const
       return {
-        schema: ['id', 'name'] as const,
-        subreddits: subreddits.map(({ id, name }) => [id, name] as const),
+        schema,
+        subreddits: buildFromSchema(schema, subreddits),
       }
     }),
 })
