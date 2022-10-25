@@ -105,9 +105,8 @@ export default function Home() {
                   setCollection(id, name)
                 }}
                 onFocus={(e) => e.relatedTarget?.focus()}
-                class="i-mdi-edit text-xl"
               >
-                /r/
+                <span class="i-mdi-edit text-xl"></span>
               </button>
             </Show>
           </TransitionFade>
@@ -117,9 +116,8 @@ export default function Home() {
                 type="button"
                 onClick={() => setQuery('')}
                 onFocus={(e) => e.relatedTarget?.focus()}
-                class="i-mdi-close-circle text-xl"
               >
-                /r/
+                <span class="i-mdi-close-circle text-xl"></span>
               </button>
             </Show>
           </TransitionFade>

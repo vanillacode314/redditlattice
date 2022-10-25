@@ -100,16 +100,16 @@ export default function Home() {
             <Show when={query()}>
               <button
                 type="button"
+                class="grid place-items-center"
                 onClick={() => {
                   batch(() => {
                     setSubreddit('')
                     setSearchTerm('')
                   })
                 }}
-                onFocus={(e) => e.relatedTarget?.focus()}
-                class="i-mdi-close-circle text-xl"
+                onFocus={(e) => e.relatedTarget?.focus?.()}
               >
-                /r/
+                <span class="i-mdi-close-circle text-xl"></span>
               </button>
             </Show>
           </TransitionFade>

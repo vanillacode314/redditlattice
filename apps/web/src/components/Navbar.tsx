@@ -114,10 +114,10 @@ export const Navbar: Component = () => {
             >
               <button
                 type="button"
-                text="2xl"
-                class="i-mdi-arrow-left"
                 onClick={() => setAppState({ isSearching: false })}
-              ></button>
+              >
+                <span text="2xl" class="i-mdi-arrow-left"></span>
+              </button>
               <input
                 ref={(el) => {
                   requestAnimationFrame(() => {
@@ -137,11 +137,11 @@ export const Navbar: Component = () => {
                   <Show when={query()}>
                     <button
                       type="button"
-                      text="2xl"
-                      class="i-mdi-close-circle"
                       onClick={() => setQuery('')}
                       onFocus={(e) => e.relatedTarget?.focus()}
-                    ></button>
+                    >
+                      <span text="2xl" class="i-mdi-close-circle"></span>
+                    </button>
                   </Show>
                 </TransitionFade>
               </div>
@@ -150,13 +150,16 @@ export const Navbar: Component = () => {
         >
           <button
             type="button"
-            text="2xl"
-            classList={{
-              'i-mdi-menu': !showBack(),
-              'i-mdi-arrow-left': showBack(),
-            }}
             onClick={() => (showBack() ? history.go(-1) : toggleDrawer())}
-          ></button>
+          >
+            <span
+              text="2xl"
+              classList={{
+                'i-mdi-menu': !showBack(),
+                'i-mdi-arrow-left': showBack(),
+              }}
+            ></span>
+          </button>
           <span text="xl" truncate>
             {appState.title || 'RedditLattice'}
           </span>
@@ -165,10 +168,10 @@ export const Navbar: Component = () => {
           <Show when={showBack()}>
             <button
               type="button"
-              text="2xl"
-              class="i-mdi-magnify"
               onClick={() => setAppState({ isSearching: true })}
-            ></button>
+            >
+              <span text="2xl" class="i-mdi-magnify"></span>
+            </button>
           </Show>
           {/* </TransitionFade> */}
         </Show>

@@ -11,14 +11,7 @@ export const ListItem: Component<Props> = (props) => {
   const merged = mergeProps({ focusable: true }, props)
   return (
     <div
-      bg="hover:gray-800 focus-within:gray-800"
-      cursor-pointer
-      flex
-      items-center
-      gap-5
-      transition-colors
-      px-5
-      py-2
+      class="cursor-pointer flex items-center gap-5 transition-colors px-5 py-2 hover:bg-gray-800 focus-within:bg-gray-800"
       onClick={() => props.onClick()}
       tabindex="-1"
       onMouseDown={(e) => merged.focusable || e.preventDefault()}
@@ -28,15 +21,14 @@ export const ListItem: Component<Props> = (props) => {
       </div>
       <Show when={props.onRemove}>
         <button
-          outline-none
-          class="i-mdi-close-circle"
-          text="gray-700 hover:white focus:white xl"
-          transition-colors
+          class="outline-none group"
           onClick={(e) => {
             e.stopPropagation()
-            props.onRemove()
+            props.onRemove!()
           }}
-        ></button>
+        >
+          <span class="i-mdi-close-circle text-gray-700 group-hover:text-white group-focus:text-white text-xl transition-colors"></span>
+        </button>
       </Show>
     </div>
   )
