@@ -5,6 +5,7 @@ import {
   mergeProps,
   Component,
   Show,
+  For,
 } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Portal } from 'solid-js/web'
@@ -243,33 +244,37 @@ export const ImageCard: Component<Props> = (props) => {
             onCleanup(dispose)
           }}
         >
-          <li class="contents">
-            <button
-              type="button"
-              onClick={() => window.open(props.image.url, '_blank')}
-              class="rounded hover:bg-gray-800 px-2 py-1 text-xs uppercase font-bold text-left"
-            >
-              Open in New Tab
-            </button>
-          </li>
-          <li class="contents">
-            <button
-              type="button"
-              onClick={() => downloadImage()}
-              class="rounded hover:bg-gray-800 px-2 py-1 text-xs uppercase font-bold text-left"
-            >
-              Download
-            </button>
-          </li>
-          <li class="contents">
-            <button
-              type="button"
-              onClick={() => removeFromCache()}
-              class="rounded hover:bg-gray-800 px-2 py-1 text-xs uppercase font-bold text-left"
-            >
-              Invalidate Cache
-            </button>
-          </li>
+          <For
+            each={[
+              {
+                title: 'Open in New Tab',
+                handler: () => window.open(props.image.url, '_blank'),
+              },
+              {
+                title: 'Download',
+                handler: () => downloadImage(),
+              },
+              {
+                title: 'Invalidate Cache',
+                handler: () => removeFromCache(),
+              },
+            ]}
+          >
+            {({ title, handler }) => (
+              <li class="contents">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handler()
+                    setMenu(false)
+                  }}
+                  class="rounded hover:bg-gray-800 px-2 py-1 text-xs uppercase font-bold text-left"
+                >
+                  {title}
+                </button>
+              </li>
+            )}
+          </For>
         </ul>
       </Show>
     </>
