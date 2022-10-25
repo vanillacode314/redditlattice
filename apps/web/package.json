@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "solid-start dev",
-    "build": "solid-start build && workbox generateSW workbox-config.cjs",
+    "build": "solid-start build && workbox generateSW workbox-config.cjs && cp -f _redirects netlify/",
     "start": "solid-start start",
     "lint": "eslint 'src/**/*(*.tsx|*.ts|*.js|*.jsx)'"
   },

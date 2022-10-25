@@ -1,8 +1,7 @@
 [build]
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF . ../api/ ../../packages/ui/"
-  command = "pnpm install && pnpm run build"
+  command = "pnpm run build"
   publish = "netlify"
 
 [build.environment]
-  NPM_FLAGS = "--version"
   NODE_VERSION = "16"

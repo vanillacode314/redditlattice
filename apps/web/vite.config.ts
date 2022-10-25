@@ -1,16 +1,16 @@
-import solid from 'solid-start/vite';
-import { defineConfig } from 'vite';
-import Unocss from '@unocss/vite';
+import solid from 'solid-start/vite'
+import { defineConfig } from 'vite'
+import Unocss from '@unocss/vite'
 import {
   presetUno,
   presetIcons,
   presetWebFonts,
   presetAttributify,
-} from 'unocss';
-import path from 'path';
-import netlify from 'solid-start-netlify';
-import node from 'solid-start-node';
-import { version } from './package.json' assert { type: 'json' };
+} from 'unocss'
+import path from 'path'
+import netlify from 'solid-start-netlify'
+import node from 'solid-start-node'
+import { version } from './package.json' assert { type: 'json' }
 
 export default defineConfig({
   define: {
@@ -45,4 +45,4 @@ export default defineConfig({
       ],
     }),
   ],
-});
+})
