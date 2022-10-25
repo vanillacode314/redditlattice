@@ -107,17 +107,21 @@ export const ImageCard: Component<Props> = (props) => {
   }
 
   async function removeFromCache() {
-    const cache = await caches.open('images-assets')
-    const keys = await cache.keys()
-    for (const response of keys) {
-      const url = new URL(response.url)
-      if (url.searchParams.get('url') === props.image.url) {
-        cache.delete(key)
-        break
-      }
-    }
     setError(true)
-    setError(false)
+    requestAnimationFrame(() =>
+      requestAnimationFrame(async () => {
+        const cache = await caches.open('images-assets')
+        const keys = await cache.keys()
+        for (const response of keys) {
+          const url = new URL(response.url)
+          if (url.searchParams.get('url') === props.image.url) {
+            await cache.delete(url)
+            break
+          }
+        }
+        setError(false)
+      })
+    )
   }
 
   return (
