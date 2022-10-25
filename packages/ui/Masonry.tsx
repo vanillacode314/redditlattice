@@ -60,6 +60,11 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   function addItems(...items: Item[]) {
     let len = items.length
     let i = 0
+    if (cols() === 1) {
+      const old = columns[0] || []
+      setColumns(0, [...old, ...items])
+      return
+    }
     requestAnimationFrame(function handler() {
       if (i === len) return
       const item = items[i]
