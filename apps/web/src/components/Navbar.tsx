@@ -12,14 +12,20 @@ import {
 import { createSpring, animated } from 'solid-spring'
 import { TransitionFade } from 'ui/transitions'
 import { throttle } from 'lodash-es'
+import screenfull from 'screenfull'
 
 export const Navbar: Component = () => {
   const [mounted, setMounted] = createSignal<boolean>(false)
   const [height, setHeight] = createSignal<number>(0)
   const [appState, setAppState] = useAppState()
   const [query, setQuery] = createSignal<string>('')
+  const [fullscreen, setFullscreen] = createSignal<boolean>(false)
 
-  const navigate = useNavigate()
+  createEffect(() => {
+    if (!screenfull.isEnabled) return
+    fullscreen() ? screenfull.request() : screenfull.exit()
+  })
+
   const location = useLocation()
   const [, setSearchParams] = useSearchParams()
 
@@ -160,7 +166,7 @@ export const Navbar: Component = () => {
               }}
             ></span>
           </button>
-          <span text="xl" truncate>
+          <span class="text-semibold font-semibold truncate">
             {appState.title || 'RedditLattice'}
           </span>
           <span class="grow" />
@@ -171,6 +177,15 @@ export const Navbar: Component = () => {
               onClick={() => setAppState({ isSearching: true })}
             >
               <span text="2xl" class="i-mdi-magnify"></span>
+            </button>
+            <button type="button" onClick={() => setFullscreen((_) => !_)}>
+              <span
+                text="2xl"
+                classList={{
+                  'i-mdi-fullscreen': !fullscreen(),
+                  'i-mdi-fullscreen-exit': fullscreen(),
+                }}
+              ></span>
             </button>
           </Show>
           {/* </TransitionFade> */}

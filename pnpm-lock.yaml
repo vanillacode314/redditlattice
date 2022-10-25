@@ -83,6 +83,7 @@ importers:
       eslint-config-custom: workspace:*
       image-server: workspace:*
       lodash-es: ^4.17.21
+      screenfull: ^6.0.2
       solid-js: ^1.5.7
       solid-spring: ^0.0.7
       solid-start: ^0.1.6
@@ -111,6 +112,7 @@ importers:
       api: link:../api
       devalue: 4.0.0
       image-server: link:../image-server
+      screenfull: 6.0.2
       solid-js: 1.5.7
       solid-spring: 0.0.7_solid-js@1.5.7
       solid-start: 0.1.6_3c2wxe5giaavn7kxcvquai6bbu
@@ -7378,6 +7380,11 @@ packages:
 
   /safer-buffer/2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
+
+  /screenfull/6.0.2:
+    resolution: {integrity: sha512-AQdy8s4WhNvUZ6P8F6PB21tSPIYKniic+Ogx0AacBMjKP1GUHN2E9URxQHtCusiwxudnCKkdy4GrHXPPJSkCCw==}
+    engines: {node: ^14.13.1 || >=16.0.0}
+    dev: false
 
   /secure-json-parse/2.5.0:
     resolution: {integrity: sha512-ZQruFgZnIWH+WyO9t5rWt4ZEGqCKPwhiw+YbzTwpmT9elgLrLcfuyUiSnwwjUiVy9r4VM3urtbNF1xmEh9IL2w==}

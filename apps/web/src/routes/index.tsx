@@ -11,7 +11,7 @@ export default function Home() {
   const [userState, setUserState] = useUserState()
   const [, setAppState] = useAppState()
 
-  onMount(() => setAppState('title', ''))
+  onMount(() => setAppState('title', 'Home'))
 
   const [subreddit, setSubreddit] = createSignal<string>('')
   const [searchTerm, setSearchTerm] = createSignal<string>('')

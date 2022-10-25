@@ -11,7 +11,7 @@ export default function Home() {
   const [userState, setUserState] = useUserState()
   const [, setAppState] = useAppState()
 
-  onMount(() => setAppState('title', ''))
+  onMount(() => setAppState('title', 'Collections'))
 
   const [focused, setFocused] = createSignal<boolean>(false)
   const [query, setQuery] = createSignal<string>('')
