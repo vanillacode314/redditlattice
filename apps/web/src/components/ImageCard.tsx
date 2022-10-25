@@ -106,6 +106,20 @@ export const ImageCard: Component<Props> = (props) => {
     )
   }
 
+  async function removeFromCache() {
+    const cache = await caches.open('images-assets')
+    const keys = await cache.keys()
+    for (const response of keys) {
+      const url = new URL(response.url)
+      if (url.searchParams.get('url') === props.image.url) {
+        cache.delete(key)
+        break
+      }
+    }
+    setError(true)
+    setError(false)
+  }
+
   return (
     <>
       <Show
@@ -189,6 +203,13 @@ export const ImageCard: Component<Props> = (props) => {
                 <span class="py-5 grow">{props.image.title}</span>
                 <button
                   class="py-5"
+                  onClick={() => removeFromCache()}
+                  type="button"
+                >
+                  <span class="text-2xl i-mdi-cached"></span>
+                </button>
+                <button
+                  class="py-5"
                   onClick={() => window.open(props.image.url, '_blank')}
                   type="button"
                 >
@@ -234,6 +255,15 @@ export const ImageCard: Component<Props> = (props) => {
               class="rounded hover:bg-gray-800 px-2 py-1 text-xs uppercase font-bold text-left"
             >
               Download
+            </button>
+          </li>
+          <li class="contents">
+            <button
+              type="button"
+              onClick={() => removeFromCache()}
+              class="rounded hover:bg-gray-800 px-2 py-1 text-xs uppercase font-bold text-left"
+            >
+              Invalidate Cache
             </button>
           </li>
         </ul>
