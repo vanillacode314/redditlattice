@@ -1,5 +1,8 @@
-export function outsideclick(node: HTMLElement, callback: (e: Event) => void) {
-  const onClick = (e: Event) => e.target !== node && callback(e)
-  window.addEventListener('mousedown', onClick)
-  return () => window.removeEventListener('mousedown', onClick)
+export function outsideclick(node: HTMLElement, callback: (e: Event) => any) {
+  const onMouseDown = (e: MouseEvent) => {
+    if (!e.target) return
+    node.contains(e.target as HTMLElement) || callback(e)
+  }
+  window.addEventListener('mousedown', onMouseDown, { passive: true })
+  return () => window.removeEventListener('mousedown', onMouseDown)
 }
