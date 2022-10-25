@@ -65,6 +65,10 @@ export const Root: Component = () => {
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-XDR9E19TGZ"
+        ></script>
         <Link rel="manifest" href="/manifest.webmanifest"></Link>
         <Link rel="icon" href="/favicon.svg" />
       </Head>
