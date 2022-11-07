@@ -18,6 +18,7 @@ import { trpc } from '~/client'
 import { Spinner, Masonry, Button, InfiniteLoading, InfiniteHandler } from 'ui'
 import { parseSchema } from '~/utils'
 import { TRPCClientError } from '@trpc/client'
+import { minBy } from 'lodash-es'
 
 const [appState, setAppState] = useAppState()
 
@@ -79,7 +80,23 @@ export default function Subreddit() {
     if (subreddits().length > 1) return
     if (q().length > 1) return
     setUserState((state) => {
+      /* Update Subreddits */
       state!.subreddits.add(subreddits()[0])
+
+      /* Update Recents */
+      while (state!.recents.size >= state!.recentsLimit) {
+        const [q, _] = minBy(
+          [...state!.recents],
+          ([_, timestamp]) => timestamp
+        )!
+        state!.recents.delete(q)
+      }
+      state!.recents.set(
+        q().length > 0 ? `${subreddits()[0]}?${q()[0]}` : subreddits()[0],
+        Math.floor(Date.now() / 1000)
+      )
+
+      /* Updated Search Terms */
       if (q().length > 0)
         state!.searchTerms.set(q()[0].toLowerCase(), subreddits()[0])
       return { ...state! }

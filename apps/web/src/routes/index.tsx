@@ -25,6 +25,14 @@ export default function Home() {
     return `${subreddit().toLowerCase()}`
   }
 
+  const setQuery = (val: string) => {
+    const [sr, q] = val.split('?')
+    batch(() => {
+      setSubreddit(sr)
+      setSearchTerm(q || '')
+    })
+  }
+
   const navigate = useNavigate()
 
   function onSubmit(e: SubmitEvent) {
@@ -185,11 +193,23 @@ export default function Home() {
           }
         >
           <List
+            onClick={(id) => setQuery(id)}
+            reverse
+            title="recents"
+            items={[...userState()!.recents]
+              .sort(([_q1, t1], [_q2, t2]) => t2 - t1)
+              .map(([q, _]) => ({
+                id: q,
+                title: q,
+              }))}
+          ></List>
+          <div border="b gray-800"></div>
+          <List
             onClick={(id) => setSubreddit(id)}
             onRemove={(id) => removeSubreddit(id)}
             reverse
             title="subreddits"
-            items={[...userState().subreddits].sort().map((sr) => ({
+            items={[...userState()!.subreddits].sort().map((sr) => ({
               id: sr,
               title: sr,
             }))}
@@ -197,7 +217,7 @@ export default function Home() {
           <div border="b gray-800"></div>
           <List
             onClick={(id) => {
-              const sr = subreddit() || userState().searchTerms.get(id)
+              const sr = subreddit() || userState()!.searchTerms.get(id)
               if (sr) {
                 batch(() => {
                   setSubreddit(sr)
@@ -208,7 +228,7 @@ export default function Home() {
             onRemove={(id) => removeSearchTerm(id)}
             reverse
             title="searches"
-            items={[...userState().searchTerms.keys()].sort().map((q) => ({
+            items={[...userState()!.searchTerms.keys()].sort().map((q) => ({
               id: q,
               title: q,
             }))}

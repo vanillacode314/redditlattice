@@ -23,7 +23,6 @@
     "@use-gesture/vanilla": "^10.2.20",
     "api": "workspace:*",
     "devalue": "^4.0.0",
-    "image-server": "workspace:*",
     "screenfull": "^6.0.2",
     "solid-js": "^1.5.7",
     "solid-spring": "^0.0.7",
@@ -31,7 +30,8 @@
     "solid-start-netlify": "^0.2.0",
     "solid-start-node": "^0.1.6",
     "ui": "workspace:*",
-    "undici": "^5.11.0"
+    "undici": "^5.11.0",
+    "xstate": "^4.34.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

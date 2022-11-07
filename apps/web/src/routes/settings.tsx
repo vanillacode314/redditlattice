@@ -4,6 +4,7 @@ import { download, formatBytes } from '~/utils'
 import { useUserState, useAppState } from '~/stores'
 import { stringify, parse } from 'devalue'
 import { Button } from 'ui'
+import { minBy } from 'lodash-es'
 
 export default function Settings() {
   let filesInput: HTMLInputElement
@@ -78,17 +79,20 @@ export default function Settings() {
 
   onMount(() => setAppState('title', 'Settings'))
 
+  const setRecentsLimit = (n: number) => {
+    setUserState((_) => ({ ..._!, recentsLimit: n }))
+  }
   const setImageSizeMultiplier = (n: number) =>
-    setUserState((_) => ({ ..._, imageSizeMultiplier: n }))
-  const setGap = (n: number) => setUserState((_) => ({ ..._, gap: n }))
+    setUserState((_) => ({ ..._!, imageSizeMultiplier: n }))
+  const setGap = (n: number) => setUserState((_) => ({ ..._!, gap: n }))
   const setBorderRadius = (n: number) =>
-    setUserState((_) => ({ ..._, borderRadius: n }))
+    setUserState((_) => ({ ..._!, borderRadius: n }))
   const setImageFormat = (format: string) =>
-    setUserState((_) => ({ ..._, prefferedImageFormat: format }))
+    setUserState((_) => ({ ..._!, prefferedImageFormat: format }))
   const setProcessImages = (processImages: boolean) =>
-    setUserState((_) => ({ ..._, processImages }))
+    setUserState((_) => ({ ..._!, processImages }))
   const setHideNSFW = (hideNSFW: boolean) =>
-    setUserState((_) => ({ ..._, hideNSFW }))
+    setUserState((_) => ({ ..._!, hideNSFW }))
 
   const resetState = () =>
     setAppState({
@@ -99,7 +103,20 @@ export default function Settings() {
       },
     })
 
-  onCleanup(() => resetState())
+  onCleanup(() => {
+    /* Update Recents */
+    setUserState((state) => {
+      while (state!.recents.size > state!.recentsLimit) {
+        const [q, _] = minBy(
+          [...state!.recents],
+          ([_, timestamp]) => timestamp
+        )!
+        state!.recents.delete(q)
+      }
+      return { ...state! }
+    })
+    resetState()
+  })
 
   return (
     <div p-5 flex flex-col-reverse h-full gap-5 id="scroller">
@@ -210,6 +227,19 @@ export default function Settings() {
           type="checkbox"
           checked={userState()!.hideNSFW}
           onChange={(e) => setHideNSFW(e.currentTarget.checked)}
+        />
+      </label>
+      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
+        <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+          Recents Limit
+        </span>
+        <input
+          class="bg-black outline-none"
+          min="0"
+          step="1"
+          type="number"
+          value={userState()!.recentsLimit}
+          onChange={(e) => setRecentsLimit(+e.currentTarget.value)}
         />
       </label>
     </div>
