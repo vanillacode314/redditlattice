@@ -25,25 +25,42 @@ workbox.routing.registerRoute(
       {
         cacheDidUpdate: async ({ request }) => {
           const url = new URL(request.url)
-          await set(
-            JSON.stringify(Object.fromEntries(url.searchParams.entries())),
-            request.url
+          const key = url.searchParams.get('url')
+
+          const oldData = await get(key)
+          const newData = {
+            ...Object.fromEntries(url.searchParams.entries()),
+            requestUrl: request.url,
+          }
+          if (
+            oldData?.width <= newData.width ||
+            newData.format !== oldData?.format
           )
+            await set(key, newData)
         },
         cacheKeyWillBeUsed: async ({ request }) => {
-          const keys = await entries()
-
-          for (const [data, response] of keys) {
-            const newURL = new URL(request.url)
-            const { url, width, format } = JSON.parse(data)
-            if (format !== newURL.searchParams.get('format')) continue
-            if (url !== newURL.searchParams.get('url')) continue
-            if (width > +newURL.searchParams.get('width')) {
-              return new Request(response)
-            }
-            caches.open('images-assets').then((cache) => cache.delete(url))
+          async function removeFromCache() {
+            await caches
+              .open('images-assets')
+              .then((cache) => cache.delete(requestUrl))
+            await del(newURL.searchParams.get('url'))
           }
-          return request
+
+          const newURL = new URL(request.url)
+          const data = await get(newURL.searchParams.get('url'))
+          if (!data) return request
+
+          const { requestUrl, width, format } = data
+          if (format !== newURL.searchParams.get('format')) {
+            await removeFromCache()
+            return request
+          }
+          if (width >= +newURL.searchParams.get('width'))
+            return new Request(requestUrl)
+          else {
+            await removeFromCache()
+            return request
+          }
         },
       },
       new workbox.cacheableResponse.CacheableResponsePlugin({

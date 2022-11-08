@@ -54,12 +54,15 @@ export const Root: Component = () => {
   const cleanCache = async () => {
     const cache = await caches.open('images-assets')
     if (!cache) return
-    const keysToDelete: IDBValidKey[] = await entries()
+    const urlsToDelete: IDBValidKey[] = await entries()
       .then((entries) =>
-        asyncFilter(entries, async ([_key, url]) => !(await cache.match(url)))
+        asyncFilter(entries, async ([_url, { requestUrl }]) => {
+          const entry = await cache.match(requestUrl)
+          return !entry
+        })
       )
-      .then((entries) => entries.map(([key, _url]) => key))
-    await delMany(keysToDelete)
+      .then((entries) => entries.map(([url, _data]) => url))
+    await delMany(urlsToDelete)
   }
 
   onMount(() => importLegacyState())
