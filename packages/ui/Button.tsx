@@ -7,6 +7,7 @@ interface Props extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button: Component<Props> = (props) => {
   return (
     <button
+      style={{ '-webkit-tap-highlight-color': 'transparent' }}
       class={props.class}
       uppercase
       tracking-wide

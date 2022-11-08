@@ -32,7 +32,8 @@ export default function About() {
         <ul>
           <li>
             <a
-              href="https://raqueebuddinaziz.com/"
+              style={{ '-webkit-tap-highlight-color': 'transparent' }}
+              href="https://raqueebuddinaziz.com/#contact"
               px-5
               py-3
               flex
@@ -48,6 +49,7 @@ export default function About() {
           </li>
           <li>
             <a
+              style={{ '-webkit-tap-highlight-color': 'transparent' }}
               href="https://github.com/vanillacode314/redditlattice"
               px-5
               py-3

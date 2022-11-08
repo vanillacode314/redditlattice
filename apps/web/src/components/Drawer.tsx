@@ -89,6 +89,7 @@ export const Drawer: Component = () => {
           <For each={links}>
             {({ icon, href, title }) => (
               <A
+                style={{ '-webkit-tap-highlight-color': 'transparent' }}
                 class="flex gap-3 px-5 py-3 uppercase items-center tracking-wide text-sm font-bold bg-black hover:bg-gray-900 transition-colors"
                 href={href}
                 onClick={() => setOpen(false)}
