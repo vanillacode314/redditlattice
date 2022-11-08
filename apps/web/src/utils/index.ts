@@ -101,3 +101,11 @@ export function parseSchema<R extends {}, S extends keyof R = keyof R>(
     )
   )
 }
+
+export const asyncFilter = async <T = unknown>(
+  arr: T[],
+  predicate: (val: T) => Promise<boolean>
+): Promise<T[]> => {
+  const results = await Promise.all(arr.map(predicate))
+  return arr.filter((_v, index) => results[index])
+}

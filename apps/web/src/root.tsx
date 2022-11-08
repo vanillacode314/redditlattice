@@ -12,7 +12,7 @@ import {
   Scripts,
   Title,
 } from 'solid-start'
-
+import { entries, delMany } from 'idb-keyval'
 import '@unocss/reset/tailwind.css'
 import 'uno.css'
 import './root.css'
@@ -20,6 +20,7 @@ import Base from '~/layouts/Base'
 import { useAppState, useUserState } from '~/stores'
 import { Spinner } from 'ui'
 import { DevtoolsOverlay } from '@solid-devtools/overlay'
+import { asyncFilter } from './utils'
 
 export const Root: Component = () => {
   const [appState] = useAppState()
@@ -31,9 +32,9 @@ export const Root: Component = () => {
       const sr = JSON.parse(localSr)
       setUserState((_) => {
         for (const x of sr) {
-          _.subreddits.add(x)
+          _!.subreddits.add(x)
         }
-        return { ..._ }
+        return { ..._! }
       })
       localStorage.removeItem('subreddits')
     }
@@ -42,15 +43,27 @@ export const Root: Component = () => {
       const searches = JSON.parse(localSearches)
       setUserState((_) => {
         for (const x of searches) {
-          _.searchTerms.set(x, '')
+          _!.searchTerms.set(x, '')
         }
-        return { ..._ }
+        return { ..._! }
       })
       localStorage.removeItem('searches')
     }
   }
 
+  const cleanCache = async () => {
+    const cache = await caches.open('images-assets')
+    if (!cache) return
+    const keysToDelete: IDBValidKey[] = await entries()
+      .then((entries) =>
+        asyncFilter(entries, async ([_key, url]) => !(await cache.match(url)))
+      )
+      .then((entries) => entries.map(([key, _url]) => key))
+    await delMany(keysToDelete)
+  }
+
   onMount(() => importLegacyState())
+  onMount(() => cleanCache())
 
   return (
     <Html lang="en">

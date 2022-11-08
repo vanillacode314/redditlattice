@@ -4,10 +4,7 @@ importScripts('third_party/idb/umd.js')
 
 const { del, set, get, entries } = idbKeyval
 
-let CACHE
-
 self.skipWaiting()
-
 workbox.setConfig({
   modulePathPrefix: '/third_party/workbox/workbox-v6.5.4/',
 })
