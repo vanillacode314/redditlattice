@@ -1,5 +1,7 @@
 import { Show, For, Component } from 'solid-js'
 import ListItem from './ListItem'
+import { TransitionSlide } from './transitions'
+import { Key } from '@solid-primitives/keyed'
 
 interface Item {
   id: string
@@ -30,19 +32,28 @@ export const List: Component<Props> = (props) => {
         class="flex flex-col"
         classList={{ 'flex-col-reverse': props.reverse }}
       >
-        <For each={props.items}>
-          {({ id, title }) => (
-            <li>
-              <ListItem
-                focusable={props.focusable}
-                onClick={() => props.onClick(id)}
-                onRemove={props.onRemove ? () => props.onRemove(id) : undefined}
-              >
-                {title}
-              </ListItem>
-            </li>
-          )}
-        </For>
+        <TransitionSlide duration={200}>
+          <Key each={props.items} by="id">
+            {(item) => {
+              const title = () => item().title
+              const id = () => item().id
+              return (
+                <li class="w-full overflow-hidden">
+                  <ListItem
+                    focusable={props.focusable}
+                    onClick={() => props.onClick(id())}
+                    onRemove={
+                      /* TODO: Possible bug */
+                      props.onRemove ? () => props.onRemove!(id()) : undefined
+                    }
+                  >
+                    {title()}
+                  </ListItem>
+                </li>
+              )
+            }}
+          </Key>
+        </TransitionSlide>
       </ul>
     </div>
   )
