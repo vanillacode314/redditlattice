@@ -23,27 +23,31 @@ const options = {
           {
             cacheKeyWillBeUsed: async ({ request }) => {
               console.time(request.url);
-              const cache = await caches.open('images-assets');
-              const keys = await cache.keys();
+              return await caches
+                .open('images-assets')
+                .then((cache) => cache.keys())
+                .then((keys) => {
+                  console.time(request.url + 'loop');
+                  for (const response of keys) {
+                    const oldUrl = new URL(response.url);
+                    const newUrl = new URL(request.url);
+                    const oldAsset = oldUrl.searchParams.get('url');
+                    const newAsset = newUrl.searchParams.get('url');
+                    if (oldAsset !== newAsset) continue;
 
-              for (const response of keys) {
-                const oldUrl = new URL(response.url);
-                const newUrl = new URL(request.url);
-                const oldAsset = oldUrl.searchParams.get('url');
-                const newAsset = newUrl.searchParams.get('url');
-                if (oldAsset !== newAsset) continue;
-
-                const oldWidth = +oldUrl.searchParams.get('width');
-                const newWidth = +newUrl.searchParams.get('width');
-                if (newWidth <= oldWidth) {
+                    const oldWidth = +oldUrl.searchParams.get('width');
+                    const newWidth = +newUrl.searchParams.get('width');
+                    if (newWidth <= oldWidth) {
+                      console.timeEnd(request.url + 'loop');
+                      console.timeEnd(request.url);
+                      return new Request(oldUrl);
+                    }
+                    cache.delete(oldUrl);
+                  }
+                  console.timeEnd(request.url + 'loop');
                   console.timeEnd(request.url);
-                  return new Request(oldUrl);
-                }
-                cache.delete(oldUrl);
-              }
-
-              console.timeEnd(request.url);
-              return request;
+                  return request;
+                });
             },
           },
         ],
