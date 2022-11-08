@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "solid-start dev",
-    "build": "solid-start build && workbox generateSW workbox-config.cjs && cp -f _redirects netlify/",
+    "build": "solid-start build && workbox injectManifest workbox-config.cjs && cp -f _redirects netlify/",
     "start": "solid-start start",
     "lint": "eslint 'src/**/*(*.tsx|*.ts|*.js|*.jsx)'"
   },
@@ -40,6 +40,7 @@
     "@types/lodash-es": "^4.17.6",
     "@types/node": "^17.0.12",
     "@types/web": "^0.0.75",
+    "@types/workbox-sw": "^4.3.2",
     "@unocss/preset-attributify": "^0.45.29",
     "@unocss/vite": "^0.45.29",
     "eslint": "7.32.0",
