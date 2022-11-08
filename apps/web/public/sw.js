@@ -1,5 +1,8 @@
 /// <reference lib="webworker" />
 importScripts('/third_party/workbox/workbox-v6.5.4/workbox-sw.js')
+importScripts('third_party/idb/umd.js')
+
+const { del, set, get, entries } = idbKeyval
 
 let CACHE
 
@@ -23,31 +26,26 @@ workbox.routing.registerRoute(
     },
     plugins: [
       {
+        cacheDidUpdate: async ({ request }) => {
+          const url = new URL(request.url)
+          await set(
+            JSON.stringify(Object.fromEntries(url.searchParams.entries())),
+            request.url
+          )
+        },
         cacheKeyWillBeUsed: async ({ request }) => {
-          if (!CACHE) CACHE = caches.open('images-assets')
-          const cache = await CACHE
-          console.time(request.url)
-          const keys = await cache.keys()
+          const keys = await entries()
 
-          console.time(request.url + 'loop')
-          for (const response of keys) {
-            const oldUrl = new URL(response.url)
-            const newUrl = new URL(request.url)
-            const oldAsset = oldUrl.searchParams.get('url')
-            const newAsset = newUrl.searchParams.get('url')
-            if (oldAsset !== newAsset) continue
-
-            const oldWidth = +oldUrl.searchParams.get('width')
-            const newWidth = +newUrl.searchParams.get('width')
-            if (newWidth <= oldWidth) {
-              console.timeEnd(request.url + 'loop')
-              console.timeEnd(request.url)
-              return new Request(oldUrl)
+          for (const [data, response] of keys) {
+            const newURL = new URL(request.url)
+            const { url, width, format } = JSON.parse(data)
+            if (format !== newURL.searchParams.get('format')) continue
+            if (url !== newURL.searchParams.get('url')) continue
+            if (width > +newURL.searchParams.get('width')) {
+              return new Request(response)
             }
-            cache.delete(oldUrl)
+            caches.open('images-assets').then((cache) => cache.delete(url))
           }
-          console.timeEnd(request.url + 'loop')
-          console.timeEnd(request.url)
           return request
         },
       },

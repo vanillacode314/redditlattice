@@ -53,6 +53,7 @@ importers:
       devalue: ^4.0.0
       eslint: 7.32.0
       eslint-config-custom: workspace:*
+      idb-keyval: ^6.2.0
       lodash-es: ^4.17.21
       screenfull: ^6.0.2
       solid-js: ^1.5.7
@@ -83,6 +84,7 @@ importers:
       '@use-gesture/vanilla': 10.2.20
       api: link:../api
       devalue: 4.0.0
+      idb-keyval: 6.2.0
       screenfull: 6.0.2
       solid-js: 1.5.7
       solid-spring: 0.0.7_solid-js@1.5.7
@@ -5384,6 +5386,12 @@ packages:
       safer-buffer: 2.1.2
     dev: false
 
+  /idb-keyval/6.2.0:
+    resolution: {integrity: sha512-uw+MIyQn2jl3+hroD7hF8J7PUviBU7BPKWw4f/ISf32D4LoGu98yHjrzWWJDASu9QNrX10tCJqk9YY0ClWm8Ng==}
+    dependencies:
+      safari-14-idb-fix: 3.0.0
+    dev: false
+
   /idb/7.1.0:
     resolution: {integrity: sha512-Wsk07aAxDsntgYJY4h0knZJuTxM73eQ4reRAO+Z1liOh8eMCJ/MoDS8fCui1vGT9mnjtl1sOu3I2i/W1swPYZg==}
     dev: true
@@ -6691,6 +6699,10 @@ packages:
     engines: {node: '>=6'}
     dependencies:
       mri: 1.2.0
+    dev: false
+
+  /safari-14-idb-fix/3.0.0:
+    resolution: {integrity: sha512-eBNFLob4PMq8JA1dGyFn6G97q3/WzNtFK4RnzT1fnLq+9RyrGknzYiM/9B12MnKAxuj1IXr7UKYtTNtjyKMBog==}
     dev: false
 
   /safe-buffer/5.1.2:
