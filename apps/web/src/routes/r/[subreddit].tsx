@@ -84,17 +84,17 @@ export default function Subreddit() {
       state!.subreddits.add(subreddits()[0])
 
       /* Update Recents */
-      while (state!.recents.size >= state!.recentsLimit) {
+      state!.recents.set(
+        q().length > 0 ? `${subreddits()[0]}?${q()[0]}` : subreddits()[0],
+        Math.floor(Date.now() / 1000)
+      )
+      while (state!.recents.size > state!.recentsLimit) {
         const [q, _] = minBy(
           [...state!.recents],
           ([_, timestamp]) => timestamp
         )!
         state!.recents.delete(q)
       }
-      state!.recents.set(
-        q().length > 0 ? `${subreddits()[0]}?${q()[0]}` : subreddits()[0],
-        Math.floor(Date.now() / 1000)
-      )
 
       /* Updated Search Terms */
       if (q().length > 0)
