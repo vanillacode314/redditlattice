@@ -1,0 +1,6 @@
+singleQuote: true
+semi: false
+overrides:
+  - files: 'workbox-config.cjs'
+    options:
+      semi: true

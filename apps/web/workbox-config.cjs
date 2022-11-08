@@ -1,11 +1,13 @@
 /** @type {Parameters<import('workbox-build').generateSW>[0]} */
+const BASE_DIR = 'netlify';
+
 const options = {
   skipWaiting: true,
-  globDirectory: 'netlify',
+  globDirectory: BASE_DIR,
   globPatterns: [
     '**/*.{js,webmanifest,mjs,css,ttf,svg,eot,woff,woff2,html,png,json}',
   ],
-  swDest: 'netlify/sw.js',
+  swDest: BASE_DIR + '/sw.js',
   dontCacheBustURLsMatching: /\..*\./,
   ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
   runtimeCaching: [
@@ -20,6 +22,7 @@ const options = {
         plugins: [
           {
             cacheKeyWillBeUsed: async ({ request }) => {
+              console.time(request.url);
               const cache = await caches.open('images-assets');
               const keys = await cache.keys();
 
@@ -32,10 +35,14 @@ const options = {
 
                 const oldWidth = +oldUrl.searchParams.get('width');
                 const newWidth = +newUrl.searchParams.get('width');
-                if (newWidth <= oldWidth) return new Request(oldUrl);
+                if (newWidth <= oldWidth) {
+                  console.timeEnd(request.url);
+                  return new Request(oldUrl);
+                }
                 cache.delete(oldUrl);
               }
 
+              console.timeEnd(request.url);
               return request;
             },
           },

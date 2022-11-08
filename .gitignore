@@ -33,3 +33,5 @@ yarn-error.log*
 .turbo
 
 apps/image-server-v2/target
+# Local Netlify folder
+.netlify
