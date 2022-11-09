@@ -5,6 +5,7 @@ import { useUserState, useAppState } from '~/stores'
 import { stringify, parse } from 'devalue'
 import { Button } from 'ui'
 import { minBy } from 'lodash-es'
+import { clear } from 'idb-keyval'
 
 export default function Settings() {
   let filesInput: HTMLInputElement
@@ -25,6 +26,7 @@ export default function Settings() {
 
   const clearCache = async () => {
     await caches.delete('images-assets')
+    await clear()
     setUsageStats(await getUsageStats())
   }
 

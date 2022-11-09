@@ -19,6 +19,7 @@ import { AutoResizingPicture, Button } from 'ui'
 import { IImage, useUserState } from '~/stores'
 import { download, blobToDataURL } from '~/utils'
 import { uniq } from 'lodash-es'
+import { del } from 'idb-keyval'
 
 interface Props {
   width: number
@@ -109,6 +110,7 @@ export const ImageCard: Component<Props> = (props) => {
 
   async function removeFromCache() {
     setError(true)
+    del(props.image.url)
     requestAnimationFrame(() =>
       requestAnimationFrame(async () => {
         const cache = await caches.open('images-assets')
