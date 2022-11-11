@@ -7,6 +7,21 @@ import { useAppState, useUserState } from '~/stores'
 import { parseSchema } from '~/utils'
 import { TRPCClientError } from '@trpc/client'
 
+const getSubredditsAndSearchTerms = (query: string): [string, string] => {
+  let [sr, q] = query.toLowerCase().split('?')
+  sr = sr.split('+').sort().join('+')
+  q = q ? q.split('+').sort().join('+') : ''
+  return [sr, q]
+}
+
+const getURL = (subreddits: string, searchTerms: string) =>
+  searchTerms
+    ? `/r/${subreddits}?${searchTerms
+        .split('+')
+        .map((query) => `q=${query}`)
+        .join('&')}`
+    : `/r/${subreddits}`
+
 export default function Home() {
   const [userState, setUserState] = useUserState()
   const [, setAppState] = useAppState()
@@ -18,40 +33,28 @@ export default function Home() {
 
   const navigate = useNavigate()
 
-  function onSubmit(e: SubmitEvent) {
-    e.preventDefault()
-    if (!query()) return
-    if (query().startsWith('?')) return
-    let [sr, q] = query().toLowerCase().split('?')
-    sr = sr.split('+').sort().join('+')
-    q = q ? q.split('+').sort().join('+') : ''
-    let id = sr
-    if (q) id += '?' + q
-    if (!userState()!.collections.has(id)) setCollection(id, id)
-    if (q) {
-      navigate(
-        `/r/${sr}?${q
-          .split('+')
-          .map((query) => `q=${query}`)
-          .join('&')}`
-      )
-    } else {
-      navigate(`/r/${sr}`)
-    }
-  }
-
-  function removeCollection(id: string) {
+  const removeCollection = (id: string) =>
     setUserState((state) => {
       state!.collections.delete(id)
       return { ...state! }
     })
-  }
 
-  function setCollection(id: string, value: string) {
+  const setCollection = (id: string, value: string) =>
     setUserState((state) => {
       state!.collections.set(id, value)
       return { ...state! }
     })
+
+  function onSubmit(e: SubmitEvent) {
+    e.preventDefault()
+    if (!query() || query().startsWith('?')) return
+
+    const [subreddits, searchTerms] = getSubredditsAndSearchTerms(query())
+
+    const id = subreddits + searchTerms ? '?' + searchTerms : ''
+    if (!userState()!.collections.has(id)) setCollection(id, id)
+
+    navigate(getURL(subreddits, searchTerms))
   }
 
   return (
