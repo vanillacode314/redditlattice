@@ -8,12 +8,13 @@ import {
   onCleanup,
   onMount,
 } from 'solid-js'
+import { throttle } from 'lodash-es'
+
 export type State = 'idle' | 'error' | 'loading' | 'completed'
 export type InfiniteHandler = (
   setState: (state: State) => void,
   firstload: boolean
 ) => void
-import { throttle } from 'lodash-es'
 
 interface Props {
   children: (state: State, load: (firstload?: boolean) => void) => JSXElement
@@ -29,56 +30,70 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
     { key: '', distance: 0, target: 'body', firstload: true },
     props
   )
+
+  const { onInfinite } = props
+
   const [state, setState] = createSignal<State>('idle')
 
   const onScroll = throttle((e: Event) => {
     if (state() !== 'idle') return
-    const scrollArea = e.currentTarget as HTMLElement
-    if (!scrollArea) return
-    const scrollBottom =
-      scrollArea.scrollHeight - scrollArea.scrollTop - scrollArea.clientHeight
+
+    const scrollTarget = e.currentTarget as HTMLElement
+    if (!scrollTarget)
+      throw new Error(
+        `scroll-target ${props.target} not found for infinite loading`
+      )
+
+    const scrollBottom = Math.round(
+      scrollTarget.scrollHeight -
+        scrollTarget.scrollTop -
+        scrollTarget.clientHeight
+    )
     if (scrollBottom - 1 <= merged.distance) load()
   }, 16)
 
-  const load = (firstload: boolean = false) => {
-    setState('loading')
-    merged.onInfinite((s) => {
-      setTimeout(() => {
-        if (s === 'idle') {
-          const scrollArea = document.querySelector(merged.target)
-          if (
-            scrollArea &&
-            scrollArea.scrollHeight === scrollArea.clientHeight
-          ) {
-            load()
-            return
-          }
-        }
-        setState(s)
-      }, 1000)
-    }, firstload)
+  const updateState = (newState: State) => {
+    setTimeout(() => {
+      if (newState !== 'idle') {
+        setState(newState)
+        return
+      }
+
+      const scrollTarget = document.querySelector(merged.target)
+      if (!scrollTarget)
+        throw new Error(
+          `scroll-target ${props.target} not found for infinite loading`
+        )
+
+      const noScrollbar =
+        scrollTarget.scrollHeight === scrollTarget.clientHeight
+      noScrollbar ? load() : setState('idle')
+    }, 1000)
   }
 
-  const setup = () => {
-    if (merged.firstload) load(true)
+  const load = (firstload: boolean = false) => {
+    setState('loading')
+    onInfinite(updateState, firstload)
   }
+
+  const setup = () => merged.firstload && load(true)
 
   createEffect(
     on(
       () => merged.key,
-      () => {
-        setTimeout(() => {
-          setup()
-        })
-      }
+      () => setTimeout(() => setup())
     )
   )
 
   onMount(() => {
-    const scrollArea = document.querySelector(merged.target)
-    if (!scrollArea) return
-    scrollArea.addEventListener('scroll', onScroll, { passive: true })
-    onCleanup(() => scrollArea.removeEventListener('scroll', onScroll))
+    const scrollTarget = document.querySelector(merged.target)
+    if (!scrollTarget)
+      throw new Error(
+        `scroll-target ${props.target} not found for infinite loading`
+      )
+
+    scrollTarget.addEventListener('scroll', onScroll, { passive: true })
+    onCleanup(() => scrollTarget.removeEventListener('scroll', onScroll))
   })
 
   return <div>{props.children(state(), load)}</div>
