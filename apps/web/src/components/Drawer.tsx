@@ -34,14 +34,17 @@ const links: ILink[] = [
 ]
 
 export const Drawer: Component = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const [appState, setAppState] = useAppState()
+
   const open = () => appState.drawerVisible
   const setOpen = (value: boolean) =>
     setAppState({
       drawerVisible: value,
     })
-  const navigate = useNavigate()
-  const location = useLocation()
+
   createEffect(() =>
     open()
       ? navigate(location.pathname + '#drawer', { resolve: false })
