@@ -189,7 +189,7 @@ export default function Home() {
                   }
                   return []
                 }}
-                key={query().split('+').at(-1)}
+                key={() => ['sr-autocomplete', query().split('+').at(-1)!]}
               ></AsyncList>
             </Suspense>
           }

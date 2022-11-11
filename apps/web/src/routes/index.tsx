@@ -187,7 +187,7 @@ export default function Home() {
                   }
                   return []
                 }}
-                key={query()}
+                key={() => ['sr-autocomplete', query()]}
               ></AsyncList>
             </Suspense>
           }

@@ -18,6 +18,8 @@ interface Props {
 }
 
 export const List: Component<Props> = (props) => {
+  const { onClick, onRemove } = props
+
   return (
     <div
       class="flex flex-col gap-2"
@@ -41,10 +43,10 @@ export const List: Component<Props> = (props) => {
                 <li class="w-full overflow-hidden">
                   <ListItem
                     focusable={props.focusable}
-                    onClick={() => props.onClick(id())}
+                    onClick={() => onClick(id())}
                     onRemove={
                       /* TODO: Possible bug */
-                      props.onRemove ? () => props.onRemove!(id()) : undefined
+                      onRemove ? () => onRemove!(id()) : undefined
                     }
                   >
                     {title()}

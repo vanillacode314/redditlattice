@@ -6,9 +6,9 @@ interface Item {
   title: string
 }
 
-interface Props<T = any> {
-  key: T
-  fetcher: (key: T, ac: AbortController) => Promise<Item[]>
+interface Props {
+  key: () => string | string[]
+  fetcher: (key: string, ac: AbortController) => Promise<Item[]>
   onClick: (id: Item['id']) => void
   onRemove?: (id: Item['id']) => void
   title?: string
@@ -17,26 +17,31 @@ interface Props<T = any> {
 }
 
 export const AsyncList: Component<Props> = (props) => {
-  let ac: AbortController
-  type Params = typeof props.key
+  type Params = ReturnType<typeof props.key>
   type Item = Awaited<ReturnType<typeof props.fetcher>>[number]
+
+  const { key, fetcher, onClick, onRemove } = props
+
+  let ac: AbortController
+
   const [items] = createResource<Item[], Params>(
-    () => props.key,
-    (key) => {
+    key,
+    async ([, query]) => {
       ac?.abort()
       ac = new AbortController()
-      return props.fetcher(key, ac)
-    }
+      return await fetcher(query, ac)
+    },
+    { initialValue: [] }
   )
 
   return (
     <List
-      items={items() || []}
-      onClick={props.onClick}
+      items={items()}
       focusable={props.focusable}
       title={props.title}
       reverse={props.reverse}
-      onRemove={props.onRemove}
+      onClick={onClick}
+      onRemove={onRemove}
     />
   )
 }
