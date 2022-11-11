@@ -17,9 +17,9 @@ import { IMAGE_SERVER_BASE_PATH } from '~/consts'
 import { TransitionFade } from 'ui/transitions'
 import { AutoResizingPicture, Button } from 'ui'
 import { IImage, useUserState } from '~/stores'
-import { download, blobToDataURL } from '~/utils'
+import { getExtension, download, blobToDataURL, nextFrame } from '~/utils'
 import { uniq } from 'lodash-es'
-import { del } from 'idb-keyval'
+import { del, get } from 'idb-keyval'
 
 interface Props {
   width: number
@@ -28,8 +28,12 @@ interface Props {
 }
 
 export const ImageCard: Component<Props> = (props) => {
-  const [userState] = useUserState()
   const merged = mergeProps({ onLoad: () => {} }, props)
+
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const [userState] = useUserState()
 
   const [menu, setMenu] = createSignal<boolean>(false)
   const [menuPos, setMenuPos] = createStore<{ x: number; y: number }>({
@@ -37,19 +41,17 @@ export const ImageCard: Component<Props> = (props) => {
     y: 0,
   })
   const [error, setError] = createSignal<boolean>(false)
-  const navigate = useNavigate()
-  const location = useLocation()
-
-  const popupVisible = () => location.hash === '#popup-' + props.image.name
   const width = () =>
     Math.round(props.width / 100) * 100 * userState()!.imageSizeMultiplier
+
+  const popupVisible = () => location.hash === '#popup-' + props.image.name
 
   const scale = createSpring(() => ({
     transform: `scale(${popupVisible() ? 1 : 0})`,
     config: config.stiff,
   }))
 
-  function getProcessedImageURL(
+  const getProcessedImageURL = (
     url: string,
     width: number,
     {
@@ -59,12 +61,10 @@ export const ImageCard: Component<Props> = (props) => {
       format?: string
       passthrough?: boolean
     } = {}
-  ): string {
-    if (passthrough) {
-      return `${IMAGE_SERVER_BASE_PATH}/?passthrough=true&url=${url}&width=0`
-    }
-    return `${IMAGE_SERVER_BASE_PATH}/?url=${url}&width=${width}&format=${format}`
-  }
+  ) =>
+    passthrough
+      ? `${IMAGE_SERVER_BASE_PATH}/?passthrough=true&url=${url}&width=0`
+      : `${IMAGE_SERVER_BASE_PATH}/?url=${url}&width=${width}&format=${format}`
 
   function getSources() {
     const state = userState()!
@@ -79,24 +79,16 @@ export const ImageCard: Component<Props> = (props) => {
     )
   }
 
-  function popupImage() {
+  const showPopup = () =>
     navigate(location.pathname + location.search + '#popup-' + props.image.name)
-  }
 
-  function removePopupImage() {
-    history.go(-1)
-  }
+  const removePopupImage = () => history.go(-1)
 
-  async function retry() {
-    setError(false)
-  }
-
-  function onError() {
-    setError(true)
-  }
+  const retry = () => setError(false)
+  const onError = async () => setError(true)
 
   async function downloadImage() {
-    const format = new URL(props.image.url).pathname.split('.').at(-1)
+    const format = getExtension(props.image.url)
     const url = await fetch(
       getProcessedImageURL(props.image.url, 0, { passthrough: true })
     )
@@ -111,20 +103,12 @@ export const ImageCard: Component<Props> = (props) => {
   async function removeFromCache() {
     setError(true)
     del(props.image.url)
-    requestAnimationFrame(() =>
-      requestAnimationFrame(async () => {
-        const cache = await caches.open('images-assets')
-        const keys = await cache.keys()
-        for (const response of keys) {
-          const url = new URL(response.url)
-          if (url.searchParams.get('url') === props.image.url) {
-            await cache.delete(url)
-            break
-          }
-        }
-        setError(false)
-      })
-    )
+    nextFrame(async () => {
+      const cache = await caches.open('images-assets')
+      await cache.delete((await get(props.image.url)).requestUrl)
+      await del(props.image.url)
+    })
+    setError(false)
   }
 
   return (
@@ -161,7 +145,7 @@ export const ImageCard: Component<Props> = (props) => {
           width={props.width}
           fallbackHeight={props.width}
           ref={(el) => {
-            const dispose = longpress(el, { callback: popupImage })
+            const dispose = longpress(el, { callback: showPopup })
             onCleanup(dispose)
           }}
           onContextMenu={(e: MouseEvent) => {

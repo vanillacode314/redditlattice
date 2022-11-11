@@ -109,3 +109,9 @@ export const asyncFilter = async <T = unknown>(
   const results = await Promise.all(arr.map(predicate))
   return arr.filter((_v, index) => results[index])
 }
+
+export const nextFrame = (cb: FrameRequestCallback) =>
+  requestAnimationFrame(() => requestAnimationFrame(cb))
+
+export const getExtension = (path: string) =>
+  new URL(path).pathname.split('.').at(-1)
