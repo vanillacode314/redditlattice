@@ -9,6 +9,7 @@ workbox.setConfig({
   modulePathPrefix: '/third_party/workbox/workbox-v6.5.4/',
 })
 
+workbox.core.clientsClaim()
 workbox.loadModule('workbox-expiration')
 workbox.loadModule('workbox-cacheable-response')
 
