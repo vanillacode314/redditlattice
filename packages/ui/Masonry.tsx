@@ -11,7 +11,7 @@ import {
 import { createStore } from 'solid-js/store'
 import { Entries, Key } from '@solid-primitives/keyed'
 import { createElementSize } from '@solid-primitives/resize-observer'
-import { range, differenceBy } from 'lodash-es'
+import { minBy, range, differenceBy } from 'lodash-es'
 
 interface Item<T = any> {
   id: string
@@ -29,9 +29,17 @@ export interface Props<T> {
   ) => JSXElement
 }
 
+function getColumnHeight(idx: number): number {
+  const colEl = document.getElementById(`__masonry-col-${idx}`)
+  const height = colEl?.getBoundingClientRect().height ?? 0
+  return height
+}
+
 export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
-  const merged = mergeProps({ gap: 0 }, props)
   type I = typeof props.items[number]
+
+  const merged = mergeProps({ gap: 0 }, props)
+
   const [el, setEl] = createSignal<HTMLElement>()
   const size = createElementSize(el)
   const cols = createMemo<number>(() =>
@@ -43,35 +51,30 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   )
   const [columns, setColumns] = createStore<Record<number, I[]>>()
 
+  const appendToColumn = (idx: number, ...val: I[]) => {
+    const old = columns[idx] || []
+    setColumns(idx, [...old, ...val])
+  }
+
   function getShortestColumnIndex(): number {
-    let minIndex = 0
-    let minHeight = Infinity
-    for (const x of range(cols())) {
-      const colEl = document.getElementById(`__masonry-col-${x}`)
-      const { height } = colEl ? colEl.getBoundingClientRect() : { height: 0 }
-      if (height <= minHeight) {
-        minIndex = x
-        minHeight = height
-      }
-    }
-    return minIndex
+    return minBy(
+      range(cols()).map((idx) => [idx, getColumnHeight(idx)]),
+      ([, height]) => height
+    )![0]
   }
 
   function addItems(...items: Item[]) {
-    let len = items.length
-    let i = 0
     if (cols() === 1) {
-      const old = columns[0] || []
-      setColumns(0, [...old, ...items])
+      appendToColumn(0, ...items)
       return
     }
+
+    const len = items.length
+    let idx = 0
     requestAnimationFrame(function handler() {
-      if (i === len) return
-      const item = items[i]
-      const idx = getShortestColumnIndex()
-      const old = columns[idx] || []
-      setColumns(idx, [...old, item])
-      i++
+      if (idx === len) return
+      appendToColumn(getShortestColumnIndex(), items[idx])
+      idx++
       requestAnimationFrame(handler)
     })
   }
@@ -79,9 +82,9 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   function deleteItems(...itemsToRemove: Item[]) {
     batch(() => {
       for (const [idx, items] of Object.entries(columns)) {
-        const filteredItems = differenceBy(items, itemsToRemove, (v) => v.id)
+        const remainingItems = differenceBy(items, itemsToRemove, (v) => v.id)
         setColumns({
-          [idx]: filteredItems.length ? filteredItems : undefined,
+          [idx]: remainingItems || undefined,
         })
       }
     })
@@ -90,26 +93,22 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   createEffect(
     on(
       () => props.items,
-      (n, p) => {
-        p = p || []
-        const deletedItems = differenceBy(p, n, (v) => v.id)
-        const addedItems = differenceBy(n, p, (v) => v.id)
+      (newItems, oldItems) => {
+        oldItems = oldItems || []
+        const deletedItems = differenceBy(oldItems, newItems, (v) => v.id)
+        const addedItems = differenceBy(newItems, oldItems, (v) => v.id)
         deleteItems(...deletedItems)
         addItems(...addedItems)
       }
     )
   )
 
-  createEffect(
-    on(
-      cols,
-      () => {
-        deleteItems(...props.items)
-        addItems(...props.items)
-      },
-      { defer: true }
-    )
-  )
+  const resetGrid = () => {
+    deleteItems(...props.items)
+    addItems(...props.items)
+  }
+
+  createEffect(on(cols, () => resetGrid(), { defer: true }))
 
   return (
     <div
@@ -120,6 +119,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
         'grid-template-columns': `repeat(${cols()},1fr)`,
       }}
     >
+      {/* COLUMNS */}
       <Entries of={columns}>
         {(key, items) => (
           <div
@@ -127,10 +127,9 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
             id={`__masonry-col-${key}`}
             style={{
               'row-gap': `${props.gap}px`,
-              'grid-column': `${cols() - +key} / span 1`,
-              'grid-row': `1 / span 1`,
             }}
           >
+            {/* ROWS */}
             <Key each={items()} by="id">
               {(item) => {
                 const i = item()
