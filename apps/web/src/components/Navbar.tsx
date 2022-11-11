@@ -62,13 +62,7 @@ export const Navbar: Component = () => {
       setNavVisible(true)
       return
     }
-    if (Math.abs(dy) > threshold) {
-      if (dy > 0) {
-        setNavVisible(false)
-      } else {
-        setNavVisible(true)
-      }
-    }
+    if (Math.abs(dy) > threshold) setNavVisible(dy <= 0)
   }, 100)
 
   createEffect(
@@ -84,9 +78,7 @@ export const Navbar: Component = () => {
     )
   )
 
-  onMount(() => {
-    setMounted(true)
-  })
+  onMount(() => setMounted(true))
 
   return (
     <div class="overflow-hidden shrink-0 z-20 relative bg-black">
