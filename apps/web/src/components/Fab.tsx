@@ -32,13 +32,7 @@ const Fab: Component<Props> = (props) => {
     last_known_scroll_position = el.scrollTop
     batch(() => {
       setOpen(false)
-      if (Math.abs(dy) > threshold) {
-        if (dy > 0) {
-          setHidden(true)
-        } else {
-          setHidden(false)
-        }
-      }
+      if (Math.abs(dy) > threshold) setHidden(dy > 0)
     })
   }, 100)
 
@@ -50,13 +44,9 @@ const Fab: Component<Props> = (props) => {
 
   onMount(() => {
     const scroller = document.getElementById('scroller')
-    if (scroller)
-      scroller.addEventListener('scroll', onScroll, { passive: true })
-  })
-
-  onCleanup(() => {
-    const scroller = document.getElementById('scroller')
-    if (scroller) scroller.removeEventListener('scroll', onScroll)
+    if (!scroller) return
+    scroller.addEventListener('scroll', onScroll, { passive: true })
+    onCleanup(() => scroller.removeEventListener('scroll', onScroll))
   })
 
   return (
