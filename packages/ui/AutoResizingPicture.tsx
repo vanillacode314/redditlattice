@@ -27,6 +27,8 @@ interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
 }
 
 export const AutoResizingPicture: Component<Props> = (props) => {
+  let imgElement: HTMLImageElement
+
   const [local, others] = splitProps(props, [
     'width',
     'fallbackHeight',
@@ -40,37 +42,35 @@ export const AutoResizingPicture: Component<Props> = (props) => {
     'fallback',
     'style',
   ])
-  let imgElement: HTMLImageElement
   const merged = mergeProps(
     {
-      onLoad: () => {},
-      onHasHeight: () => {},
-      onError: () => {},
       srcSets: new Map(),
     },
     local
   )
+  const { onHasHeight, onLoad, onError } = local
 
   const [height, setHeight] = createSignal<number>(props.fallbackHeight)
   const [hasImage, setHasImage] = createSignal<boolean>(false)
   const [error, setError] = createSignal<boolean>(false)
-  const [count, setCount] = createSignal(0)
+  const [tries, setTries] = createSignal(0)
   const [animate, setAnimate] = createSignal<boolean>(false)
 
-  const checkSize = throttle(() => {
-    setCount((c) => c + 1)
-    if (count() > 1) setAnimate(true)
+  const checkHeight = throttle(() => {
+    setTries((_) => _ + 1)
+    if (tries() > 1) setAnimate(true)
     if (error()) return
     if (!imgElement) return
-    if (imgElement.naturalHeight) {
-      const height =
-        (imgElement.naturalHeight / imgElement.naturalWidth) * local.width
-      setHeight(height)
-      setHasImage(true)
-      merged.onHasHeight(height)
+    if (!imgElement.naturalHeight) {
+      checkHeight()
       return
     }
-    checkSize()
+
+    const height =
+      (imgElement.naturalHeight / imgElement.naturalWidth) * local.width
+    setHeight(height)
+    setHasImage(true)
+    onHasHeight?.(height)
   }, 100)
 
   const expand = createSpring(() => ({
@@ -83,8 +83,8 @@ export const AutoResizingPicture: Component<Props> = (props) => {
     on(
       () => props.width,
       () => {
-        setCount(0)
-        queueMicrotask(() => checkSize())
+        setTries(0)
+        queueMicrotask(() => checkHeight())
       }
     )
   )
@@ -96,7 +96,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
       ref={props.ref}
       {...others}
     >
-      <Show when={!hasImage() && count() > 1}>
+      <Show when={!hasImage() && tries() > 1}>
         <div class="absolute inset-0">{props.fallback}</div>
       </Show>
       <picture>
@@ -108,15 +108,16 @@ export const AutoResizingPicture: Component<Props> = (props) => {
           ref={(el) => {
             if (imgElement) return
             imgElement = el
-            queueMicrotask(() => checkSize())
+            queueMicrotask(() => checkHeight())
           }}
           onError={() => {
             batch(() => {
               setError(true)
               setHasImage(false)
             })
-            merged.onError()
+            onError?.()
           }}
+          onLoad={() => onLoad?.()}
           alt={merged.alt}
         />
       </picture>
