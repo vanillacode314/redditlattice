@@ -1,4 +1,4 @@
-import { useAppState, useUserState } from '~/stores'
+import { IAppState, useAppState, useUserState } from '~/stores'
 import { useParams, useLocation } from 'solid-start'
 import {
   onMount,
@@ -21,6 +21,11 @@ import { TRPCClientError } from '@trpc/client'
 import { minBy } from 'lodash-es'
 
 const [appState, setAppState] = useAppState()
+
+const CACHE: Map<
+  string /* key */,
+  Omit<IAppState['images'], 'key'> & { completed: boolean }
+> = new Map()
 
 export default function Subreddit() {
   const componentOwner = getOwner()!
@@ -96,7 +101,7 @@ export default function Subreddit() {
         state!.recents.delete(q)
       }
 
-      /* Updated Search Terms */
+      /* Update Search Terms */
       if (q().length > 0)
         state!.searchTerms.set(q()[0].toLowerCase(), subreddits()[0])
       return { ...state! }
@@ -104,8 +109,14 @@ export default function Subreddit() {
   })
 
   const onInfinite: InfiniteHandler = async (setState, firstload) => {
-    if (firstload && appState.images.data.size > 0) {
-      setState('idle')
+    if (firstload && CACHE.has(key())) {
+      const { after, completed, data } = CACHE.get(key())!
+      setAppState('images', (images) => ({
+        ...images,
+        after,
+        data,
+      }))
+      setState(completed ? 'completed' : 'idle')
       return
     }
     try {
@@ -136,6 +147,12 @@ export default function Subreddit() {
         ...images,
         data: new Set([...images.data, ...newImages]),
       }))
+
+      CACHE.set(key(), {
+        after,
+        data: new Set([...appState.images.data, ...newImages]),
+        completed: !after,
+      })
 
       if (after) {
         setAppState('images', { after })

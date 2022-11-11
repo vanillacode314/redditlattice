@@ -10,7 +10,7 @@ export interface IImage {
   title: string
 }
 
-interface IAppState {
+export interface IAppState {
   title: string
   drawerVisible: boolean
   navVisible: boolean
