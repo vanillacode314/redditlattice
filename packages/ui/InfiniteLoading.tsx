@@ -53,22 +53,19 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
   }, 16)
 
   const updateState = (newState: State) => {
-    setTimeout(() => {
-      if (newState !== 'idle') {
-        setState(newState)
-        return
-      }
+    if (newState !== 'idle') {
+      setState(newState)
+      return
+    }
 
-      const scrollTarget = document.querySelector(merged.target)
-      if (!scrollTarget)
-        throw new Error(
-          `scroll-target ${props.target} not found for infinite loading`
-        )
+    const scrollTarget = document.querySelector(merged.target)
+    if (!scrollTarget)
+      throw new Error(
+        `scroll-target ${props.target} not found for infinite loading`
+      )
 
-      const noScrollbar =
-        scrollTarget.scrollHeight === scrollTarget.clientHeight
-      noScrollbar ? load() : setState('idle')
-    }, 1000)
+    const noScrollbar = scrollTarget.scrollHeight === scrollTarget.clientHeight
+    noScrollbar ? load() : setState('idle')
   }
 
   const load = (firstload: boolean = false) => {
@@ -81,7 +78,7 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
   createEffect(
     on(
       () => merged.key,
-      () => setTimeout(() => setup())
+      () => setup()
     )
   )
 

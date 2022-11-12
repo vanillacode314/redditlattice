@@ -19,37 +19,44 @@ import { Spinner, Masonry, Button, InfiniteLoading, InfiniteHandler } from 'ui'
 import { parseSchema } from '~/utils'
 import { TRPCClientError } from '@trpc/client'
 import { minBy } from 'lodash-es'
+import { useRefresh } from '~/layouts/Base'
 
 const [appState, setAppState] = useAppState()
 
-const CACHE: Map<
+export const CACHE: Map<
   string /* key */,
   Omit<IAppState['images'], 'key'> & { completed: boolean }
 > = new Map()
 
+const fabActions: IAction[] = [
+  {
+    id: 'top',
+    icon: 'i-mdi-arrow-up-bold',
+  },
+  {
+    id: 'hot',
+    icon: 'i-mdi-fire',
+  },
+  {
+    id: 'new',
+    icon: 'i-mdi-new-box',
+  },
+]
+
 export default function Subreddit() {
   const componentOwner = getOwner()!
-  const [userState, setUserState] = useUserState()
-  const location = useLocation()
-  const q = () => new URLSearchParams(location.search.toLowerCase()).getAll('q')
-  const params = useParams()
-  const subreddits = () => params.subreddit.toLowerCase().split('+')
-  const fabActions: IAction[] = [
-    {
-      id: 'top',
-      icon: 'i-mdi-arrow-up-bold',
-    },
-    {
-      id: 'hot',
-      icon: 'i-mdi-fire',
-    },
-    {
-      id: 'new',
-      icon: 'i-mdi-new-box',
-    },
-  ]
 
+  const location = useLocation()
+  const params = useParams()
+
+  const [userState, setUserState] = useUserState()
+
+  const [, setRefresh] = useRefresh()
+
+  const q = () => new URLSearchParams(location.search.toLowerCase()).getAll('q')
+  const subreddits = () => params.subreddit.toLowerCase().split('+')
   const sort = createMemo(() => userState()!.sort.get(subreddits()[0]) || 'hot')
+  const key = createMemo(() => `${subreddits()}-${q().join('+')}-${sort()}`)
 
   const setSort = (sort: string) =>
     setUserState((state) => {
@@ -58,8 +65,6 @@ export default function Subreddit() {
     })
 
   onMount(() => setSort(sort()))
-
-  const key = createMemo(() => `${subreddits()}-${q().join('+')}-${sort()}`)
 
   const resetState = () => {
     batch(() => {
@@ -78,6 +83,11 @@ export default function Subreddit() {
       })
     })
   }
+
+  setRefresh(() => () => {
+    CACHE.delete(key())
+    resetState()
+  })
 
   createEffect(() => appState.images.key !== key() && resetState())
 
@@ -156,7 +166,7 @@ export default function Subreddit() {
 
       if (after) {
         setAppState('images', { after })
-        setState('idle')
+        setTimeout(() => setState('idle'), 1000)
         return
       }
       setState('completed')

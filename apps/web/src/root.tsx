@@ -90,19 +90,9 @@ export const Root: Component = () => {
       </Head>
       <Body>
         <Base>
-          <Suspense
-            fallback={
-              <div class="p-5 grid place-items-center">
-                <Spinner></Spinner>
-              </div>
-            }
-          >
-            <ErrorBoundary>
-              <Routes>
-                <FileRoutes />
-              </Routes>
-            </ErrorBoundary>
-          </Suspense>
+          <Routes>
+            <FileRoutes />
+          </Routes>
           <Scripts />
         </Base>
         <DevtoolsOverlay />
