@@ -1,5 +1,5 @@
 import { useAppState } from '~/stores'
-import { useSearchParams, useLocation, useNavigate } from 'solid-start'
+import { useSearchParams, useLocation } from 'solid-start'
 import {
   onMount,
   createEffect,
