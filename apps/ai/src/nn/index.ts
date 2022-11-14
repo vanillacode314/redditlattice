@@ -188,6 +188,17 @@ export class Layer {
     }
   }
 
+  toFunction(): (inputs: number[]) => number[] {
+    const weights: number[][] = this.neurons.map((neuron) => neuron.weights)
+    return (inputs: number[]) => {
+      const output = []
+      for (const [idx, input] of inputs.entries()) {
+        output.push(sum(weights[idx].map((weight) => weight * input)))
+      }
+      return output
+    }
+  }
+
   static fromObject(
     { neurons }: JSONEncodedLayer,
     neuronsMap: Record<Neuron['id'], Neuron>
@@ -266,6 +277,19 @@ export class Network {
 
   toJson(): string {
     return JSON.stringify(this.toObject())
+  }
+
+  toFunction(): (input: number[]) => number[] {
+    const inputFunction = this.inputLayer.toFunction()
+    const hiddenFunction = this.hiddenLayers.map((layer) => layer.toFunction())
+
+    return (input: number[]) => {
+      let output = inputFunction(input)
+      for (const fn of hiddenFunction) {
+        output = fn(output)
+      }
+      return output
+    }
   }
 
   static fromObject({ neurons, shape }: JSONEncodedNetwork): Network {

@@ -1,12 +1,4 @@
-import {
-  onMount,
-  batch,
-  createSignal,
-  Show,
-  Suspense,
-  For,
-  createEffect,
-} from 'solid-js'
+import { onMount, batch, createSignal, Show, Suspense } from 'solid-js'
 import { useNavigate } from 'solid-start'
 import { trpc } from '~/client'
 import { AsyncList, List, Spinner } from 'ui'
@@ -221,7 +213,7 @@ export default function Home() {
           ></List>
           <div border="b gray-800"></div>
           <List
-            onClick={() => {}}
+            onClick={(id) => setQuery(id)}
             title="suggestions"
             reverse
             items={suggestions().map(([[sr, q], feedback]) => ({
@@ -230,7 +222,9 @@ export default function Home() {
               actions: [
                 () => (
                   <button
-                    onClick={() => {
+                    class="hover:text-gray transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation()
                       feedback(true)
                       updateSuggestions()
                     }}
@@ -240,7 +234,9 @@ export default function Home() {
                 ),
                 () => (
                   <button
-                    onClick={() => {
+                    class="hover:text-gray transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation()
                       feedback(false)
                       updateSuggestions()
                     }}

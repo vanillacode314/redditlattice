@@ -60,6 +60,7 @@ export declare class Layer {
     connect(other: Layer): Layer;
     clone(): Layer;
     toObject(): JSONEncodedLayer;
+    toFunction(): (inputs: number[]) => number[];
     static fromObject({ neurons }: JSONEncodedLayer, neuronsMap: Record<Neuron['id'], Neuron>): Layer;
 }
 interface NetworkOptions {
@@ -87,6 +88,7 @@ export declare class Network {
     get neurons(): Neuron[];
     toObject(): JSONEncodedNetwork;
     toJson(): string;
+    toFunction(): (input: number[]) => number[];
     static fromObject({ neurons, shape }: JSONEncodedNetwork): Network;
     static fromJson(json: string): Network;
 }

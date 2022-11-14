@@ -16,7 +16,7 @@ export class RatingEngine {
     const [prediction1, prediction2] = this.agent.brain.activate([
       subreddit,
       searchTerm,
-      Math.random(),
+      /* Math.random(), */
     ])
 
     return [1 > prediction1 + prediction2, [prediction1, prediction2]] as const
@@ -40,8 +40,25 @@ export class RatingEngine {
   toObject() {
     return this.agent.toObject()
   }
+
   toJson() {
     return JSON.stringify(this.toObject())
+  }
+
+  toFunction(): (
+    subreddit: number,
+    searchTerm: number
+  ) => readonly [boolean, [number, number]] {
+    const fn = this.agent.brain.toFunction()
+    return (subreddit: number, searchTerm: number) => {
+      const [prediction1, prediction2] = fn([
+        subreddit,
+        searchTerm,
+        /* Math.random(), */
+      ])
+
+      return [1 > prediction1 + prediction2, [prediction1, prediction2]]
+    }
   }
 
   static fromObject(agent: JSONEncodedAgent): RatingEngine {

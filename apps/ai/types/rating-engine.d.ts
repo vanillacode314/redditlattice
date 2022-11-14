@@ -10,6 +10,7 @@ export declare class RatingEngine {
     clone(): RatingEngine;
     toObject(): JSONEncodedAgent;
     toJson(): string;
+    toFunction(): (subreddit: number, searchTerm: number) => readonly [boolean, [number, number]];
     static fromObject(agent: JSONEncodedAgent): RatingEngine;
     static fromJson(json: string): RatingEngine;
 }
