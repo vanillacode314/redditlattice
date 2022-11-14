@@ -222,26 +222,26 @@ export default function Home() {
               actions: [
                 () => (
                   <button
-                    class="hover:text-gray transition-colors"
+                    class="group hover:text-blue transition-colors"
                     onClick={(e) => {
                       e.stopPropagation()
                       feedback(true)
                       updateSuggestions()
                     }}
                   >
-                    <span class="i-mdi-thumb-up" />
+                    <span class="text-lg i-mdi-thumb-up-outline group-hover:i-mdi-thumb-up" />
                   </button>
                 ),
                 () => (
                   <button
-                    class="hover:text-gray transition-colors"
+                    class="group hover:text-gray transition-colors"
                     onClick={(e) => {
                       e.stopPropagation()
                       feedback(false)
                       updateSuggestions()
                     }}
                   >
-                    <span class="i-mdi-thumb-down" />
+                    <span class="text-lg i-mdi-thumb-down-outline group-hover:i-mdi-thumb-down" />
                   </button>
                 ),
               ],
