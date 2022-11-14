@@ -1,0 +1,32 @@
+{
+  "name": "ai",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "node esbuild.config.cjs && rm -rf ./types &&  tsc",
+    "buildstart": "npm run build && npm run start",
+    "dev": "fd -e ts -e json . src | entr -s -r -c -n 'pnpm buildstart'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/lodash-es": "^4.17.6",
+    "inquirer": "^9.1.4",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.3",
+    "@types/node": "^18.11.9",
+    "esbuild": "^0.15.13",
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "ts-node-esm": "^0.0.6",
+    "typescript": "^4.8.4"
+  }
+}

@@ -1,4 +1,4 @@
-import { Show, For, Component } from 'solid-js'
+import { Show, Component } from 'solid-js'
 import ListItem from './ListItem'
 import { TransitionSlide } from './transitions'
 import { Key } from '@solid-primitives/keyed'
@@ -6,6 +6,7 @@ import { Key } from '@solid-primitives/keyed'
 interface Item {
   id: string
   title: string
+  actions?: Component[]
 }
 
 interface Props {
@@ -34,28 +35,30 @@ export const List: Component<Props> = (props) => {
         class="flex flex-col"
         classList={{ 'flex-col-reverse': props.reverse }}
       >
-        <TransitionSlide duration={200}>
-          <Key each={props.items} by="id">
-            {(item) => {
-              const title = () => item().title
-              const id = () => item().id
-              return (
-                <li class="w-full overflow-hidden">
-                  <ListItem
-                    focusable={props.focusable}
-                    onClick={() => onClick(id())}
-                    onRemove={
-                      /* TODO: Possible bug */
-                      onRemove ? () => onRemove!(id()) : undefined
-                    }
-                  >
-                    {title()}
-                  </ListItem>
-                </li>
-              )
-            }}
-          </Key>
-        </TransitionSlide>
+        {/* <TransitionSlide duration={200}> */}
+        <Key each={props.items} by="id">
+          {(item) => {
+            const title = () => item().title
+            const id = () => item().id
+            const actions = () => item().actions
+            return (
+              <li class="w-full overflow-hidden">
+                <ListItem
+                  actions={actions()}
+                  focusable={props.focusable}
+                  onClick={() => onClick(id())}
+                  onRemove={
+                    /* TODO: Possible bug */
+                    onRemove ? () => onRemove!(id()) : undefined
+                  }
+                >
+                  {title()}
+                </ListItem>
+              </li>
+            )
+          }}
+        </Key>
+        {/* </TransitionSlide> */}
       </ul>
     </div>
   )

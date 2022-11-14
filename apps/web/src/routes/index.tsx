@@ -1,4 +1,12 @@
-import { onMount, batch, createSignal, Show, Suspense } from 'solid-js'
+import {
+  onMount,
+  batch,
+  createSignal,
+  Show,
+  Suspense,
+  For,
+  createEffect,
+} from 'solid-js'
 import { useNavigate } from 'solid-start'
 import { trpc } from '~/client'
 import { AsyncList, List, Spinner } from 'ui'
@@ -6,6 +14,7 @@ import { TransitionFade } from 'ui/transitions'
 import { useAppState, useUserState } from '~/stores'
 import { parseSchema } from '~/utils'
 import { TRPCClientError } from '@trpc/client'
+import { getSuggestions } from '~/ai'
 
 export default function Home() {
   const [userState, setUserState] = useUserState()
@@ -16,6 +25,13 @@ export default function Home() {
   const [subreddit, setSubreddit] = createSignal<string>('')
   const [searchTerm, setSearchTerm] = createSignal<string>('')
   const [focused, setFocused] = createSignal<boolean>(false)
+  const [suggestions, setSuggestions] = createSignal<
+    ReturnType<typeof getSuggestions>[number][]
+  >([])
+
+  const updateSuggestions = () => setSuggestions(getSuggestions())
+
+  onMount(() => updateSuggestions())
 
   const query = () => {
     if (!subreddit()) return ''
@@ -203,6 +219,38 @@ export default function Home() {
                 title: q,
               }))}
           ></List>
+          <div border="b gray-800"></div>
+          <List
+            onClick={() => {}}
+            title="suggestions"
+            reverse
+            items={suggestions().map(([[sr, q], feedback]) => ({
+              id: `${sr}?${q}`,
+              title: `${sr}?${q}`,
+              actions: [
+                () => (
+                  <button
+                    onClick={() => {
+                      feedback(true)
+                      updateSuggestions()
+                    }}
+                  >
+                    <span class="i-mdi-thumb-up" />
+                  </button>
+                ),
+                () => (
+                  <button
+                    onClick={() => {
+                      feedback(false)
+                      updateSuggestions()
+                    }}
+                  >
+                    <span class="i-mdi-thumb-down" />
+                  </button>
+                ),
+              ],
+            }))}
+          />
           <div border="b gray-800"></div>
           <List
             onClick={(id) => setSubreddit(id)}

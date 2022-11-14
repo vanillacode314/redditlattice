@@ -76,7 +76,7 @@ const [userState, setUserState] = createStorageSignal<IUserState>(
 )
 
 export const useAppState = () => [appState, setAppState] as const
-export const useUserState = () => [userState, setUserState] as const
+export const useUserState = () => [() => userState()!, setUserState] as const
 
 createRenderEffect(() =>
   setUserState((state) => {

@@ -1,8 +1,7 @@
 // @refresh reload
-import { Component, onMount, Suspense } from 'solid-js'
+import { Component, onMount } from 'solid-js'
 import {
   Body,
-  ErrorBoundary,
   FileRoutes,
   Head,
   Html,
@@ -18,9 +17,9 @@ import 'uno.css'
 import './root.css'
 import Base from '~/layouts/Base'
 import { useAppState, useUserState } from '~/stores'
-import { Spinner } from 'ui'
 import { DevtoolsOverlay } from '@solid-devtools/overlay'
 import { asyncFilter } from './utils'
+import { loadState, getSuggestions } from './ai'
 
 export const Root: Component = () => {
   const [appState] = useAppState()
@@ -67,6 +66,7 @@ export const Root: Component = () => {
 
   onMount(() => importLegacyState())
   onMount(() => cleanCache())
+  onMount(() => loadState())
 
   return (
     <Html lang="en">
