@@ -221,16 +221,16 @@ export default function Settings() {
           onChange={(e) => setProcessImages(e.currentTarget.checked)}
         />
       </label>
-      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg flex items-center justify-between transition-colors">
-        <span class="uppercase text-sm tracking-wide font-bold text-gray-300">
-          Hide NSFW
-        </span>
-        <input
-          type="checkbox"
-          checked={userState()!.hideNSFW}
-          onChange={(e) => setHideNSFW(e.currentTarget.checked)}
-        />
-      </label>
+      {/* <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg flex items-center justify-between transition-colors"> */}
+      {/*   <span class="uppercase text-sm tracking-wide font-bold text-gray-300"> */}
+      {/*     Hide NSFW */}
+      {/*   </span> */}
+      {/*   <input */}
+      {/*     type="checkbox" */}
+      {/*     checked={userState()!.hideNSFW} */}
+      {/*     onChange={(e) => setHideNSFW(e.currentTarget.checked)} */}
+      {/*   /> */}
+      {/* </label> */}
       <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
         <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
           Recents Limit

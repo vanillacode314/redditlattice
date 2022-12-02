@@ -16,8 +16,8 @@ export const getAutocompleteSubreddits: (query: string) => Promise<{
   subreddits: Pick<ISubreddit, ReturnKeys>[]
 }> = async (query) => {
   const searchParams = new URLSearchParams({
-    nsfw: '1',
-    include_over_18: 'on',
+    nsfw: '0',
+    include_over_18: 'off',
     include_profiles: 'off',
     query,
   })
