@@ -87,6 +87,11 @@ export const getImages: (
         IMAGE_EXTENSION_LIST.some((e) => post.url?.endsWith(e))
     )
     .map((post) => getKeys(post, SELECT_KEYS))
+    .map((post) => {
+      const url = new URL(post.url)
+      url.protocol = 'https'
+      return { ...post, url: url.toString() }
+    })
 
   return { images, after: newAfter }
 }

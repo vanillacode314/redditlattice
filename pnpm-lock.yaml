@@ -62,7 +62,7 @@ importers:
       solid-start-netlify: ^0.2.0
       solid-start-node: ^0.1.6
       tsconfig: workspace:*
-      typescript: ^4.5.3
+      typescript: ^4.8.4
       ui: workspace:*
       undici: ^5.11.0
       unocss: ^0.45.29
