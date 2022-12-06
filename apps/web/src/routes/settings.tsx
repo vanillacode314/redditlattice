@@ -213,7 +213,7 @@ export default function Settings() {
       />
       <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg flex items-center justify-between transition-colors">
         <span class="uppercase text-sm tracking-wide font-bold text-gray-300">
-          Process Images
+          Process Images (Experimental)
         </span>
         <input
           type="checkbox"
