@@ -41,6 +41,8 @@ export const ImageCard: Component<Props> = (props) => {
     y: 0,
   })
   const [error, setError] = createSignal<boolean>(false)
+  const [errorMsg, setErrorMsg] = createSignal<string>('')
+
   const width = () =>
     Math.round(props.width / 100) * 100 * userState()!.imageSizeMultiplier
 
@@ -85,7 +87,11 @@ export const ImageCard: Component<Props> = (props) => {
   const removePopupImage = () => history.go(-1)
 
   const retry = () => setError(false)
-  const onError = async () => setError(true)
+  const onError = async (_e: Event) => {
+    const res = await fetch(props.image.url, { referrer: '' })
+    setErrorMsg(`(${res.status} - ${res.statusText})`)
+    setError(true)
+  }
 
   async function downloadImage() {
     const format = getExtension(props.image.url)
@@ -118,7 +124,7 @@ export const ImageCard: Component<Props> = (props) => {
         fallback={
           <div
             style={{ height: `${props.width}px` }}
-            class="grid place-items-center"
+            class="grid place-content-center gap-5"
           >
             <Button
               class="bg-purple-800 hover:bg-purple-700"
@@ -126,6 +132,7 @@ export const ImageCard: Component<Props> = (props) => {
             >
               Retry
             </Button>
+            <span class="uppercase font-bold text-sm">{errorMsg()}</span>
           </div>
         }
       >

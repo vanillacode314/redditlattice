@@ -21,8 +21,8 @@ interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   src?: string
   srcSets?: Map<string, string>
   onHasHeight?: (height: number) => void
-  onLoad?: () => void
-  onError?: () => void
+  onLoad?: (e: Event) => void
+  onError?: (e: Event) => void
   fallback?: JSXElement
 }
 
@@ -110,15 +110,16 @@ export const AutoResizingPicture: Component<Props> = (props) => {
             imgElement = el
             queueMicrotask(() => checkHeight())
           }}
-          onError={() => {
+          onError={(e) => {
             batch(() => {
               setError(true)
               setHasImage(false)
             })
-            onError?.()
+            onError?.(e)
           }}
-          onLoad={() => onLoad?.()}
+          onLoad={(e) => onLoad?.(e)}
           alt={merged.alt}
+          referrerpolicy="no-referrer"
         />
       </picture>
     </animated.div>
