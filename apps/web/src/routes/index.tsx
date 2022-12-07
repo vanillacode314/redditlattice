@@ -17,6 +17,9 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = createSignal<string>('')
   const [focused, setFocused] = createSignal<boolean>(false)
 
+  const [flashing, setFlashing] = createSignal<boolean>(false)
+  const flashSearchInput = () => setFlashing(true)
+
   const query = () => {
     if (!subreddit()) return ''
     if (searchTerm()) {
@@ -70,9 +73,15 @@ export default function Home() {
         onSubmit={onSubmit}
       >
         <div
-          ring="~ pink-800 hover:pink-700 focus:pink-700"
-          transition-colors
-          class="grid grid-cols-[auto_1fr_auto]"
+          class="grid grid-cols-[auto_1fr_auto] transitions-colors duration-250"
+          border="2 hover:pink-700 focus:pink-700"
+          classList={{
+            'border-pink-500': flashing(),
+            'border-pink-900': !flashing(),
+          }}
+          onTransitionEnd={() => {
+            if (flashing()) setFlashing(false)
+          }}
           gap-3
           bg-black
           outline-none
@@ -164,6 +173,7 @@ export default function Home() {
                     setSubreddit(id)
                     setSearchTerm('')
                   })
+                  flashSearchInput()
                 }}
                 focusable={false}
                 reverse
@@ -193,7 +203,10 @@ export default function Home() {
           }
         >
           <List
-            onClick={(id) => setQuery(id)}
+            onClick={(id) => {
+              setQuery(id)
+              flashSearchInput()
+            }}
             reverse
             title="recents"
             items={[...userState()!.recents]
@@ -205,7 +218,10 @@ export default function Home() {
           ></List>
           <div border="b gray-800"></div>
           <List
-            onClick={(id) => setSubreddit(id)}
+            onClick={(id) => {
+              setSubreddit(id)
+              flashSearchInput()
+            }}
             onRemove={(id) => removeSubreddit(id)}
             reverse
             title="subreddits"
@@ -223,6 +239,7 @@ export default function Home() {
                   setSubreddit(sr)
                   setSearchTerm(id)
                 })
+                flashSearchInput()
               }
             }}
             onRemove={(id) => removeSearchTerm(id)}

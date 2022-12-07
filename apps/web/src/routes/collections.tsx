@@ -31,6 +31,9 @@ export default function Home() {
   const [focused, setFocused] = createSignal<boolean>(false)
   const [query, setQuery] = createSignal<string>('')
 
+  const [flashing, setFlashing] = createSignal<boolean>(false)
+  const flashSearchInput = () => setFlashing(true)
+
   const navigate = useNavigate()
 
   const removeCollection = (id: string) =>
@@ -66,9 +69,15 @@ export default function Home() {
         onSubmit={onSubmit}
       >
         <div
-          ring="~ pink-800 hover:pink-700 focus:pink-700"
-          transition-colors
-          class="grid grid-cols-[auto_1fr_auto_auto]"
+          class="grid grid-cols-[auto_1fr_auto_auto] transitions-colors duration-250"
+          border="2 hover:pink-700 focus:pink-700"
+          classList={{
+            'border-pink-500': flashing(),
+            'border-pink-900': !flashing(),
+          }}
+          onTransitionEnd={() => {
+            if (flashing()) setFlashing(false)
+          }}
           gap-3
           bg-black
           outline-none
@@ -86,7 +95,7 @@ export default function Home() {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder="e.g. wallpapers+earthporn?nature+landscape"
-            class="placeholder:text-gray-500"
+            class="placeholder:text-gray-500 min-w-0"
             type="text"
             id="search"
             name="subreddit"
@@ -168,6 +177,7 @@ export default function Home() {
                   const x = sr.split('+')
                   x[x.length - 1] = id
                   setQuery(q ? x.join('+') + `?q=${q}` : x.join('+'))
+                  flashSearchInput()
                 }}
                 focusable={false}
                 reverse
@@ -197,7 +207,10 @@ export default function Home() {
           }
         >
           <List
-            onClick={(id) => setQuery(id)}
+            onClick={(id) => {
+              setQuery(id)
+              flashSearchInput()
+            }}
             onRemove={(id) => removeCollection(id)}
             reverse
             title="collections"
