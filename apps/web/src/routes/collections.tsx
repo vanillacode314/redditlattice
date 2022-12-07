@@ -50,8 +50,7 @@ export default function Home() {
     if (!query() || query().startsWith('?')) return
 
     const [subreddits, searchTerms] = getSubredditsAndSearchTerms(query())
-
-    const id = subreddits + searchTerms ? '?' + searchTerms : ''
+    const id = subreddits + (searchTerms ? '?' + searchTerms : '')
     if (!userState()!.collections.has(id)) setCollection(id, id)
 
     navigate(getURL(subreddits, searchTerms))
