@@ -7,10 +7,12 @@ import { useAppState, useUserState } from '~/stores'
 import { parseSchema } from '~/utils'
 import { TRPCClientError } from '@trpc/client'
 
-const getSubredditsAndSearchTerms = (query: string): [string, string] => {
-  let [sr, q] = query.toLowerCase().split('?')
+const getSubredditsAndSearchTerms = (
+  query: string
+): [string, string | undefined] => {
+  let [sr, q] = query.toLowerCase().split('?') as [string, string | undefined]
   sr = sr.split('+').sort().join('+')
-  q = q ? q.split('+').sort().join('+') : ''
+  q = q !== undefined ? q.split('+').sort().join('+') : undefined
   return [sr, q]
 }
 
@@ -53,10 +55,10 @@ export default function Home() {
     if (!query() || query().startsWith('?')) return
 
     const [subreddits, searchTerms] = getSubredditsAndSearchTerms(query())
-    const id = subreddits + (searchTerms ? '?' + searchTerms : '')
+    const id = subreddits + (searchTerms !== undefined ? '?' + searchTerms : '')
     if (!userState()!.collections.has(id)) setCollection(id, id)
 
-    navigate(getURL(subreddits, searchTerms))
+    navigate(getURL(subreddits, searchTerms || ''))
   }
 
   return (

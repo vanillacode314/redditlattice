@@ -22,7 +22,7 @@ export default function Home() {
 
   const query = () => {
     if (!subreddit()) return ''
-    if (searchTerm()) {
+    if (searchTerm() !== undefined) {
       return `${subreddit().toLowerCase()}?${searchTerm().toLowerCase()}`
     }
     return `${subreddit().toLowerCase()}`
@@ -99,7 +99,7 @@ export default function Home() {
               const [sr, q] = e.currentTarget.value.split('?')
               batch(() => {
                 setSubreddit(sr || '')
-                setSearchTerm(q || '')
+                setSearchTerm(q)
               })
             }}
             onFocus={() => setFocused(true)}
