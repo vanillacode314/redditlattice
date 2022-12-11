@@ -26,14 +26,14 @@ export const Navbar: Component = () => {
   const scrolling = () => appState.autoScrolling
 
   let cancelScroll: () => void
-  function toggleScroll() {
+  async function toggleScroll() {
     if (scrolling()) {
       cancelScroll?.()
-      setScrolling(!scrolling())
+      setScrolling(false)
       return
     }
-    cancelScroll = showAutoScrollModal()
-    setScrolling(!scrolling())
+    cancelScroll = await showAutoScrollModal()
+    setScrolling(true)
   }
 
   createEffect(() => {
