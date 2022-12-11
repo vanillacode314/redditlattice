@@ -1,13 +1,27 @@
 import { Component, createSignal } from 'solid-js'
 import { Button } from 'ui'
+import { useAppState } from '~/stores'
 import { autoScroll } from '~/utils/scroller'
 
-export const [speed, setSpeed] = createSignal<number>(150) // in pixels per second
-let el!: HTMLDialogElement
+const [speed, setSpeed] = createSignal<number>(150) // in pixels per second
 let cancelScroll: () => void
+let el!: HTMLDialogElement
 
-export const showAutoScrollModal = () => {
+export const startScroll = () => {
+  cancelScroll = autoScroll('#scroller', speed())
+}
+
+let submitResolve: () => void
+let submitReject: () => void
+
+export const showAutoScrollModal = async () => {
   el.showModal()
+
+  /* wait for modal to be closed, resolves on submit and rejects on cancel */
+  await new Promise<void>((resolve, reject) => {
+    submitResolve = resolve
+    submitReject = () => reject(new Error('Cancelled auto scrolling'))
+  })
   return () => cancelScroll()
 }
 
@@ -16,6 +30,8 @@ interface Props {
 }
 
 export const AutoScrollModal: Component<Props> = (props) => {
+  const [_appState, setAppState] = useAppState()
+
   const { onClose } = props
 
   return () => (
@@ -24,18 +40,27 @@ export const AutoScrollModal: Component<Props> = (props) => {
         ref={el}
         class="bg-transparent max-w-[30rem] w-full mx-auto px-5 backdrop:bg-white/10 backdrop:backdrop-blur-sm"
         onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            el.close()
-            onClose?.(false)
-          }
+          if (e.target !== e.currentTarget) return
+
+          el.close()
+          onClose?.(false)
+          submitReject?.()
         }}
       >
         <form
-          onSubmit={(e) => {
-            cancelScroll = autoScroll('#scroller', speed())
-            window.addEventListener('touchstart', () => cancelScroll(), {
-              once: true,
-            })
+          onSubmit={() => {
+            submitResolve?.()
+            startScroll()
+            window.addEventListener(
+              'touchstart',
+              () => {
+                setAppState('autoScrolling', false)
+                cancelScroll?.()
+              },
+              {
+                once: true,
+              }
+            )
             onClose?.(true)
           }}
           method="dialog"

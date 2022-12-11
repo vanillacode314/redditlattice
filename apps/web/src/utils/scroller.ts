@@ -22,7 +22,7 @@ export function autoScroll(elementSelector: string, speed: number): () => void {
     if (!start) start = timestamp
     const progress = timestamp - start
     const time = Math.min(1, progress / duration)
-    element.scrollTo({ top: startY + time * diff, behavior: 'smooth' })
+    element.scrollTop = startY + time * diff
     if (time < 1) id = window.requestAnimationFrame(step)
   }
 

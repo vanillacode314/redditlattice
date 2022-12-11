@@ -38,7 +38,7 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
   const onScroll = throttle((e: Event) => {
     if (state() !== 'idle') return
 
-    const scrollTarget = e.currentTarget as HTMLElement
+    const scrollTarget = document.querySelector(merged.target)
     if (!scrollTarget)
       throw new Error(
         `scroll-target ${props.target} not found for infinite loading`
