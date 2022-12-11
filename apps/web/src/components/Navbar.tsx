@@ -13,6 +13,7 @@ import { createSpring, animated } from 'solid-spring'
 import { TransitionFade } from 'ui/transitions'
 import { throttle } from 'lodash-es'
 import screenfull from 'screenfull'
+import AutoScrollModal, { showAutoScrollModal } from '~/modals/AutoScrollModal'
 
 export const Navbar: Component = () => {
   const [mounted, setMounted] = createSignal<boolean>(false)
@@ -20,6 +21,20 @@ export const Navbar: Component = () => {
   const [appState, setAppState] = useAppState()
   const [query, setQuery] = createSignal<string>('')
   const [fullscreen, setFullscreen] = createSignal<boolean>(false)
+
+  const setScrolling = (val: boolean) => setAppState('autoScrolling', val)
+  const scrolling = () => appState.autoScrolling
+
+  let cancelScroll: () => void
+  function toggleScroll() {
+    if (scrolling()) {
+      cancelScroll?.()
+      setScrolling(!scrolling())
+      return
+    }
+    cancelScroll = showAutoScrollModal()
+    setScrolling(!scrolling())
+  }
 
   createEffect(() => {
     if (!screenfull.isEnabled) return
@@ -166,11 +181,26 @@ export const Navbar: Component = () => {
           <Show when={showBack()}>
             <button
               type="button"
+              title="search"
               onClick={() => setAppState({ isSearching: true })}
             >
               <span text="2xl" class="i-mdi-magnify"></span>
             </button>
-            <button type="button" onClick={() => setFullscreen((_) => !_)}>
+            <AutoScrollModal onClose={(success) => setScrolling(success)} />
+            <button type="button" title="autoscroll" onClick={toggleScroll}>
+              <span
+                text="2xl"
+                classList={{
+                  'i-mdi-play': !scrolling(),
+                  'i-mdi-pause': scrolling(),
+                }}
+              ></span>
+            </button>
+            <button
+              title="fullscreen"
+              type="button"
+              onClick={() => setFullscreen((_) => !_)}
+            >
               <span
                 text="2xl"
                 classList={{

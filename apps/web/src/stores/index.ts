@@ -15,6 +15,7 @@ export interface IAppState {
   drawerVisible: boolean
   navVisible: boolean
   isSearching: boolean
+  autoScrolling: boolean
   images: {
     key: string
     after: string
@@ -42,6 +43,7 @@ const [appState, setAppState] = createStore<IAppState>({
   drawerVisible: false,
   navVisible: true,
   isSearching: false,
+  autoScrolling: false,
   images: {
     key: '',
     after: '',

@@ -20,6 +20,8 @@ import { parseSchema } from '~/utils'
 import { TRPCClientError } from '@trpc/client'
 import { minBy } from 'lodash-es'
 import { useRefresh } from '~/layouts/Base'
+import { autoScroll } from '~/utils/scroller'
+import { speed } from '~/modals/AutoScrollModal'
 
 const [appState, setAppState] = useAppState()
 
@@ -166,7 +168,10 @@ export default function Subreddit() {
 
       if (after) {
         setAppState('images', { after })
-        setTimeout(() => setState('idle'), 1000)
+        setTimeout(() => {
+          setState('idle')
+          if (appState.autoScrolling) autoScroll('#scroller', speed())
+        }, 1000)
         return
       }
       setState('completed')
