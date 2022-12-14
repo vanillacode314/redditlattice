@@ -51,16 +51,18 @@ export const AutoScrollModal: Component<Props> = (props) => {
           onSubmit={() => {
             submitResolve?.()
             startScroll()
-            window.addEventListener(
-              'touchstart',
-              () => {
-                setAppState('autoScrolling', false)
-                cancelScroll?.()
-              },
-              {
-                once: true,
-              }
-            )
+            ;['touchstart', 'mousedown'].forEach((eventType) => {
+              window.addEventListener(
+                eventType,
+                () => {
+                  setAppState('autoScrolling', false)
+                  cancelScroll?.()
+                },
+                {
+                  once: true,
+                }
+              )
+            })
             onClose?.(true)
           }}
           method="dialog"
