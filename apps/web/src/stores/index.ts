@@ -36,6 +36,7 @@ export interface IUserState {
   collections: Map<string /* query */, string /* nickname */>
   recents: Map<string /* query */, number /* timestamp */>
   recentsLimit: number
+  columnMaxWidth: number
 }
 
 const [appState, setAppState] = createStore<IAppState>({
@@ -63,6 +64,7 @@ function GET_DEFAULT_USER_STATE(): IUserState {
     gap: 10,
     borderRadius: 10,
     collections: new Map(),
+    columnMaxWidth: 400,
     recents: new Map(),
     recentsLimit: 5,
   }
