@@ -199,7 +199,7 @@ export default function Subreddit() {
           id: image.name,
           data: image,
         }))}
-        maxWidth={400}
+        maxWidth={userState()!.columnMaxWidth}
         gap={userState()!.gap}
       >
         {(_, image, width) => (
