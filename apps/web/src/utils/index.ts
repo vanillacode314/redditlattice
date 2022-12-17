@@ -115,3 +115,9 @@ export const nextFrame = (cb: FrameRequestCallback) =>
 
 export const getExtension = (path: string) =>
   new URL(path).pathname.split('.').at(-1)
+
+export function filterStringKeys<T extends Record<any, any>>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key]) => typeof key === 'string')
+  ) as T
+}

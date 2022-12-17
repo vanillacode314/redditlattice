@@ -209,7 +209,7 @@ export default function Home() {
             }}
             reverse
             title="recents"
-            items={[...userState()!.recents]
+            items={[...userState.recents]
               .sort(([_q1, t1], [_q2, t2]) => t2 - t1)
               .map(([q, _]) => ({
                 id: q,
@@ -225,7 +225,7 @@ export default function Home() {
             onRemove={(id) => removeSubreddit(id)}
             reverse
             title="subreddits"
-            items={[...userState()!.subreddits].sort().map((sr) => ({
+            items={[...userState.subreddits].sort().map((sr) => ({
               id: sr,
               title: sr,
             }))}
@@ -233,7 +233,7 @@ export default function Home() {
           <div border="b gray-800"></div>
           <List
             onClick={(id) => {
-              const sr = subreddit() || userState()!.searchTerms.get(id)
+              const sr = subreddit() || userState.searchTerms.get(id)
               if (sr) {
                 batch(() => {
                   setSubreddit(sr)
@@ -245,7 +245,7 @@ export default function Home() {
             onRemove={(id) => removeSearchTerm(id)}
             reverse
             title="searches"
-            items={[...userState()!.searchTerms.keys()].sort().map((q) => ({
+            items={[...userState.searchTerms.keys()].sort().map((q) => ({
               id: q,
               title: q,
             }))}

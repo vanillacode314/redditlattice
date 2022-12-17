@@ -1,8 +1,41 @@
 import { createStore } from 'solid-js/store'
-import { createStorageSignal } from '@solid-primitives/storage'
+import { isServer } from 'solid-js/web'
 import { parse, stringify } from 'devalue'
-import { merge } from 'lodash-es'
-import { createRenderEffect } from 'solid-js'
+import { createComputed } from 'solid-js'
+import { filterStringKeys } from '~/utils'
+
+interface LocalStorageStoreOptions<T = any> {
+  serializer: (input: T) => string
+  deserializer: (input: string) => T
+}
+const createLocalStorageStore = <T extends Record<string, any>>(
+  localStorageKey: string,
+  initialValue: T,
+  {
+    serializer = JSON.stringify,
+    deserializer = JSON.parse,
+  }: Partial<LocalStorageStoreOptions<T>> = {}
+) => {
+  const [store, set] = createStore<T>(initialValue)
+
+  function getLocalStorageValue() {
+    const localStorageValue = localStorage.getItem(localStorageKey)
+    localStorageValue
+      ? set(deserializer(localStorageValue))
+      : localStorage.setItem(localStorageKey, serializer(initialValue))
+  }
+
+  if (!isServer) {
+    getLocalStorageValue()
+    window.addEventListener('storage', () => getLocalStorageValue())
+  }
+
+  createComputed(
+    () => !isServer && localStorage.setItem(localStorageKey, serializer(store))
+  )
+
+  return [store, set] as const
+}
 
 export interface IImage {
   name: string
@@ -70,21 +103,14 @@ function GET_DEFAULT_USER_STATE(): IUserState {
   }
 }
 
-const [userState, setUserState] = createStorageSignal<IUserState>(
+const [userState, setUserState] = createLocalStorageStore<IUserState>(
   'user-state',
   GET_DEFAULT_USER_STATE(),
   {
-    serializer: stringify,
+    serializer: (obj) => stringify(filterStringKeys(obj)),
     deserializer: parse,
   }
 )
 
 export const useAppState = () => [appState, setAppState] as const
 export const useUserState = () => [userState, setUserState] as const
-
-createRenderEffect(() =>
-  setUserState((state) => {
-    state = merge(GET_DEFAULT_USER_STATE(), state)
-    return state
-  })
-)

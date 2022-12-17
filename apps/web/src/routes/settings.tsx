@@ -1,6 +1,6 @@
 import { Show, batch, For, onMount, onCleanup } from 'solid-js'
 import { createStore } from 'solid-js/store'
-import { download, formatBytes } from '~/utils'
+import { filterStringKeys, download, formatBytes } from '~/utils'
 import { useUserState, useAppState } from '~/stores'
 import { stringify, parse } from 'devalue'
 import { Button } from 'ui'
@@ -26,7 +26,7 @@ export default function Settings() {
 
   const clearCache = async () => {
     await caches.delete('images-assets')
-    await clear()
+    await clear() // IDBKeyVal
     setUsageStats(await getUsageStats())
   }
 
@@ -38,29 +38,26 @@ export default function Settings() {
     }
     try {
       const content = await file.text()
-      const data = parse(content) as ReturnType<typeof userState>
+      const data = parse(content) as typeof userState
       const { collections, subreddits, sort, searchTerms } = data!
+
+      function appendKey<
+        K extends keyof typeof userState = any,
+        V extends typeof userState[K] = any
+      >(key: K, value: V) {
+        if (value instanceof Set) {
+          const newValue = new Set([...value, ...userState[key]])
+          setUserState(key, newValue)
+        } else {
+          const newValue = new Map([...value, ...userState[key]])
+          setUserState(key, newValue)
+        }
+      }
       batch(() => {
-        if (subreddits) {
-          const x = new Set([...subreddits, ...userState()!.subreddits])
-          setUserState((state) => ({ ...state!, subreddits: x }))
-        }
-        if (sort) {
-          const x = new Map([...sort, ...userState()!.sort])
-          setUserState((state) => ({ ...state!, sort: x }))
-        }
-        if (sort) {
-          const x = new Map([...sort, ...userState()!.sort])
-          setUserState((state) => ({ ...state!, sort: x }))
-        }
-        if (searchTerms) {
-          const x = new Map([...searchTerms, ...userState()!.searchTerms])
-          setUserState((state) => ({ ...state!, searchTerms: x }))
-        }
-        if (collections) {
-          const x = new Map([...collections, ...userState()!.collections])
-          setUserState((state) => ({ ...state!, collections: x }))
-        }
+        subreddits && appendKey('subreddits', subreddits)
+        sort && appendKey('sort', sort)
+        searchTerms && appendKey('searchTerms', searchTerms)
+        collections && appendKey('collections', collections)
       })
     } catch (e) {
       alert('Selected file contains invalid data')
@@ -68,7 +65,7 @@ export default function Settings() {
   }
 
   const exportData = async () => {
-    const data = stringify(userState())
+    const data = stringify(filterStringKeys(userState))
     download(
       `data:text/plain;charset=utf-8,${encodeURIComponent(data)}`,
       `redditlattice-${new Date().toLocaleDateString()}.dat`
@@ -80,23 +77,6 @@ export default function Settings() {
   })
 
   onMount(() => setAppState('title', 'Settings'))
-
-  const setRecentsLimit = (n: number) => {
-    setUserState((_) => ({ ..._!, recentsLimit: n }))
-  }
-  const setImageSizeMultiplier = (n: number) =>
-    setUserState((_) => ({ ..._!, imageSizeMultiplier: n }))
-  const setGap = (n: number) => setUserState((_) => ({ ..._!, gap: n }))
-  const setColumnMaxWidth = (n: number) =>
-    setUserState((_) => ({ ..._!, columnMaxWidth: n }))
-  const setBorderRadius = (n: number) =>
-    setUserState((_) => ({ ..._!, borderRadius: n }))
-  const setImageFormat = (format: string) =>
-    setUserState((_) => ({ ..._!, prefferedImageFormat: format }))
-  const setProcessImages = (processImages: boolean) =>
-    setUserState((_) => ({ ..._!, processImages }))
-  const setHideNSFW = (hideNSFW: boolean) =>
-    setUserState((_) => ({ ..._!, hideNSFW }))
 
   const resetState = () =>
     setAppState({
@@ -110,14 +90,11 @@ export default function Settings() {
   onCleanup(() => {
     /* Update Recents */
     setUserState((state) => {
-      while (state!.recents.size > state!.recentsLimit) {
-        const [q, _] = minBy(
-          [...state!.recents],
-          ([_, timestamp]) => timestamp
-        )!
-        state!.recents.delete(q)
+      while (state.recents.size > state.recentsLimit) {
+        const [q, _] = minBy([...state.recents], ([_, timestamp]) => timestamp)!
+        state.recents.delete(q)
       }
-      return { ...state! }
+      return { ...state }
     })
     resetState()
   })
@@ -161,8 +138,10 @@ export default function Settings() {
           min="100"
           step="10"
           type="number"
-          value={userState()!.columnMaxWidth}
-          onChange={(e) => setColumnMaxWidth(+e.currentTarget.value)}
+          value={userState.columnMaxWidth}
+          onChange={(e) =>
+            setUserState('columnMaxWidth', +e.currentTarget.value)
+          }
         />
       </label>
       <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
@@ -174,8 +153,8 @@ export default function Settings() {
           min="0"
           step="1"
           type="number"
-          value={userState()!.borderRadius}
-          onChange={(e) => setBorderRadius(+e.currentTarget.value)}
+          value={userState.borderRadius}
+          onChange={(e) => setUserState('borderRadius', +e.currentTarget.value)}
         />
       </label>
       <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
@@ -187,11 +166,11 @@ export default function Settings() {
           min="0"
           step="1"
           type="number"
-          value={userState()!.gap}
-          onChange={(e) => setGap(+e.currentTarget.value)}
+          value={userState.gap}
+          onChange={(e) => setUserState('gap', +e.currentTarget.value)}
         />
       </label>
-      <Show when={userState()!.processImages}>
+      <Show when={userState.processImages}>
         <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
           <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
             Image Size Multiplier (relative to width)
@@ -201,8 +180,10 @@ export default function Settings() {
             min="1"
             step="0.1"
             type="number"
-            value={userState()!.imageSizeMultiplier}
-            onChange={(e) => setImageSizeMultiplier(+e.currentTarget.value)}
+            value={userState.imageSizeMultiplier}
+            onChange={(e) =>
+              setUserState('imageSizeMultiplier', +e.currentTarget.value)
+            }
           />
         </label>
         <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
@@ -210,8 +191,10 @@ export default function Settings() {
             Preffered Image Format
           </span>
           <select
-            value={userState()!.prefferedImageFormat}
-            onChange={(e) => setImageFormat(e.currentTarget.value)}
+            value={userState.prefferedImageFormat}
+            onChange={(e) =>
+              setUserState('prefferedImageFormat', e.currentTarget.value)
+            }
             class="bg-black outline-none"
           >
             <For each={['webp', 'avif', 'jpeg', 'png']}>
@@ -232,8 +215,10 @@ export default function Settings() {
         </span>
         <input
           type="checkbox"
-          checked={userState()!.processImages}
-          onChange={(e) => setProcessImages(e.currentTarget.checked)}
+          checked={userState.processImages}
+          onChange={(e) =>
+            setUserState('processImages', e.currentTarget.checked)
+          }
         />
       </label>
       {/* <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg flex items-center justify-between transition-colors"> */}
@@ -255,8 +240,8 @@ export default function Settings() {
           min="0"
           step="1"
           type="number"
-          value={userState()!.recentsLimit}
-          onChange={(e) => setRecentsLimit(+e.currentTarget.value)}
+          value={userState.recentsLimit}
+          onChange={(e) => setUserState('recentsLimit', +e.currentTarget.value)}
         />
       </label>
     </div>

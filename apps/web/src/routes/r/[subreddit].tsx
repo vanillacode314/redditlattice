@@ -21,6 +21,7 @@ import { TRPCClientError } from '@trpc/client'
 import { minBy } from 'lodash-es'
 import { useRefresh } from '~/layouts/Base'
 import { startScroll } from '~/modals/AutoScrollModal'
+import { produce } from 'solid-js/store'
 
 const [appState, setAppState] = useAppState()
 
@@ -56,14 +57,17 @@ export default function Subreddit() {
 
   const q = () => new URLSearchParams(location.search.toLowerCase()).getAll('q')
   const subreddits = () => params.subreddit.toLowerCase().split('+')
-  const sort = createMemo(() => userState()!.sort.get(subreddits()[0]) || 'hot')
+  const sort = createMemo(
+    () => userState.sort.get(subreddits().sort().join('+')) || 'hot'
+  )
   const key = createMemo(() => `${subreddits()}-${q().join('+')}-${sort()}`)
 
   const setSort = (sort: string) =>
-    setUserState((state) => {
-      state!.sort.set(subreddits().sort().join('+'), sort)
-      return { ...state! }
-    })
+    setUserState(
+      'sort',
+      (current) =>
+        new Map([...current.set(subreddits().sort().join('+'), sort)])
+    )
 
   onMount(() => setSort(sort()))
 
@@ -95,27 +99,30 @@ export default function Subreddit() {
   createEffect(() => {
     if (subreddits().length > 1) return
     if (q().length > 1) return
-    setUserState((state) => {
-      /* Update Subreddits */
-      state!.subreddits.add(subreddits()[0])
 
-      /* Update Recents */
-      state!.recents.set(
+    /* Update Subreddits */
+    setUserState(
+      'subreddits',
+      (current) => new Set([...current.add(subreddits()[0])])
+    )
+
+    /* Update Recents */
+    setUserState('recents', (current) => {
+      current.set(
         q().length > 0 ? `${subreddits()[0]}?${q()[0]}` : subreddits()[0],
         Math.floor(Date.now() / 1000)
       )
-      while (state!.recents.size > state!.recentsLimit) {
-        const [q, _] = minBy(
-          [...state!.recents],
-          ([_, timestamp]) => timestamp
-        )!
-        state!.recents.delete(q)
+      while (current.size > userState.recentsLimit) {
+        const [q, _] = minBy([...current], ([_, timestamp]) => timestamp)!
+        current.delete(q)
       }
+      return new Map([...current])
+    })
 
-      /* Update Search Terms */
-      if (q().length > 0)
-        state!.searchTerms.set(q()[0].toLowerCase(), subreddits()[0])
-      return { ...state! }
+    /* Update Search Terms */
+    setUserState('searchTerms', (current) => {
+      if (q().length > 0) current.set(q()[0].toLowerCase(), subreddits()[0])
+      return new Map([...current])
     })
   })
 
@@ -139,8 +146,8 @@ export default function Subreddit() {
             q: q(),
             after: appState.images.after,
             subreddits: subreddits(),
-            sort: userState()!.sort.get(subreddits().sort().join('+')),
-            nsfw: !userState()!.hideNSFW,
+            sort: userState.sort.get(subreddits().sort().join('+')),
+            nsfw: !userState.hideNSFW,
           },
           {
             signal: ac.signal,
@@ -192,15 +199,15 @@ export default function Subreddit() {
       h-full
       max-h-full
       id="scroller"
-      style={{ padding: `${userState()!.gap}px` }}
+      style={{ padding: `${userState.gap}px` }}
     >
       <Masonry
         items={[...appState.images.data].map((image) => ({
           id: image.name,
           data: image,
         }))}
-        maxWidth={userState()!.columnMaxWidth}
-        gap={userState()!.gap}
+        maxWidth={userState.columnMaxWidth}
+        gap={userState.gap}
       >
         {(_, image, width) => (
           <ImageCard width={width()} image={image}></ImageCard>

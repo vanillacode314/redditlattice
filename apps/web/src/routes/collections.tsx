@@ -56,7 +56,7 @@ export default function Home() {
 
     const [subreddits, searchTerms] = getSubredditsAndSearchTerms(query())
     const id = subreddits + (searchTerms !== undefined ? '?' + searchTerms : '')
-    if (!userState()!.collections.has(id)) setCollection(id, id)
+    if (!userState.collections.has(id)) setCollection(id, id)
 
     navigate(getURL(subreddits, searchTerms || ''))
   }
@@ -216,7 +216,7 @@ export default function Home() {
             onRemove={(id) => removeCollection(id)}
             reverse
             title="collections"
-            items={[...userState()!.collections].sort().map(([key, value]) => ({
+            items={[...userState.collections].sort().map(([key, value]) => ({
               id: key,
               title: value,
             }))}

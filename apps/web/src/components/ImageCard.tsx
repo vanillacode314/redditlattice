@@ -44,7 +44,7 @@ export const ImageCard: Component<Props> = (props) => {
   const [errorMsg, setErrorMsg] = createSignal<string>('')
 
   const width = () =>
-    Math.round(props.width / 100) * 100 * userState()!.imageSizeMultiplier
+    Math.round(props.width / 100) * 100 * userState.imageSizeMultiplier
 
   const popupVisible = () => location.hash === '#popup-' + props.image.name
 
@@ -69,12 +69,11 @@ export const ImageCard: Component<Props> = (props) => {
       : `${IMAGE_SERVER_BASE_PATH}/?url=${url}&width=${width}&format=${format}`
 
   function getSources() {
-    const state = userState()!
-    const formats = uniq([state.prefferedImageFormat, 'webp'])
+    const formats = uniq([userState.prefferedImageFormat, 'webp'])
     return new Map(
       formats.map((format) => [
         `image/${format}`,
-        state.processImages
+        userState.processImages
           ? getProcessedImageURL(props.image.url, width(), { format })
           : props.image.url,
       ])
@@ -137,7 +136,7 @@ export const ImageCard: Component<Props> = (props) => {
         }
       >
         <AutoResizingPicture
-          style={{ 'border-radius': `${userState()!.borderRadius}px` }}
+          style={{ 'border-radius': `${userState.borderRadius}px` }}
           fallback={
             <div class="grid place-items-center h-full">
               <div
@@ -165,7 +164,7 @@ export const ImageCard: Component<Props> = (props) => {
           }}
           srcSets={getSources()}
           src={
-            userState()!.processImages
+            userState.processImages
               ? getProcessedImageURL(props.image.url, width())
               : props.image.url
           }
