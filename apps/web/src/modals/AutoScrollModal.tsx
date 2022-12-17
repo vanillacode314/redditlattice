@@ -52,7 +52,8 @@ export const AutoScrollModal: Component<Props> = (props) => {
             submitResolve?.()
             startScroll()
             ;['touchstart', 'mousedown'].forEach((eventType) => {
-              window.addEventListener(
+              const scroller = document.getElementById('scroller')
+              scroller?.addEventListener(
                 eventType,
                 () => {
                   setAppState('autoScrolling', false)
