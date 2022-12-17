@@ -10,11 +10,11 @@ import {
 import path from 'path'
 import netlify from 'solid-start-netlify'
 import node from 'solid-start-node'
-import { version } from './package.json' assert { type: 'json' }
+import pkgJson from './package.json' assert { type: 'json' }
 
 export default defineConfig({
   define: {
-    __version__: JSON.stringify(version),
+    __version__: JSON.stringify(pkgJson.version),
   },
   resolve: {
     alias: {
