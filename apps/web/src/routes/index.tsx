@@ -50,16 +50,16 @@ export default function Home() {
   }
 
   function removeSubreddit(id: string) {
-    setUserState((state) => {
-      state!.subreddits.delete(id)
-      return { ...state! }
+    setUserState('subreddits', (subreddits) => {
+      subreddits.delete(id)
+      return new Set([...subreddits])
     })
   }
 
   function removeSearchTerm(id: string) {
-    setUserState((state) => {
-      state!.searchTerms.delete(id)
-      return { ...state! }
+    setUserState('searchTerms', (searchTerms) => {
+      searchTerms.delete(id)
+      return new Map([...searchTerms])
     })
   }
 

@@ -39,9 +39,9 @@ export default function Home() {
   const navigate = useNavigate()
 
   const removeCollection = (id: string) =>
-    setUserState((state) => {
-      state!.collections.delete(id)
-      return { ...state! }
+    setUserState('collections', (collections) => {
+      collections.delete(id)
+      return new Map([...collections])
     })
 
   const setCollection = (id: string, value: string) =>
