@@ -65,28 +65,21 @@ export default function Home() {
 
   return (
     <main pb-5 h-full flex flex-col-reverse overflow-hidden>
-      <form
-        class="grid grid-cols-[1fr_auto]"
-        gap-3
-        items-center
-        px-5
-        onSubmit={onSubmit}
-      >
+      <form class="flex" items-center px-5 onSubmit={onSubmit}>
         <div
-          class="grid grid-cols-[auto_1fr_auto] transitions-colors duration-250"
-          border="2 hover:pink-700 focus:pink-700"
+          class="flex transitions-colors duration-250 bg-gray-900 rounded-l grow border-2 border-r-0 focus-within:border-pink-900 hover:bg-gray-800"
           classList={{
             'border-pink-500': flashing(),
-            'border-pink-900': !flashing(),
+            'border-transparent': !flashing(),
           }}
           onTransitionEnd={() => {
-            if (flashing()) setFlashing(false)
+            if (!flashing()) return
+            setFlashing(false)
           }}
           gap-3
           bg-black
           outline-none
-          rounded-full
-          py-2
+          py-3
           px-5
           items-center
         >
@@ -106,7 +99,7 @@ export default function Home() {
             onBlur={() => setFocused(false)}
             type="text"
             placeholder="e.g. wallpapers?red"
-            class="placeholder:text-gray-500"
+            class="placeholder:text-gray-500 grow"
             id="search"
             name="subreddit"
             min-w-0
@@ -133,9 +126,9 @@ export default function Home() {
         </div>
         <button
           text="white xl"
-          rounded-full
-          w-13
-          h-13
+          rounded-r
+          h-full
+          aspect-square
           outline-none
           grid
           place-items-center
