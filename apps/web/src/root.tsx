@@ -19,7 +19,7 @@ import './root.css'
 import Base from '~/layouts/Base'
 import { useAppState, useUserState } from '~/stores'
 import { Spinner } from 'ui'
-import { DevtoolsOverlay } from '@solid-devtools/overlay'
+/* import { DevtoolsOverlay } from '@solid-devtools/overlay' */
 import { asyncFilter } from './utils'
 
 export const Root: Component = () => {
@@ -95,7 +95,7 @@ export const Root: Component = () => {
           </Routes>
           <Scripts />
         </Base>
-        <DevtoolsOverlay />
+        {/* <DevtoolsOverlay /> */}
       </Body>
     </Html>
   )

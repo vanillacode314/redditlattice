@@ -3,6 +3,7 @@ import { isServer } from 'solid-js/web'
 import { parse, stringify } from 'devalue'
 import { createComputed } from 'solid-js'
 import { filterStringKeys } from '~/utils'
+import { z } from 'zod'
 
 interface LocalStorageStoreOptions<T = any> {
   serializer: (input: T) => string
@@ -20,9 +21,17 @@ const createLocalStorageStore = <T extends Record<string, any>>(
 
   function getLocalStorageValue() {
     const localStorageValue = localStorage.getItem(localStorageKey)
-    localStorageValue
-      ? set(deserializer(localStorageValue))
-      : localStorage.setItem(localStorageKey, serializer(initialValue))
+    if (!localStorageValue) {
+      localStorage.setItem(localStorageKey, serializer(initialValue))
+      return
+    }
+
+    try {
+      const data = deserializer(localStorageValue)
+      set(data)
+    } catch {
+      localStorage.setItem(localStorageKey, serializer(initialValue))
+    }
   }
 
   if (!isServer) {
@@ -56,21 +65,23 @@ export interface IAppState {
   }
 }
 
-export interface IUserState {
-  subreddits: Set<string>
-  searchTerms: Map<string, string>
-  sort: Map<string, string>
-  imageSizeMultiplier: number
-  prefferedImageFormat: string
-  processImages: boolean
-  hideNSFW: boolean
-  gap: number
-  borderRadius: number
-  collections: Map<string /* query */, string /* nickname */>
-  recents: Map<string /* query */, number /* timestamp */>
-  recentsLimit: number
-  columnMaxWidth: number
-}
+const userStateSchema = z.object({
+  subreddits: z.set(z.string()),
+  searchTerms: z.map(z.string(), z.string()),
+  sort: z.map(z.string(), z.string()),
+  imageSizeMultiplier: z.number(),
+  prefferedImageFormat: z.string(),
+  processImages: z.boolean(),
+  hideNSFW: z.boolean(),
+  gap: z.number(),
+  borderRadius: z.number(),
+  collections: z.map(z.string(), z.string()),
+  recents: z.map(z.string(), z.number()),
+  recentsLimit: z.number(),
+  columnMaxWidth: z.number(),
+})
+
+type TUserState = z.infer<typeof userStateSchema>
 
 const [appState, setAppState] = createStore<IAppState>({
   title: '',
@@ -85,7 +96,7 @@ const [appState, setAppState] = createStore<IAppState>({
   },
 })
 
-function GET_DEFAULT_USER_STATE(): IUserState {
+function GET_DEFAULT_USER_STATE(): TUserState {
   return {
     subreddits: new Set(),
     searchTerms: new Map(),
@@ -103,7 +114,7 @@ function GET_DEFAULT_USER_STATE(): IUserState {
   }
 }
 
-const [userState, setUserState] = createLocalStorageStore<IUserState>(
+const [userState, setUserState] = createLocalStorageStore<TUserState>(
   'user-state',
   GET_DEFAULT_USER_STATE(),
   {
