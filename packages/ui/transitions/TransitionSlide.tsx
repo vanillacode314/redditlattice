@@ -1,4 +1,10 @@
-import { Component, createSignal, JSXElement, mergeProps } from 'solid-js'
+import {
+  Component,
+  createSignal,
+  JSXElement,
+  mergeProps,
+  onMount,
+} from 'solid-js'
 import { TransitionGroup } from 'solid-transition-group'
 
 interface Props {
@@ -41,14 +47,16 @@ export const TransitionSlide: Component<Props> = (props) => {
   return (
     <TransitionGroup
       onBeforeEnter={(el) => {
-        setSize(
+        requestAnimationFrame(() => {
+          setSize(
+            merged.direction === 'x'
+              ? el.getBoundingClientRect().width
+              : el.getBoundingClientRect().height
+          )
           merged.direction === 'x'
-            ? el.getBoundingClientRect().width
-            : el.getBoundingClientRect().height
-        )
-        merged.direction === 'x'
-          ? (el.style.width = `0px`)
-          : (el.style.height = `0px`)
+            ? (el.style.width = `0px`)
+            : (el.style.height = `0px`)
+        })
       }}
       onEnter={(el, done) => {
         el.animate(keyframes(), animationOptions).finished.then(done)
