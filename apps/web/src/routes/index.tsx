@@ -1,4 +1,11 @@
-import { onMount, batch, createSignal, Show, Suspense } from 'solid-js'
+import {
+  onMount,
+  batch,
+  createSignal,
+  Show,
+  Suspense,
+  createEffect,
+} from 'solid-js'
 import { useNavigate } from 'solid-start'
 import { trpc } from '~/client'
 import { AsyncList, List, Spinner } from 'ui'
@@ -60,6 +67,15 @@ export default function Home() {
     setUserState('searchTerms', (searchTerms) => {
       searchTerms.delete(id)
       return new Map([...searchTerms])
+    })
+  }
+
+  function toggleFavouriteSubreddit(subreddit: string) {
+    setUserState('favouriteSubreddits', (favouriteSubreddits) => {
+      favouriteSubreddits.has(subreddit)
+        ? favouriteSubreddits.delete(subreddit)
+        : favouriteSubreddits.add(subreddit)
+      return new Set([...favouriteSubreddits])
     })
   }
 
@@ -157,6 +173,7 @@ export default function Home() {
         shrink-1
         p="t-[70%]"
       >
+        {/* AUTOCOMPLETE LIST */}
         <Show
           when={!query() || !(focused() && !query().includes('?'))}
           fallback={
@@ -202,6 +219,41 @@ export default function Home() {
             </Suspense>
           }
         >
+          {/* FAVOURITES LIST */}
+          <List
+            onClick={(id) => {
+              setSubreddit(id)
+              flashSearchInput()
+            }}
+            reverse
+            buttons={[
+              (id) => (
+                <button
+                  class="outline-none group"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toggleFavouriteSubreddit(id)
+                  }}
+                >
+                  <div
+                    class="i-mdi-star text-xl transition-colors"
+                    classList={{
+                      'text-amber-500 group-hover:text-amber-400 group-focus:text-amber-400':
+                        userState.favouriteSubreddits.has(id),
+                      'text-gray-700 group-hover:text-white group-focus:text-white':
+                        !userState.favouriteSubreddits.has(id),
+                    }}
+                  />
+                </button>
+              ),
+            ]}
+            title="favourites"
+            items={[...userState.favouriteSubreddits].sort().map((sr) => ({
+              id: sr,
+              title: sr,
+            }))}
+          ></List>
+          {/* RECENTS LIST */}
           <List
             onClick={(id) => {
               setQuery(id)
@@ -217,6 +269,7 @@ export default function Home() {
               }))}
           ></List>
           <div border="b gray-800"></div>
+          {/* SUBREDDITS LIST */}
           <List
             onClick={(id) => {
               setSubreddit(id)
@@ -224,13 +277,38 @@ export default function Home() {
             }}
             onRemove={(id) => removeSubreddit(id)}
             reverse
+            buttons={[
+              (id) => (
+                <button
+                  class="outline-none group"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toggleFavouriteSubreddit(id)
+                  }}
+                >
+                  <div
+                    class="i-mdi-star text-xl transition-colors"
+                    classList={{
+                      'text-amber-500 group-hover:text-amber-400 group-focus:text-amber-400':
+                        userState.favouriteSubreddits.has(id),
+                      'text-gray-700 group-hover:text-white group-focus:text-white':
+                        !userState.favouriteSubreddits.has(id),
+                    }}
+                  />
+                </button>
+              ),
+            ]}
             title="subreddits"
-            items={[...userState.subreddits].sort().map((sr) => ({
-              id: sr,
-              title: sr,
-            }))}
+            items={[...userState.subreddits]
+              .filter((sr) => !userState.favouriteSubreddits.has(sr))
+              .sort()
+              .map((sr) => ({
+                id: sr,
+                title: sr,
+              }))}
           ></List>
           <div border="b gray-800"></div>
+          {/* SEARCH TERMS LIST */}
           <List
             onClick={(id) => {
               const sr = subreddit() || userState.searchTerms.get(id)

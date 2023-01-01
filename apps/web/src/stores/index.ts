@@ -81,6 +81,7 @@ const userStateSchema = z.object({
   gap: z.number().default(10),
   borderRadius: z.number().default(10),
   collections: z.map(z.string(), z.string()).default(() => new Map()),
+  favouriteSubreddits: z.set(z.string()).default(() => new Set<string>()),
   recents: z.map(z.string(), z.number()).default(() => new Map()),
   recentsLimit: z.number().default(5),
   columnMaxWidth: z.number().default(400),
