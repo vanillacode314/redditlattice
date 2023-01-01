@@ -1,15 +1,18 @@
 import solid from 'solid-start/vite'
 import { defineConfig } from 'vite'
-import Unocss from '@unocss/vite'
+
+import Unocss from 'unocss/vite'
 import {
   presetUno,
   presetIcons,
   presetWebFonts,
   presetAttributify,
 } from 'unocss'
-import path from 'path'
+
 import netlify from 'solid-start-netlify'
 import node from 'solid-start-node'
+
+import path from 'path'
 import pkgJson from './package.json' assert { type: 'json' }
 
 export default defineConfig({
@@ -28,6 +31,7 @@ export default defineConfig({
     solid({ ssr: false, adapter: process.env.NETLIFY ? netlify() : node() }),
     Unocss({
       presets: [
+        presetUno(),
         presetAttributify(),
         presetWebFonts({
           provider: 'google',
@@ -35,7 +39,6 @@ export default defineConfig({
             sans: ['Roboto:400,500,600,700'],
           },
         }),
-        presetUno(),
         presetIcons({
           extraProperties: {
             display: 'inline-block',

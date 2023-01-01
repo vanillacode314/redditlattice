@@ -3,6 +3,7 @@ import { isServer } from 'solid-js/web'
 import { parse, stringify } from 'devalue'
 import { createComputed } from 'solid-js'
 import { filterStringKeys } from '~/utils'
+import { z } from 'zod'
 
 interface LocalStorageStoreOptions<T = any> {
   serializer: (input: T) => string
@@ -20,9 +21,16 @@ const createLocalStorageStore = <T extends Record<string, any>>(
 
   function getLocalStorageValue() {
     const localStorageValue = localStorage.getItem(localStorageKey)
-    localStorageValue
-      ? set(deserializer(localStorageValue))
-      : localStorage.setItem(localStorageKey, serializer(initialValue))
+    if (!localStorageValue) {
+      localStorage.setItem(localStorageKey, serializer(initialValue))
+      return
+    }
+
+    try {
+      set(deserializer(localStorageValue))
+    } catch {
+      localStorage.setItem(localStorageKey, serializer(initialValue))
+    }
   }
 
   if (!isServer) {
@@ -37,80 +45,53 @@ const createLocalStorageStore = <T extends Record<string, any>>(
   return [store, set] as const
 }
 
-export interface IImage {
-  name: string
-  url: string
-  title: string
-}
-
-export interface IAppState {
-  title: string
-  drawerVisible: boolean
-  navVisible: boolean
-  isSearching: boolean
-  autoScrolling: boolean
-  images: {
-    key: string
-    after: string
-    data: Set<IImage>
-  }
-}
-
-export interface IUserState {
-  subreddits: Set<string>
-  searchTerms: Map<string, string>
-  sort: Map<string, string>
-  imageSizeMultiplier: number
-  prefferedImageFormat: string
-  processImages: boolean
-  hideNSFW: boolean
-  gap: number
-  borderRadius: number
-  collections: Map<string /* query */, string /* nickname */>
-  recents: Map<string /* query */, number /* timestamp */>
-  recentsLimit: number
-  columnMaxWidth: number
-}
-
-const [appState, setAppState] = createStore<IAppState>({
-  title: '',
-  drawerVisible: false,
-  navVisible: true,
-  isSearching: false,
-  autoScrolling: false,
-  images: {
-    key: '',
-    after: '',
-    data: new Set(),
-  },
+const imageSchema = z.object({
+  name: z.string(),
+  url: z.string(),
+  title: z.string(),
 })
+export type TImage = z.infer<typeof imageSchema>
 
-function GET_DEFAULT_USER_STATE(): IUserState {
-  return {
-    subreddits: new Set(),
-    searchTerms: new Map(),
-    sort: new Map(),
-    imageSizeMultiplier: 2,
-    prefferedImageFormat: 'webp',
-    processImages: false,
-    hideNSFW: true,
-    gap: 10,
-    borderRadius: 10,
-    collections: new Map(),
-    columnMaxWidth: 400,
-    recents: new Map(),
-    recentsLimit: 5,
-  }
-}
+const appStateSchema = z.object({
+  title: z.string().default(''),
+  drawerVisible: z.boolean().default(false),
+  navVisible: z.boolean().default(true),
+  isSearching: z.boolean().default(false),
+  autoScrolling: z.boolean().default(false),
+  images: z
+    .object({
+      key: z.string().default(''),
+      after: z.string().default(''),
+      data: z.set(imageSchema).default(() => new Set<TImage>()),
+    })
+    .default({}),
+})
+export type TAppState = z.infer<typeof appStateSchema>
+const [appState, setAppState] = createStore<TAppState>(appStateSchema.parse({}))
+export const useAppState = () => [appState, setAppState] as const
 
-const [userState, setUserState] = createLocalStorageStore<IUserState>(
+const userStateSchema = z.object({
+  subreddits: z.set(z.string()).default(() => new Set<string>()),
+  searchTerms: z.map(z.string(), z.string()).default(() => new Map()),
+  sort: z.map(z.string(), z.string()).default(() => new Map()),
+  imageSizeMultiplier: z.number().default(2),
+  prefferedImageFormat: z.string().default('webp'),
+  processImages: z.boolean().default(false),
+  hideNSFW: z.boolean().default(true),
+  gap: z.number().default(10),
+  borderRadius: z.number().default(10),
+  collections: z.map(z.string(), z.string()).default(() => new Map()),
+  recents: z.map(z.string(), z.number()).default(() => new Map()),
+  recentsLimit: z.number().default(5),
+  columnMaxWidth: z.number().default(400),
+})
+export type TUserState = z.infer<typeof userStateSchema>
+const [userState, setUserState] = createLocalStorageStore<TUserState>(
   'user-state',
-  GET_DEFAULT_USER_STATE(),
+  userStateSchema.parse({}),
   {
     serializer: (obj) => stringify(filterStringKeys(obj)),
     deserializer: parse,
   }
 )
-
-export const useAppState = () => [appState, setAppState] as const
 export const useUserState = () => [userState, setUserState] as const

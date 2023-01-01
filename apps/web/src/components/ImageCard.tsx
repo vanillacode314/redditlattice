@@ -16,14 +16,14 @@ import { outsideclick } from '~/utils/use-outsideclick'
 import { IMAGE_SERVER_BASE_PATH } from '~/consts'
 import { TransitionFade } from 'ui/transitions'
 import { AutoResizingPicture, Button } from 'ui'
-import { IImage, useUserState } from '~/stores'
+import { TImage, useUserState } from '~/stores'
 import { getExtension, download, blobToDataURL, nextFrame } from '~/utils'
 import { uniq } from 'lodash-es'
 import { del, get } from 'idb-keyval'
 
 interface Props {
   width: number
-  image: IImage
+  image: TImage
   onLoad?: () => void
 }
 

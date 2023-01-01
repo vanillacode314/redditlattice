@@ -1,4 +1,4 @@
-import { IAppState, useAppState, useUserState } from '~/stores'
+import { TAppState, useAppState, useUserState } from '~/stores'
 import { useParams, useLocation } from 'solid-start'
 import {
   onMount,
@@ -21,13 +21,12 @@ import { TRPCClientError } from '@trpc/client'
 import { minBy } from 'lodash-es'
 import { useRefresh } from '~/layouts/Base'
 import { startScroll } from '~/modals/AutoScrollModal'
-import { produce } from 'solid-js/store'
 
 const [appState, setAppState] = useAppState()
 
 export const CACHE: Map<
   string /* key */,
-  Omit<IAppState['images'], 'key'> & { completed: boolean }
+  Omit<TAppState['images'], 'key'> & { completed: boolean }
 > = new Map()
 
 const fabActions: IAction[] = [

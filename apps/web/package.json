@@ -32,7 +32,8 @@
     "solid-start-node": "^0.1.6",
     "ui": "workspace:*",
     "undici": "^5.11.0",
-    "xstate": "^4.34.0"
+    "xstate": "^4.34.0",
+    "zod": "^3.19.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
