@@ -1,4 +1,4 @@
-import { Component, createResource } from 'solid-js'
+import { JSXElement, Component, createResource } from 'solid-js'
 import List from './List'
 
 interface Item {
@@ -11,6 +11,7 @@ interface Props {
   fetcher: (key: string, ac: AbortController) => Promise<Item[]>
   onClick: (id: Item['id']) => void
   onRemove?: (id: Item['id']) => void
+  buttons?: ((id: Item['id']) => JSXElement)[]
   title?: string
   reverse?: boolean
   focusable?: boolean
@@ -36,6 +37,7 @@ export const AsyncList: Component<Props> = (props) => {
 
   return (
     <List
+      buttons={props.buttons}
       items={items()}
       focusable={props.focusable}
       title={props.title}

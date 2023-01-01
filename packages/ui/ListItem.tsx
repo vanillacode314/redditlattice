@@ -1,8 +1,10 @@
-import { Component, mergeProps, Show } from 'solid-js'
+import { For, Component, JSXElement, mergeProps, Show } from 'solid-js'
 
 interface Props {
+  id: string
   onClick: (e?: Event) => void
   onRemove?: (e?: Event) => void
+  buttons?: ((id: string) => JSXElement)[]
   focusable?: boolean
   children: Element | string
 }
@@ -23,6 +25,7 @@ export const ListItem: Component<Props> = (props) => {
       <div class="grow" tabindex="0">
         {props.children}
       </div>
+      <For each={props.buttons}>{(Comp) => Comp(props.id)}</For>
       <Show when={onRemove}>
         <button
           class="outline-none group"

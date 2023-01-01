@@ -1,4 +1,4 @@
-import { Show, For, Component } from 'solid-js'
+import { JSXElement, Show, Component, createEffect } from 'solid-js'
 import ListItem from './ListItem'
 import { TransitionSlide } from './transitions'
 import { Key } from '@solid-primitives/keyed'
@@ -12,6 +12,7 @@ interface Props {
   onClick: (id: Item['id']) => void
   onRemove?: (id: Item['id']) => void
   title?: string
+  buttons?: ((id: Item['id']) => JSXElement)[]
   items: Item[]
   reverse?: boolean
   focusable?: boolean
@@ -34,14 +35,17 @@ export const List: Component<Props> = (props) => {
         class="flex flex-col"
         classList={{ 'flex-col-reverse': props.reverse }}
       >
-        <TransitionSlide duration={200}>
+        <TransitionSlide duration={120}>
           <Key each={props.items} by="id">
             {(item) => {
               const title = () => item().title
               const id = () => item().id
+
               return (
                 <li class="w-full overflow-hidden">
                   <ListItem
+                    id={id()}
+                    buttons={props.buttons}
                     focusable={props.focusable}
                     onClick={() => onClick(id())}
                     onRemove={
