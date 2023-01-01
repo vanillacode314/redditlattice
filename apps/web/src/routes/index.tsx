@@ -253,6 +253,7 @@ export default function Home() {
               title: sr,
             }))}
           ></List>
+          <div border="b gray-800"></div>
           {/* RECENTS LIST */}
           <List
             onClick={(id) => {
