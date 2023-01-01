@@ -121,3 +121,7 @@ export function filterStringKeys<T extends Record<any, any>>(obj: T): T {
     Object.entries(obj).filter(([key]) => typeof key === 'string')
   ) as T
 }
+
+export function setDifference<T>(set1: Set<T>, set2: Set<T>): Set<T> {
+  return new Set([...set1].filter((x) => !set2.has(x)))
+}

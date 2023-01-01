@@ -11,7 +11,7 @@ import { trpc } from '~/client'
 import { AsyncList, List, Spinner } from 'ui'
 import { TransitionFade } from 'ui/transitions'
 import { useAppState, useUserState } from '~/stores'
-import { parseSchema } from '~/utils'
+import { parseSchema, setDifference } from '~/utils'
 import { TRPCClientError } from '@trpc/client'
 
 export default function Home() {
@@ -299,8 +299,12 @@ export default function Home() {
               ),
             ]}
             title="subreddits"
-            items={[...userState.subreddits]
-              .filter((sr) => !userState.favouriteSubreddits.has(sr))
+            items={[
+              ...setDifference(
+                userState.subreddits,
+                userState.favouriteSubreddits
+              ),
+            ]
               .sort()
               .map((sr) => ({
                 id: sr,
