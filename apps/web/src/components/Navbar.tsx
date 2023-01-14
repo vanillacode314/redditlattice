@@ -1,5 +1,5 @@
 import { useAppState } from '~/stores'
-import { useSearchParams, useLocation } from 'solid-start'
+import { useSearchParams, useLocation, useNavigate } from 'solid-start'
 import {
   onMount,
   createEffect,
@@ -22,6 +22,8 @@ export const Navbar: Component = () => {
   const [query, setQuery] = createSignal<string>('')
   const [fullscreen, setFullscreen] = createSignal<boolean>(false)
 
+  const navigate = useNavigate()
+
   const setScrolling = (val: boolean) => setAppState('autoScrolling', val)
   const scrolling = () => appState.autoScrolling
 
@@ -41,10 +43,18 @@ export const Navbar: Component = () => {
     fullscreen() ? screenfull.request() : screenfull.exit()
   })
 
+  onMount(() => {
+    if (!screenfull.isEnabled) return
+    screenfull.on('change', () => {
+      setFullscreen(screenfull.isFullscreen)
+    })
+  })
+
   const location = useLocation()
   const [, setSearchParams] = useSearchParams()
 
-  const showBack = () => location.pathname.startsWith('/r/')
+  const showBack = () =>
+    location.pathname.startsWith('/r/') || location.pathname.startsWith('/p/')
 
   const toggleDrawer = () => {
     setAppState((_) => ({
@@ -120,7 +130,12 @@ export const Navbar: Component = () => {
               class="contents"
               onSubmit={(e) => {
                 e.preventDefault()
-                setSearchParams({ q: query() })
+                if (location.pathname.startsWith('/p/')) {
+                  navigate(`/p/${query()}`)
+                }
+                if (location.pathname.startsWith('/r/')) {
+                  setSearchParams({ q: query() })
+                }
                 setQuery('')
                 setAppState({ isSearching: false })
               }}
@@ -138,7 +153,7 @@ export const Navbar: Component = () => {
                   })
                 }}
                 value={query()}
-                onInput={(e) => setQuery(e.currentTarget.value)}
+                onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
                 required
                 text="xl"
                 grow

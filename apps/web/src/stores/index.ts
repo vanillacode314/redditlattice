@@ -72,6 +72,7 @@ export const useAppState = () => [appState, setAppState] as const
 
 const userStateSchema = z.object({
   subreddits: z.set(z.string()).default(() => new Set<string>()),
+  pinterestQueries: z.set(z.string()).default(() => new Set<string>()),
   searchTerms: z.map(z.string(), z.string()).default(() => new Map()),
   sort: z.map(z.string(), z.string()).default(() => new Map()),
   imageSizeMultiplier: z.number().default(2),
@@ -92,7 +93,7 @@ const [userState, setUserState] = createLocalStorageStore<TUserState>(
   userStateSchema.parse({}),
   {
     serializer: (obj) => stringify(filterStringKeys(obj)),
-    deserializer: parse,
+    deserializer: (inp) => userStateSchema.parse(parse(inp)),
   }
 )
 export const useUserState = () => [userState, setUserState] as const

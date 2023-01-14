@@ -22,6 +22,11 @@ const links: ILink[] = [
     href: '/collections',
   },
   {
+    title: 'Pinterest',
+    icon: 'i-mdi-pinterest',
+    href: '/pinterest',
+  },
+  {
     title: 'Settings',
     icon: 'i-mdi-cog',
     href: '/settings',
