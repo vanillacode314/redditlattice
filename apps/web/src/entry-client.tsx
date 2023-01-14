@@ -16,6 +16,9 @@ mount(() => <StartClient />, document)
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js', { scope: '/' })
+  navigator.serviceWorker.addEventListener('controllerchange', () =>
+    window.location.reload()
+  )
 }
 
 initGtag()
