@@ -60,7 +60,7 @@ export default function Home() {
           </span>
           <input
             value={query()}
-            onInput={(e) => setQuery(e.currentTarget.value)}
+            onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             type="text"
