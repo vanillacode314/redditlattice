@@ -1,4 +1,4 @@
-import { onMount, batch, createSignal, Show, Suspense } from 'solid-js'
+import { onMount, createSignal, Show, Suspense } from 'solid-js'
 import { useNavigate } from 'solid-start'
 import { trpc } from '~/client'
 import { AsyncList, List, Spinner } from 'ui'
@@ -93,7 +93,12 @@ export default function Home() {
           </span>
           <input
             value={query()}
-            onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
+            onInput={(e) => {
+              const inp = e.currentTarget
+              const start = inp.selectionStart
+              setQuery(inp.value.toLowerCase())
+              inp.setSelectionRange(start, start)
+            }}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder="e.g. wallpapers+earthporn?nature+landscape"

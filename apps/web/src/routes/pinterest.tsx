@@ -1,30 +1,26 @@
-import { onMount, batch, createSignal, Show, Suspense } from 'solid-js'
+import { onMount, createSignal, Show } from 'solid-js'
 import { useNavigate } from 'solid-start'
-import { trpc } from '~/client'
-import { AsyncList, List, Spinner } from 'ui'
+import { List } from 'ui'
 import { TransitionFade } from 'ui/transitions'
 import { useAppState, useUserState } from '~/stores'
-import { parseSchema, setDifference } from '~/utils'
-import { TRPCClientError } from '@trpc/client'
 
 export default function Home() {
-  const [userState, setUserState] = useUserState()
+  const [userState, _setUserState] = useUserState()
   const [, setAppState] = useAppState()
+  const navigate = useNavigate()
 
   onMount(() => setAppState('title', 'Pinterest'))
 
   const [query, setQuery] = createSignal<string>('')
-  const [focused, setFocused] = createSignal<boolean>(false)
 
   const [flashing, setFlashing] = createSignal<boolean>(false)
   const flashSearchInput = () => setFlashing(true)
-
-  const navigate = useNavigate()
 
   function onSubmit(e: SubmitEvent) {
     e.preventDefault()
     if (!query().trim()) return
     if (query().startsWith('?')) return
+
     navigate(`/p/${query()}`)
   }
 
@@ -60,9 +56,12 @@ export default function Home() {
           </span>
           <input
             value={query()}
-            onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onInput={(e) => {
+              const inp = e.currentTarget
+              const start = inp.selectionStart
+              setQuery(inp.value.toLowerCase())
+              inp.setSelectionRange(start, start)
+            }}
             type="text"
             placeholder="e.g. wallpapers"
             class="placeholder:text-gray-500"
@@ -77,9 +76,7 @@ export default function Home() {
               <button
                 type="button"
                 class="grid place-items-center"
-                onClick={() => {
-                  batch(() => setQuery(''))
-                }}
+                onClick={() => setQuery('')}
                 onFocus={(e) => e.relatedTarget?.focus?.()}
               >
                 <span class="i-mdi-close-circle text-xl"></span>

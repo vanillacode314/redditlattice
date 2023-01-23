@@ -1,11 +1,4 @@
-import {
-  onMount,
-  batch,
-  createSignal,
-  Show,
-  Suspense,
-  createEffect,
-} from 'solid-js'
+import { onMount, createSignal, Show, Suspense } from 'solid-js'
 import { useNavigate } from 'solid-start'
 import { trpc } from '~/client'
 import { AsyncList, List, Spinner } from 'ui'
@@ -17,38 +10,35 @@ import { TRPCClientError } from '@trpc/client'
 export default function Home() {
   const [userState, setUserState] = useUserState()
   const [, setAppState] = useAppState()
-
   onMount(() => setAppState('title', 'Home'))
 
-  const [subreddit, setSubreddit] = createSignal<string>('')
-  const [searchTerm, setSearchTerm] = createSignal<string>('')
-  const [focused, setFocused] = createSignal<boolean>(false)
+  const navigate = useNavigate()
 
+  const [focused, setFocused] = createSignal<boolean>(false)
   const [flashing, setFlashing] = createSignal<boolean>(false)
   const flashSearchInput = () => setFlashing(true)
 
-  const query = () => {
-    if (!subreddit()) return ''
-    if (searchTerm() !== undefined) {
-      return `${subreddit().toLowerCase()}?${searchTerm().toLowerCase()}`
+  const [query, setQuery] = createSignal<string>('')
+
+  const subreddit = () => query().split('?')[0]
+  const setSubreddit = (subreddit: string) => {
+    if (query().includes('?')) {
+      setQuery(`${subreddit}?${searchTerm()}`)
+      return
     }
-    return `${subreddit().toLowerCase()}`
+
+    setQuery(subreddit)
   }
 
-  const setQuery = (val: string) => {
-    const [sr, q] = val.split('?')
-    batch(() => {
-      setSubreddit(sr)
-      setSearchTerm(q || '')
-    })
-  }
-
-  const navigate = useNavigate()
+  const searchTerm = () => query().split('?')[1] ?? ''
+  const setSearchTerm = (searchTerm: string) =>
+    setQuery(`${subreddit()}?${searchTerm}`)
 
   function onSubmit(e: SubmitEvent) {
     e.preventDefault()
     if (!query().trim()) return
     if (query().startsWith('?')) return
+
     if (searchTerm()) {
       navigate(`/r/${subreddit()}?q=${searchTerm()}`)
     } else {
@@ -56,16 +46,16 @@ export default function Home() {
     }
   }
 
-  function removeSubreddit(id: string) {
+  function removeSubreddit(name: string) {
     setUserState('subreddits', (subreddits) => {
-      subreddits.delete(id)
+      subreddits.delete(name)
       return new Set([...subreddits])
     })
   }
 
-  function removeSearchTerm(id: string) {
+  function removeSearchTerm(term: string) {
     setUserState('searchTerms', (searchTerms) => {
-      searchTerms.delete(id)
+      searchTerms.delete(term)
       return new Map([...searchTerms])
     })
   }
@@ -112,11 +102,10 @@ export default function Home() {
           <input
             value={query()}
             onInput={(e) => {
-              const [sr, q] = e.currentTarget.value.split('?')
-              batch(() => {
-                setSubreddit(sr || '')
-                setSearchTerm(q)
-              })
+              const inp = e.currentTarget
+              const start = inp.selectionStart
+              setQuery(inp.value)
+              inp.setSelectionRange(start, start)
             }}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
@@ -134,12 +123,7 @@ export default function Home() {
               <button
                 type="button"
                 class="grid place-items-center"
-                onClick={() => {
-                  batch(() => {
-                    setSubreddit('')
-                    setSearchTerm('')
-                  })
-                }}
+                onClick={() => setQuery('')}
                 onFocus={(e) => e.relatedTarget?.focus?.()}
               >
                 <span class="i-mdi-close-circle text-xl"></span>
@@ -186,10 +170,7 @@ export default function Home() {
             >
               <AsyncList
                 onClick={(id) => {
-                  batch(() => {
-                    setSubreddit(id)
-                    setSearchTerm('')
-                  })
+                  setQuery(id.toLowerCase())
                   flashSearchInput()
                 }}
                 focusable={false}
@@ -317,13 +298,10 @@ export default function Home() {
           <List
             onClick={(id) => {
               const sr = subreddit() || userState.searchTerms.get(id)
-              if (sr) {
-                batch(() => {
-                  setSubreddit(sr)
-                  setSearchTerm(id)
-                })
-                flashSearchInput()
-              }
+              if (!sr) return
+              setSubreddit(sr)
+              setSearchTerm(id)
+              flashSearchInput()
             }}
             onRemove={(id) => removeSearchTerm(id)}
             reverse
