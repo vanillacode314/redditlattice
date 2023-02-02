@@ -1,17 +1,17 @@
-import { useAppState, useUserState } from '~/stores'
-import { useParams } from 'solid-start'
 import {
-  onCleanup,
+  batch,
   createEffect,
   createMemo,
   Match,
-  Switch,
-  batch,
   onMount,
+  Switch,
 } from 'solid-js'
+import { useParams } from 'solid-start'
+import { Button, InfiniteHandler, InfiniteLoading, Masonry, Spinner } from 'ui'
 import ImageCard from '~/components/ImageCard'
-import { Spinner, Masonry, Button, InfiniteLoading, InfiniteHandler } from 'ui'
 import { useRefresh } from '~/layouts/Base'
+import { useAppState, useUserState } from '~/stores'
+import { parseSchema } from '~/utils'
 
 const [appState, setAppState] = useAppState()
 
@@ -60,8 +60,12 @@ export default function Subreddit() {
       ws.onopen = () => {
         ws!.send(query())
       }
-      ws.onmessage = ({ data }) => {
-        const newImages = JSON.parse(data) as any[]
+      ws.onmessage = ({ data: message }) => {
+        const { schema, data } = JSON.parse(message)
+        const newImages = parseSchema<Record<'name' | 'url' | 'title', string>>(
+          schema,
+          data
+        )
         setAppState('images', 'data', (data) => {
           for (const image of newImages) {
             data.add(image)
@@ -101,7 +105,7 @@ export default function Subreddit() {
         key={appState.images.key}
       >
         {(state, load) => (
-          <div class="grid p-5 place-content-center">
+          <div class="grid place-content-center p-5">
             <Switch>
               <Match when={state === 'idle'}>
                 <Button
