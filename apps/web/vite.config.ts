@@ -1,13 +1,13 @@
 import solid from 'solid-start/vite'
 import { defineConfig } from 'vite'
 
-import Unocss from 'unocss/vite'
 import {
-  presetUno,
-  presetIcons,
-  presetWebFonts,
   presetAttributify,
+  presetIcons,
+  presetUno,
+  presetWebFonts,
 } from 'unocss'
+import Unocss from 'unocss/vite'
 
 import netlify from 'solid-start-netlify'
 import node from 'solid-start-node'

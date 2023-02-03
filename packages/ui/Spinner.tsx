@@ -1,5 +1,5 @@
-import { Component } from 'solid-js'
 import styles from '@ui/Spinner.module.css'
+import { Component } from 'solid-js'
 
 export const Spinner: Component = () => {
   return (

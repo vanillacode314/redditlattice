@@ -1,17 +1,17 @@
-import {
-  JSXElement,
-  Accessor,
-  createSignal,
-  createMemo,
-  createEffect,
-  on,
-  mergeProps,
-  batch,
-} from 'solid-js'
-import { createStore } from 'solid-js/store'
 import { Entries, Key } from '@solid-primitives/keyed'
 import { createElementSize } from '@solid-primitives/resize-observer'
-import { minBy, range, differenceBy } from 'lodash-es'
+import { differenceBy, minBy, range } from 'lodash-es'
+import {
+  Accessor,
+  batch,
+  createEffect,
+  createMemo,
+  createSignal,
+  JSXElement,
+  mergeProps,
+  on,
+} from 'solid-js'
+import { createStore } from 'solid-js/store'
 
 interface Item<T = any> {
   id: string
@@ -36,7 +36,7 @@ function getColumnHeight(idx: number): number {
 }
 
 export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
-  type I = typeof props.items[number]
+  type I = (typeof props.items)[number]
 
   const merged = mergeProps({ gap: 0 }, props)
 
@@ -123,7 +123,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
       <Entries of={columns}>
         {(key, items) => (
           <div
-            class="flex flex-col w-full"
+            class="flex w-full flex-col"
             id={`__masonry-col-${key}`}
             style={{
               'row-gap': `${props.gap}px`,

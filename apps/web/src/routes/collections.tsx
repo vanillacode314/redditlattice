@@ -1,11 +1,11 @@
-import { onMount, createSignal, Show, Suspense } from 'solid-js'
+import { TRPCClientError } from '@trpc/client'
+import { createSignal, onMount, Show, Suspense } from 'solid-js'
 import { useNavigate } from 'solid-start'
-import { trpc } from '~/client'
 import { AsyncList, List, Spinner } from 'ui'
 import { TransitionFade } from 'ui/transitions'
+import { trpc } from '~/client'
 import { useAppState, useUserState } from '~/stores'
 import { parseSchema } from '~/utils'
-import { TRPCClientError } from '@trpc/client'
 
 const getSubredditsAndSearchTerms = (
   query: string
@@ -71,7 +71,7 @@ export default function Home() {
         onSubmit={onSubmit}
       >
         <div
-          class="grid grid-cols-[auto_1fr_auto_auto] transitions-colors duration-250"
+          class="transitions-colors duration-250 grid grid-cols-[auto_1fr_auto_auto]"
           border="2 hover:pink-700 focus:pink-700"
           classList={{
             'border-pink-500': flashing(),
@@ -102,7 +102,7 @@ export default function Home() {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder="e.g. wallpapers+earthporn?nature+landscape"
-            class="placeholder:text-gray-500 min-w-0"
+            class="min-w-0 placeholder:text-gray-500"
             type="text"
             id="search"
             name="subreddit"
@@ -171,7 +171,7 @@ export default function Home() {
           fallback={
             <Suspense
               fallback={
-                <div class="p-5 grid place-items-center">
+                <div class="grid place-items-center p-5">
                   <Spinner></Spinner>
                 </div>
               }

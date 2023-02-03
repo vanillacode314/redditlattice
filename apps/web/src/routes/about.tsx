@@ -1,5 +1,5 @@
-import { useAppState } from '~/stores'
 import { onMount } from 'solid-js'
+import { useAppState } from '~/stores'
 
 export default function About() {
   const [, setAppState] = useAppState()

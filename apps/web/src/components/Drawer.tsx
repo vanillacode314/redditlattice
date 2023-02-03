@@ -1,8 +1,8 @@
-import { createEffect, For, Component } from 'solid-js'
-import { A, useLocation, useNavigate } from 'solid-start'
 import { DragGesture } from '@use-gesture/vanilla'
-import { useAppState } from '~/stores'
+import { Component, createEffect, For } from 'solid-js'
+import { A, useLocation, useNavigate } from 'solid-start'
 import { Animate } from 'ui/animation'
+import { useAppState } from '~/stores'
 
 interface ILink {
   title: string
@@ -66,7 +66,7 @@ export const Drawer: Component = () => {
             ({ swipe: [swipeX] }) => swipeX === 1 && setOpen(true)
           )
         }}
-        class="fixed left-0 h-40 w-15 top-20 touch-pan-right z-20"
+        class="w-15 fixed left-0 top-20 z-20 h-40 touch-pan-right"
       ></div>
       <Animate
         when={open()}
@@ -74,7 +74,7 @@ export const Drawer: Component = () => {
           from: { opacity: 0 },
           to: { opacity: 1 },
         })}
-        class="bg-white/5 fixed inset-0 z-20"
+        class="fixed inset-0 z-20 bg-white/5"
         onMouseDown={() => setOpen(false)}
         onTouchStart={() => setOpen(false)}
       />
@@ -84,7 +84,7 @@ export const Drawer: Component = () => {
           from: { transform: `translateX(-100%)` },
           to: { transform: `translateX(0%)` },
         })}
-        class="z-30 w-80 bg-black fixed left-0 gap-5 flex flex-col inset-y-0"
+        class="fixed inset-y-0 left-0 z-30 flex w-80 flex-col gap-5 bg-black"
       >
         <a href="https://raqueebuddinaziz.com" flex="~ col" gap-1 pt-5 px-5>
           <span text="lg">RedditLattice </span>
@@ -98,7 +98,7 @@ export const Drawer: Component = () => {
             {({ icon, href, title }) => (
               <A
                 style={{ '-webkit-tap-highlight-color': 'transparent' }}
-                class="flex gap-3 px-5 py-3 uppercase items-center tracking-wide text-sm font-bold bg-black hover:bg-gray-900 transition-colors"
+                class="flex items-center gap-3 bg-black px-5 py-3 text-sm font-bold uppercase tracking-wide transition-colors hover:bg-gray-900"
                 href={href}
                 onClick={() => setOpen(false)}
               >

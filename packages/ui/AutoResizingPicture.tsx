@@ -1,18 +1,18 @@
+import { throttle } from 'lodash-es'
 import {
-  JSXElement,
-  Show,
-  createSignal,
-  on,
-  For,
-  mergeProps,
+  batch,
   Component,
   createRenderEffect,
-  batch,
+  createSignal,
+  For,
   JSX,
+  JSXElement,
+  mergeProps,
+  on,
+  Show,
   splitProps,
 } from 'solid-js'
-import { config, animated, createSpring } from 'solid-spring'
-import { throttle } from 'lodash-es'
+import { animated, config, createSpring } from 'solid-spring'
 
 interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   width: number
@@ -92,7 +92,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
   return (
     <animated.div
       style={{ ...local.style, ...expand() }}
-      class="overflow-hidden relative"
+      class="relative overflow-hidden"
       ref={props.ref}
       {...others}
     >

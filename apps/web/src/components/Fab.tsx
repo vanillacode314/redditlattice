@@ -1,15 +1,15 @@
-import type { IAction } from '~/types'
-import { createSpring, animated } from 'solid-spring'
+import { throttle } from 'lodash-es'
 import {
-  For,
+  batch,
+  Component,
   createSignal,
+  For,
   onCleanup,
   onMount,
-  Component,
-  batch,
 } from 'solid-js'
+import { animated, createSpring } from 'solid-spring'
 import { TransitionStaggeredEnter } from 'ui/transitions'
-import { throttle } from 'lodash-es'
+import type { IAction } from '~/types'
 
 interface Props {
   icon: string

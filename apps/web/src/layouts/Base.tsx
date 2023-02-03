@@ -1,21 +1,20 @@
+import { createConnectivitySignal } from '@solid-primitives/connectivity'
 import {
-  Show,
+  Component,
   createEffect,
+  createSignal,
+  JSXElement,
   on,
   onCleanup,
-  createSignal,
-  Component,
-  JSXElement,
+  Show,
   Suspense,
 } from 'solid-js'
+import { animated, createSpring } from 'solid-spring'
 import { ErrorBoundary, useLocation, useParams } from 'solid-start'
+import { Spinner } from 'ui'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
-import { animated, createSpring } from 'solid-spring'
-import { createConnectivitySignal } from '@solid-primitives/connectivity'
 import { useAppState, useUserState } from '~/stores'
-import { Spinner } from 'ui'
-import { CACHE } from '~/routes/r/[subreddit]'
 
 interface Props {
   children: JSXElement
@@ -124,9 +123,9 @@ export const BaseLayout: Component<Props> = (props) => {
 
   return (
     <div flex="~ col" h-full max-h-full relative>
-      <div class="bg-tranparent pointer-events-none place-content-center grid p-6 z-10 inset-x-0 top-0 absolute">
+      <div class="bg-tranparent pointer-events-none absolute inset-x-0 top-0 z-10 grid place-content-center p-6">
         <animated.div
-          class="p-2 bg-purple z-10 rounded-full relative"
+          class="bg-purple relative z-10 rounded-full p-2"
           style={move()}
         >
           <div text="3xl" class="i-mdi-refresh"></div>
@@ -150,7 +149,7 @@ export const BaseLayout: Component<Props> = (props) => {
       <div grow overflow-hidden>
         <Suspense
           fallback={
-            <div class="p-5 grid place-items-center">
+            <div class="grid place-items-center p-5">
               <Spinner></Spinner>
             </div>
           }

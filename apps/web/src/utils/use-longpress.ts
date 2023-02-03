@@ -1,5 +1,6 @@
-type Pos = { x: number; y: number }
 import { throttle } from 'lodash-es'
+
+type Pos = { x: number; y: number }
 
 export interface Options {
   callback?: () => any

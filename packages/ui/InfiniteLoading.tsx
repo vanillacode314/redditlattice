@@ -1,3 +1,4 @@
+import { throttle } from 'lodash-es'
 import {
   Component,
   createEffect,
@@ -8,7 +9,6 @@ import {
   onCleanup,
   onMount,
 } from 'solid-js'
-import { throttle } from 'lodash-es'
 
 export type State = 'idle' | 'error' | 'loading' | 'completed'
 export type InfiniteHandler = (

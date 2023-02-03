@@ -1,4 +1,4 @@
-import { For, Component, JSXElement, mergeProps, Show } from 'solid-js'
+import { Component, For, JSXElement, mergeProps, Show } from 'solid-js'
 
 interface Props {
   id: string
@@ -16,7 +16,7 @@ export const ListItem: Component<Props> = (props) => {
 
   return (
     <div
-      class="cursor-pointer flex items-center gap-5 transition-colors px-5 py-2 hover:bg-gray-800 focus-within:bg-gray-800"
+      class="flex cursor-pointer items-center gap-5 px-5 py-2 transition-colors focus-within:bg-gray-800 hover:bg-gray-800"
       style={{ '-webkit-tap-highlight-color': 'transparent' }}
       onClick={onClick}
       tabindex="-1"
@@ -28,14 +28,14 @@ export const ListItem: Component<Props> = (props) => {
       <For each={props.buttons}>{(Comp) => Comp(props.id)}</For>
       <Show when={onRemove}>
         <button
-          class="outline-none group"
+          class="group outline-none"
           style={{ '-webkit-tap-highlight-color': 'transparent' }}
           onClick={(e) => {
             e.stopPropagation()
             onRemove!()
           }}
         >
-          <span class="i-mdi-close-circle text-gray-700 group-hover:text-white group-focus:text-white text-xl transition-colors"></span>
+          <span class="i-mdi-close-circle text-xl text-gray-700 transition-colors group-hover:text-white group-focus:text-white"></span>
         </button>
       </Show>
     </div>

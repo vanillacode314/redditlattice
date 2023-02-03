@@ -38,7 +38,7 @@ export const AutoScrollModal: Component<Props> = (props) => {
     <>
       <dialog
         ref={el}
-        class="bg-transparent max-w-[30rem] w-full mx-auto px-5 backdrop:bg-white/10 backdrop:backdrop-blur-sm"
+        class="mx-auto w-full max-w-[30rem] bg-transparent px-5 backdrop:bg-white/10 backdrop:backdrop-blur-sm"
         onClick={(e) => {
           if (e.target !== e.currentTarget) return
 
@@ -67,10 +67,10 @@ export const AutoScrollModal: Component<Props> = (props) => {
             onClose?.(true)
           }}
           method="dialog"
-          class="p-5 flex flex-col gap-3 bg-black rounded-lg text-white shadow"
+          class="flex flex-col gap-3 rounded-lg bg-black p-5 text-white shadow"
         >
-          <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
-            <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+          <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
+            <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
               AutoScroll Speed (in pixels per second)
             </span>
             <input
@@ -84,7 +84,7 @@ export const AutoScrollModal: Component<Props> = (props) => {
           </label>
           <Button
             type="submit"
-            class="bg-pink-800 hover:bg-pink-700 focus:bg-pink-700 outline-none transition-colors self-end"
+            class="self-end bg-pink-800 outline-none transition-colors hover:bg-pink-700 focus:bg-pink-700"
           >
             Start
           </Button>

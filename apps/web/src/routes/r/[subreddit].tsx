@@ -1,26 +1,26 @@
-import { TAppState, useAppState, useUserState } from '~/stores'
-import { useParams, useLocation } from 'solid-start'
-import {
-  onMount,
-  onCleanup,
-  createEffect,
-  getOwner,
-  runWithOwner,
-  createMemo,
-  Match,
-  Switch,
-  batch,
-} from 'solid-js'
-import { IAction } from '~/types'
-import ImageCard from '~/components/ImageCard'
-import Fab from '~/components/Fab'
-import { trpc } from '~/client'
-import { Spinner, Masonry, Button, InfiniteLoading, InfiniteHandler } from 'ui'
-import { parseSchema } from '~/utils'
 import { TRPCClientError } from '@trpc/client'
 import { minBy } from 'lodash-es'
+import {
+  batch,
+  createEffect,
+  createMemo,
+  getOwner,
+  Match,
+  onCleanup,
+  onMount,
+  runWithOwner,
+  Switch,
+} from 'solid-js'
+import { useLocation, useParams } from 'solid-start'
+import { Button, InfiniteHandler, InfiniteLoading, Masonry, Spinner } from 'ui'
+import { trpc } from '~/client'
+import Fab from '~/components/Fab'
+import ImageCard from '~/components/ImageCard'
 import { useRefresh } from '~/layouts/Base'
 import { startScroll } from '~/modals/AutoScrollModal'
+import { TAppState, useAppState, useUserState } from '~/stores'
+import { IAction } from '~/types'
+import { parseSchema } from '~/utils'
 
 const [appState, setAppState] = useAppState()
 
@@ -219,7 +219,7 @@ export default function Subreddit() {
         key={appState.images.key}
       >
         {(state, load) => (
-          <div class="grid p-5 place-content-center">
+          <div class="grid place-content-center p-5">
             <Switch>
               <Match when={state === 'idle'}>
                 <Button

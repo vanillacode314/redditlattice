@@ -1,9 +1,9 @@
-import { createStore } from 'solid-js/store'
-import { isServer } from 'solid-js/web'
 import { parse, stringify } from 'devalue'
 import { createComputed } from 'solid-js'
-import { filterStringKeys } from '~/utils'
+import { createStore } from 'solid-js/store'
+import { isServer } from 'solid-js/web'
 import { z } from 'zod'
+import { filterStringKeys } from '~/utils'
 
 interface LocalStorageStoreOptions<T = any> {
   serializer: (input: T) => string

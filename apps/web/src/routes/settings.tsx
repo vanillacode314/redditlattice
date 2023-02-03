@@ -1,11 +1,11 @@
-import { Show, batch, For, onMount, onCleanup } from 'solid-js'
-import { createStore } from 'solid-js/store'
-import { filterStringKeys, download, formatBytes } from '~/utils'
-import { useUserState, useAppState } from '~/stores'
-import { stringify, parse } from 'devalue'
-import { Button } from 'ui'
-import { minBy } from 'lodash-es'
+import { parse, stringify } from 'devalue'
 import { clear } from 'idb-keyval'
+import { minBy } from 'lodash-es'
+import { batch, For, onCleanup, onMount, Show } from 'solid-js'
+import { createStore } from 'solid-js/store'
+import { Button } from 'ui'
+import { useAppState, useUserState } from '~/stores'
+import { download, filterStringKeys, formatBytes } from '~/utils'
 
 export default function Settings() {
   let filesInput: HTMLInputElement
@@ -43,7 +43,7 @@ export default function Settings() {
 
       function appendKey<
         K extends keyof typeof userState = any,
-        V extends typeof userState[K] = any
+        V extends (typeof userState)[K] = any
       >(key: K, value: V) {
         if (value instanceof Set) {
           const newValue = new Set([...value, ...userState[key]])
@@ -103,19 +103,19 @@ export default function Settings() {
     <div p-5 flex flex-col-reverse h-full gap-5 id="scroller">
       <Button
         onClick={() => filesInput.click()}
-        class="bg-green-800 hover:bg-green-700 transitions-colors"
+        class="transitions-colors bg-green-800 hover:bg-green-700"
       >
         Import Data
       </Button>{' '}
       <Button
         onClick={() => exportData()}
-        class="bg-purple-800 hover:bg-purple-700 transitions-colors"
+        class="transitions-colors bg-purple-800 hover:bg-purple-700"
       >
         Export Data
       </Button>
       <Button
         onClick={() => clearCache()}
-        class="bg-blue-800 hover:bg-red-700 relative overflow-hidden transitions-colors"
+        class="transitions-colors relative overflow-hidden bg-blue-800 hover:bg-red-700"
       >
         <div
           bg="red-800"
@@ -129,8 +129,8 @@ export default function Settings() {
           {formatBytes(usageStats.total)})
         </span>
       </Button>
-      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
-        <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+      <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
+        <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
           Column Max Width (in pixels)
         </span>
         <input
@@ -144,8 +144,8 @@ export default function Settings() {
           }
         />
       </label>
-      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
-        <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+      <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
+        <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
           Border Radius (in pixels)
         </span>
         <input
@@ -157,8 +157,8 @@ export default function Settings() {
           onChange={(e) => setUserState('borderRadius', +e.currentTarget.value)}
         />
       </label>
-      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
-        <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+      <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
+        <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
           Gaps (in pixels)
         </span>
         <input
@@ -171,8 +171,8 @@ export default function Settings() {
         />
       </label>
       <Show when={userState.processImages}>
-        <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
-          <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+        <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
+          <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
             Image Size Multiplier (relative to width)
           </span>
           <input
@@ -186,8 +186,8 @@ export default function Settings() {
             }
           />
         </label>
-        <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
-          <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+        <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
+          <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
             Preffered Image Format
           </span>
           <select
@@ -209,8 +209,8 @@ export default function Settings() {
         onInput={() => handleImport()}
         ref={filesInput!}
       />
-      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg flex items-center justify-between transition-colors">
-        <span class="uppercase text-sm tracking-wide font-bold text-gray-300">
+      <label class="flex items-center justify-between rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
+        <span class="text-sm font-bold uppercase tracking-wide text-gray-300">
           Process Images (Experimental)
         </span>
         <input
@@ -231,8 +231,8 @@ export default function Settings() {
       {/*     onChange={(e) => setHideNSFW(e.currentTarget.checked)} */}
       {/*   /> */}
       {/* </label> */}
-      <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg relative grid transition-colors">
-        <span class="absolute uppercase tracking-wide text-xs top-0 -translate-y-1/2 bg-black font-bold left-5 text-gray-300">
+      <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
+        <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
           Recents Limit
         </span>
         <input

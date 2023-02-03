@@ -1,7 +1,7 @@
-import { JSXElement, Show, Component, createEffect } from 'solid-js'
+import { Key } from '@solid-primitives/keyed'
+import { Component, JSXElement, Show } from 'solid-js'
 import ListItem from './ListItem'
 import { TransitionSlide } from './transitions'
-import { Key } from '@solid-primitives/keyed'
 
 interface Item {
   id: string
@@ -27,7 +27,7 @@ export const List: Component<Props> = (props) => {
       classList={{ 'flex-col-reverse': props.reverse }}
     >
       <Show when={props.title}>
-        <span class="px-5 text-xs text-gray-500 font-bold tracking-wide uppercase">
+        <span class="px-5 text-xs font-bold uppercase tracking-wide text-gray-500">
           {props.title}
         </span>
       </Show>

@@ -1,19 +1,19 @@
-import { useAppState } from '~/stores'
-import { useSearchParams, useLocation, useNavigate } from 'solid-start'
-import {
-  onMount,
-  createEffect,
-  createSignal,
-  onCleanup,
-  on,
-  Show,
-  Component,
-} from 'solid-js'
-import { createSpring, animated } from 'solid-spring'
-import { TransitionFade } from 'ui/transitions'
 import { throttle } from 'lodash-es'
 import screenfull from 'screenfull'
+import {
+  Component,
+  createEffect,
+  createSignal,
+  on,
+  onCleanup,
+  onMount,
+  Show,
+} from 'solid-js'
+import { animated, createSpring } from 'solid-spring'
+import { useLocation, useNavigate, useSearchParams } from 'solid-start'
+import { TransitionFade } from 'ui/transitions'
 import AutoScrollModal, { showAutoScrollModal } from '~/modals/AutoScrollModal'
+import { useAppState } from '~/stores'
 
 export const Navbar: Component = () => {
   const [mounted, setMounted] = createSignal<boolean>(false)
@@ -106,7 +106,7 @@ export const Navbar: Component = () => {
   onMount(() => setMounted(true))
 
   return (
-    <div class="overflow-hidden shrink-0 z-20 relative bg-black">
+    <div class="relative z-20 shrink-0 overflow-hidden bg-black">
       <animated.div style={slide()}></animated.div>
       <nav
         ref={(el) => {
@@ -121,7 +121,7 @@ export const Navbar: Component = () => {
             setHeight(h)
           })
         }}
-        class="text-white flex gap-5 px-5 py-3 sticky top-0 items-center z-20 relative"
+        class="relative sticky top-0 z-20 flex items-center gap-5 px-5 py-3 text-white"
       >
         <Show
           when={!appState.isSearching}
@@ -188,7 +188,7 @@ export const Navbar: Component = () => {
               }}
             ></span>
           </button>
-          <span class="text-semibold font-semibold truncate">
+          <span class="text-semibold truncate font-semibold">
             {appState.title || 'RedditLattice'}
           </span>
           <span class="grow" />

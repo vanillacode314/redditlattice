@@ -1,10 +1,4 @@
-import {
-  Component,
-  createSignal,
-  JSXElement,
-  mergeProps,
-  onMount,
-} from 'solid-js'
+import { Component, createSignal, JSXElement, mergeProps } from 'solid-js'
 import { TransitionGroup } from 'solid-transition-group'
 
 interface Props {

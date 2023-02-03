@@ -1,8 +1,10 @@
 // @refresh reload
-import { Component, onMount, Suspense } from 'solid-js'
+import { DevtoolsOverlay } from '@solid-devtools/overlay'
+import '@unocss/reset/tailwind.css'
+import { delMany, entries } from 'idb-keyval'
+import { Component, onMount } from 'solid-js'
 import {
   Body,
-  ErrorBoundary,
   FileRoutes,
   Head,
   Html,
@@ -12,14 +14,10 @@ import {
   Scripts,
   Title,
 } from 'solid-start'
-import { entries, delMany } from 'idb-keyval'
-import '@unocss/reset/tailwind.css'
 import 'uno.css'
-import './root.css'
 import Base from '~/layouts/Base'
 import { useAppState, useUserState } from '~/stores'
-import { Spinner } from 'ui'
-import { DevtoolsOverlay } from '@solid-devtools/overlay'
+import './root.css'
 import { asyncFilter } from './utils'
 
 export const Root: Component = () => {

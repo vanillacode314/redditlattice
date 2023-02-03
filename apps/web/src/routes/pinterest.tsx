@@ -1,11 +1,11 @@
-import { onMount, createSignal, Show } from 'solid-js'
+import { createSignal, onMount, Show } from 'solid-js'
 import { useNavigate } from 'solid-start'
 import { List } from 'ui'
 import { TransitionFade } from 'ui/transitions'
 import { useAppState, useUserState } from '~/stores'
 
 export default function Home() {
-  const [userState, _setUserState] = useUserState()
+  const [userState, setUserState] = useUserState()
   const [, setAppState] = useAppState()
   const navigate = useNavigate()
 
@@ -24,6 +24,13 @@ export default function Home() {
     navigate(`/p/${query()}`)
   }
 
+  function removePinterestHistory(id: string) {
+    setUserState('pinterestQueries', (pinterestQueries) => {
+      pinterestQueries.delete(id)
+      return new Set(pinterestQueries)
+    })
+  }
+
   return (
     <main pb-5 h-full flex flex-col-reverse overflow-hidden>
       <form
@@ -34,7 +41,7 @@ export default function Home() {
         onSubmit={onSubmit}
       >
         <div
-          class="grid grid-cols-[auto_1fr_auto] transitions-colors duration-250"
+          class="transitions-colors duration-250 grid grid-cols-[auto_1fr_auto]"
           border="2 hover:pink-700 focus:pink-700"
           classList={{
             'border-pink-500': flashing(),
@@ -115,6 +122,9 @@ export default function Home() {
           onClick={(id) => {
             setQuery(id)
             flashSearchInput()
+          }}
+          onRemove={(id) => {
+            removePinterestHistory(id)
           }}
           reverse
           title="history"

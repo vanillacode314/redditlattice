@@ -1,25 +1,25 @@
+import { del, get } from 'idb-keyval'
+import { uniq } from 'lodash-es'
 import {
-  onCleanup,
   batch,
-  createSignal,
-  mergeProps,
   Component,
-  Show,
+  createSignal,
   For,
+  mergeProps,
+  onCleanup,
+  Show,
 } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Portal } from 'solid-js/web'
-import { config, animated, createSpring } from 'solid-spring'
+import { animated, config, createSpring } from 'solid-spring'
 import { useLocation, useNavigate } from 'solid-start'
+import { AutoResizingPicture, Button } from 'ui'
+import { TransitionFade } from 'ui/transitions'
+import { IMAGE_SERVER_BASE_PATH } from '~/consts'
+import { TImage, useUserState } from '~/stores'
+import { blobToDataURL, download, getExtension, nextFrame } from '~/utils'
 import { longpress } from '~/utils/use-longpress'
 import { outsideclick } from '~/utils/use-outsideclick'
-import { IMAGE_SERVER_BASE_PATH } from '~/consts'
-import { TransitionFade } from 'ui/transitions'
-import { AutoResizingPicture, Button } from 'ui'
-import { TImage, useUserState } from '~/stores'
-import { getExtension, download, blobToDataURL, nextFrame } from '~/utils'
-import { uniq } from 'lodash-es'
-import { del, get } from 'idb-keyval'
 
 interface Props {
   width: number
@@ -131,14 +131,14 @@ export const ImageCard: Component<Props> = (props) => {
             >
               Retry
             </Button>
-            <span class="uppercase font-bold text-sm">{errorMsg()}</span>
+            <span class="text-sm font-bold uppercase">{errorMsg()}</span>
           </div>
         }
       >
         <AutoResizingPicture
           style={{ 'border-radius': `${userState.borderRadius}px` }}
           fallback={
-            <div class="grid place-items-center h-full">
+            <div class="grid h-full place-items-center">
               <div
                 class="bg-white/15"
                 animate-pulse
@@ -183,7 +183,7 @@ export const ImageCard: Component<Props> = (props) => {
             <TransitionFade>
               <Show when={popupVisible()}>
                 <div
-                  class="absolute inset-0 backdrop-blur-[30px] z-10 bg-black/50"
+                  class="absolute inset-0 z-10 bg-black/50 backdrop-blur-[30px]"
                   onContextMenu={(e) => e.preventDefault()}
                   onClick={() => removePopupImage()}
                 ></div>
@@ -191,33 +191,33 @@ export const ImageCard: Component<Props> = (props) => {
             </TransitionFade>
             <animated.div
               onContextMenu={(e) => e.preventDefault()}
-              class="z-20 w-full flex flex-col bg-black relative"
+              class="relative z-20 flex w-full flex-col bg-black"
               style={scale()}
             >
               <img src={props.image.url} alt={props.image.title}></img>
               <img />
-              <span class="uppercase tracking-wide bg-black text-white font-bold flex gap-5 items-center px-5">
-                <span class="py-5 grow">{props.image.title}</span>
+              <span class="flex items-center gap-5 bg-black px-5 font-bold uppercase tracking-wide text-white">
+                <span class="grow py-5">{props.image.title}</span>
                 <button
                   class="py-5"
                   onClick={() => removeFromCache()}
                   type="button"
                 >
-                  <span class="text-2xl i-mdi-cached"></span>
+                  <span class="i-mdi-cached text-2xl"></span>
                 </button>
                 <button
                   class="py-5"
                   onClick={() => window.open(props.image.url, '_blank')}
                   type="button"
                 >
-                  <span class="text-2xl i-mdi-open-in-new"></span>
+                  <span class="i-mdi-open-in-new text-2xl"></span>
                 </button>
                 <button
                   class="py-5"
                   onClick={() => downloadImage()}
                   type="button"
                 >
-                  <span class="text-2xl i-mdi-download"></span>
+                  <span class="i-mdi-download text-2xl"></span>
                 </button>
               </span>
             </animated.div>
@@ -226,7 +226,7 @@ export const ImageCard: Component<Props> = (props) => {
       </Show>
       <Show when={menu()}>
         <ul
-          class="fixed rounded-lg bg-gray-900 p-2 flex flex-col z-10"
+          class="fixed z-10 flex flex-col rounded-lg bg-gray-900 p-2"
           style={{
             left: menuPos.x + 'px',
             top: menuPos.y + 'px',
@@ -260,7 +260,7 @@ export const ImageCard: Component<Props> = (props) => {
                     handler()
                     setMenu(false)
                   }}
-                  class="rounded hover:bg-gray-800 px-2 py-1 text-xs uppercase font-bold text-left"
+                  class="rounded px-2 py-1 text-left text-xs font-bold uppercase hover:bg-gray-800"
                 >
                   {title}
                 </button>

@@ -1,4 +1,4 @@
-import { JSXElement, Component, createResource } from 'solid-js'
+import { Component, createResource, JSXElement } from 'solid-js'
 import List from './List'
 
 interface Item {
