@@ -116,11 +116,9 @@ export const BaseLayout: Component<Props> = (props) => {
       <div class="bg-tranparent pointer-events-none absolute inset-x-0 top-0 z-10 grid place-content-center p-6">
         <Motion.div
           class="bg-purple relative z-10 rounded-full p-2"
+          initial={false}
           animate={{
-            transform: [
-              `translateY(0px) rotate(0deg)`,
-              `translateY(${offset() - 200}%) rotate(${offset()}deg)`,
-            ],
+            transform: `translateY(${offset() - 200}%) rotate(${offset()}deg)`,
           }}
           transition={{ duration: down() ? 0.000001 : 1 }}
         >
