@@ -25,6 +25,7 @@ interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   onLoad?: (e: Event) => void
   onError?: (e: Event) => void
   fallback?: JSXElement
+  style: JSX.CSSProperties
 }
 
 export const AutoResizingPicture: Component<Props> = (props) => {
@@ -41,6 +42,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
     'onError',
     'ref',
     'fallback',
+    'style',
   ])
   const merged = mergeProps(
     {
@@ -85,6 +87,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
 
   return (
     <Motion.div
+      style={{ ...local.style, 'will-change': 'height' }}
       class="relative overflow-hidden"
       ref={props.ref}
       animate={{ height: `${height()}px` }}
