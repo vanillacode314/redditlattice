@@ -92,7 +92,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
       transition={{
         easing: spring({
           damping: 12,
-          stiffness: 120,
+          stiffness: 210,
         }),
       }}
       {...others}

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "solid-start dev",
-    "build": "solid-start build && workbox injectManifest workbox-config.cjs",
+    "prebuild": "patch ./node_modules/solid-start/root/Links.tsx ./bug-fix.diff",
+    "build": "npm run prebuild && solid-start build && workbox injectManifest workbox-config.cjs",
     "start": "solid-start start",
     "lint": "eslint 'src/**/*(*.tsx|*.ts|*.js|*.jsx)'"
   },

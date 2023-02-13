@@ -1,0 +1,146 @@
+1,15c1,20
+< import { JSXElement, useContext } from "solid-js";
+< import { useAssets } from "solid-js/web";
+< import { ServerContext } from "../server/ServerContext";
+< import type { IslandManifest, ManifestEntry, PageEvent } from "../server/types";
+< import { routeLayouts } from "./InlineStyles";
+< 
+< type NotUndefined<T> = T extends undefined ? never : T;
+< 
+< type RouterContext = NotUndefined<PageEvent["routerContext"]>
+< 
+< function flattenIslands(match: ManifestEntry[], manifest: Record<string, ManifestEntry> | IslandManifest) {
+<   let result = [...match];
+<   match.forEach(m => {
+<     if (m.type !== "island") return;
+<     const islandManifest = manifest[m.href as keyof typeof manifest] as unknown as IslandManifest | undefined;
+---
+> import { JSXElement, useContext } from 'solid-js'
+> import { useAssets } from 'solid-js/web'
+> import { ServerContext } from '../server/ServerContext'
+> import type { IslandManifest, ManifestEntry, PageEvent } from '../server/types'
+> import { routeLayouts } from './InlineStyles'
+> 
+> type NotUndefined<T> = T extends undefined ? never : T
+> 
+> type RouterContext = NotUndefined<PageEvent['routerContext']>
+> 
+> function flattenIslands(
+>   match: ManifestEntry[],
+>   manifest: Record<string, ManifestEntry> | IslandManifest
+> ) {
+>   let result = [...match]
+>   match.forEach((m) => {
+>     if (m.type !== 'island') return
+>     const islandManifest = manifest[
+>       m.href as keyof typeof manifest
+>     ] as unknown as IslandManifest | undefined
+17,18c22,26
+<       const res = flattenIslands((islandManifest as IslandManifest).assets, manifest);
+<       result.push(...res);
+---
+>       const res = flattenIslands(
+>         (islandManifest as IslandManifest).assets,
+>         manifest
+>       )
+>       result.push(...res)
+20,21c28,29
+<   });
+<   return result;
+---
+>   })
+>   return result
+25c33
+<   manifest: PageEvent["env"]["manifest"],
+---
+>   manifest: PageEvent['env']['manifest'],
+28,41c36,56
+<   let match = routerContext.matches ? routerContext.matches.reduce<ManifestEntry[]>((memo, m) => {
+<     if (m.length) {
+<       const fullPath = m.reduce((previous, match) => previous + match.originalPath, "");
+<       const route = routeLayouts[fullPath];
+<       if (route) {
+<         memo.push(...((manifest![route.id] || []) as ManifestEntry[]));
+<         const layoutsManifestEntries = route.layouts.flatMap(
+<           manifestKey => (manifest![manifestKey as keyof typeof manifest] || []) as ManifestEntry[]
+<         );
+<         memo.push(...layoutsManifestEntries);
+<       }
+<     }
+<     return memo;
+<   }, []) : [];
+---
+>   let match = routerContext.matches
+>     ? routerContext.matches.reduce<ManifestEntry[]>((memo, m) => {
+>         if (m.length) {
+>           const fullPath = m.reduce(
+>             (previous, match) => previous + match.originalPath,
+>             ''
+>           )
+>           const route = routeLayouts[fullPath]
+>           if (route) {
+>             memo.push(...((manifest![route.id] || []) as ManifestEntry[]))
+>             const layoutsManifestEntries = route.layouts.flatMap(
+>               (manifestKey) =>
+>                 (manifest![manifestKey as keyof typeof manifest] ||
+>                   []) as ManifestEntry[]
+>             )
+>             memo.push(...layoutsManifestEntries)
+>           }
+>         }
+>         return memo
+>       }, [])
+>     : []
+43c58
+<   match.push(...((manifest!["entry-client"] || []) as ManifestEntry[]));
+---
+>   match.push(...((manifest!['entry-client'] || []) as ManifestEntry[]))
+45c60
+<   match = manifest ? flattenIslands(match, manifest as any) : [];
+---
+>   match = manifest ? flattenIslands(match, manifest as any) : []
+49c64
+<       src.type === "style" ? (
+---
+>       src.type === 'style' ? (
+51c66
+<       ) : src.type === "script" ? (
+---
+>       ) : src.type === 'script' ? (
+53,55c68,70
+<       ) : undefined;
+<     return r;
+<   }, {} as Record<string, JSXElement>);
+---
+>       ) : undefined
+>     return r
+>   }, {} as Record<string, JSXElement>)
+57c72
+<   return Object.values(links);
+---
+>   return Object.values(links)
+65,70c80,96
+<   const isDev = import.meta.env.MODE === "development";
+<   const context = useContext(ServerContext);
+<   !isDev &&
+<     import.meta.env.START_SSR &&
+<     useAssets(() => getAssetsFromManifest(context!.env.manifest, context!.routerContext!));
+<   return null;
+---
+>   const isDev = import.meta.env.MODE === 'development'
+>   const context = useContext(ServerContext)
+>   if (!isDev) {
+>     if (import.meta.env.START_SSR) {
+>       useAssets(() =>
+>         getAssetsFromManifest(context!.env.manifest, context!.routerContext!)
+>       )
+>     } else {
+>       return (
+>         <link
+>           rel="stylesheet"
+>           href={context.env.manifest?.['index.html'][1]?.href}
+>         />
+>       )
+>     }
+>   }
+>   return null
