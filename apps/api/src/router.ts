@@ -1,7 +1,7 @@
+import { getAutocompleteSubreddits } from '@api/lib/get-autocomplete-subreddits'
+import { getImages } from '@api/lib/get-images'
 import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
-import { getImages } from '@api/lib/get-images'
-import { getAutocompleteSubreddits } from '@api/lib/get-autocomplete-subreddits'
 
 const t = initTRPC.create()
 

@@ -1,18 +1,19 @@
 import { IMAGE_EXTENSION_LIST } from '@api/consts'
-import { getKeys, isEmpty } from '@api/utils'
-import { IRemotePostsData, IPost } from '@api/types'
+import { postSchema, remotePostsDataSchema } from '@api/types'
+import z from 'zod'
 
-const SELECT_KEYS = ['name', 'url', 'title'] as const
-type ReturnKeys = typeof SELECT_KEYS[number]
+const expandGallery = z
+  .function()
+  .args(postSchema)
+  .returns(postSchema.array())
+  .implement((post) => {
+    if (
+      !post.url.startsWith(`https://www.reddit.com/gallery/`) ||
+      !post.media_metadata
+    )
+      return [post]
 
-function expandGallery(post: IPost): IPost[] {
-  if (
-    !post.url.startsWith(`https://www.reddit.com/gallery/`) ||
-    isEmpty(post.media_metadata || {})
-  )
-    return [post]
-  return Array.from(
-    Object.values(post.media_metadata).map(({ id, m: mime }) => {
+    return Object.values(post.media_metadata).map(({ id, m: mime }) => {
       const fileExtension = mime.replace('image/', '')
       return {
         ...post,
@@ -21,77 +22,80 @@ function expandGallery(post: IPost): IPost[] {
         title: post.title,
       }
     })
-  )
-}
-
-async function fetchPosts(url: string): Promise<IRemotePostsData> {
-  const res = await fetch(url, { redirect: 'error' })
-  const data = await res.json()
-  return getKeys(data.data, ['children', 'after'])
-}
-
-interface Options {
-  subreddits: string[]
-  sort: string
-  after?: string
-  q?: string[]
-  nsfw?: boolean
-}
-
-export const getImages: (
-  fn: Options
-) => Promise<{ images: Pick<IPost, ReturnKeys>[]; after: string }> = async ({
-  subreddits,
-  sort,
-  after,
-  q = [],
-  nsfw = false,
-}) => {
-  const searchParams = new URLSearchParams({
-    restrict_sr: 'true',
-    t: 'all',
   })
 
-  /* searchParams.append('nsfw', `${nsfw ? 1 : 0}`); */
-  /* searchParams.append('include_over_18', nsfw ? 'on' : 'off'); */
+const fetchPosts = z
+  .function()
+  .args(z.string())
+  .returns(remotePostsDataSchema.promise())
+  .implement(async (url) => {
+    const res = await fetch(url, { redirect: 'error' })
+    const data = await res.json()
+    return data.data as z.input<typeof remotePostsDataSchema>
+  })
 
-  /* NOTE: Disabling NSFW Content Permanently */
-  searchParams.append('nsfw', `0`)
-  searchParams.append('include_over_18', 'off')
-
-  if (after) searchParams.append('after', after)
-  if (sort) searchParams.append('sort', sort)
-  if (q.length > 0)
-    searchParams.append('q', q.map((query) => `(${query})`).join(' OR '))
-
-  const url =
-    q.length > 0
-      ? `https://www.reddit.com/r/${subreddits.join(
-          '+'
-        )}/search.json?${searchParams.toString()}`
-      : `https://www.reddit.com/r/${subreddits.join(
-          '+'
-        )}/${sort}.json?${searchParams.toString()}`
-
-  const { children, after: newAfter } = await fetchPosts(url)
-
-  const images = children
-    .map((c) => c.data)
-    .flatMap(expandGallery)
-    .filter(
-      (post) =>
-        !post.is_self &&
-        !post.is_video &&
-        !post.media &&
-        !(post.over_18 && !nsfw) &&
-        IMAGE_EXTENSION_LIST.some((e) => post.url?.endsWith(e))
-    )
-    .map((post) => getKeys(post, SELECT_KEYS))
-    .map((post) => {
-      const url = new URL(post.url)
-      url.protocol = 'https'
-      return { ...post, url: url.toString() }
+export const getImages = z
+  .function()
+  .args(
+    z.object({
+      subreddits: z
+        .string()
+        .array()
+        .transform((subreddits) => subreddits.join('+')),
+      sort: z.string(),
+      after: z.string().optional(),
+      q: z
+        .string()
+        .transform((query) => `(${query})`)
+        .array()
+        .optional(),
+      nsfw: z.boolean().optional(),
+    })
+  )
+  .returns(
+    z
+      .object({
+        images: postSchema
+          .pick({
+            name: true,
+            title: true,
+            url: true,
+          })
+          .array(),
+        after: z.string().nullable(),
+      })
+      .promise()
+  )
+  .implement(async ({ sort, subreddits, q = [], nsfw = false, after = '' }) => {
+    const searchParams = new URLSearchParams({
+      restrict_sr: 'true',
+      t: 'all',
     })
 
-  return { images, after: newAfter }
-}
+    /* NOTE: Disabling NSFW Content Permanently */
+    searchParams.append('nsfw', `0`)
+    searchParams.append('include_over_18', 'off')
+
+    if (after) searchParams.append('after', after)
+    if (sort) searchParams.append('sort', sort)
+    if (q.length > 0) searchParams.append('q', q.join(' OR '))
+
+    const url = `https://www.reddit.com/r/${subreddits}/${
+      q.length > 0 ? 'search' : sort
+    }.json?${searchParams.toString()}`
+
+    const { children, after: newAfter } = await fetchPosts(url)
+
+    const images = children
+      .flatMap(expandGallery)
+      .filter(
+        (post) =>
+          !post.is_self &&
+          !post.is_video &&
+          !post.media &&
+          !(post.over_18 && !nsfw) &&
+          IMAGE_EXTENSION_LIST.some((e) => post.url.endsWith(e))
+      )
+
+    return { images, after: newAfter }
+  })

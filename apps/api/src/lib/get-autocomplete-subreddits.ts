@@ -1,33 +1,38 @@
-import { getKeys } from '@api/utils'
-import { ISubreddit, IRemoteSubredditAutocompleteData } from '@api/types'
+import {
+  remoteSubredditAutocompleteDataSchema,
+  subredditSchema,
+} from '@api/types'
+import z from 'zod'
 
-const SELECT_KEYS = ['id', 'name'] as const
-type ReturnKeys = typeof SELECT_KEYS[number]
-
-async function fetchAutocompleteResults(
-  url: string
-): Promise<IRemoteSubredditAutocompleteData> {
-  const res = await fetch(url, { redirect: 'error' })
-  const data = await res.json()
-  return data
-}
-
-export const getAutocompleteSubreddits: (query: string) => Promise<{
-  subreddits: Pick<ISubreddit, ReturnKeys>[]
-}> = async (query) => {
-  const searchParams = new URLSearchParams({
-    nsfw: '0',
-    include_over_18: 'off',
-    include_profiles: 'off',
-    query,
+const fetchAutocompleteResults = z
+  .function()
+  .args(z.string())
+  .returns(remoteSubredditAutocompleteDataSchema.promise())
+  .implement(async (url) => {
+    const res = await fetch(url, { redirect: 'error' })
+    const data = await res.json()
+    return data as TRemoteSubredditAutocompleteData
   })
-  const url = `https://www.reddit.com/api/subreddit_autocomplete.json?${searchParams.toString()}`
 
-  const { subreddits: data } = await fetchAutocompleteResults(url)
-
-  const subreddits = data
-    .filter((sr) => sr.allowedPostTypes.images)
-    .map((sr) => getKeys(sr, SELECT_KEYS))
-
-  return { subreddits }
-}
+export const getAutocompleteSubreddits = z
+  .function()
+  .args(z.string())
+  .returns(
+    z
+      .object({
+        subreddits: subredditSchema.pick({ id: true, name: true }).array(),
+      })
+      .promise()
+  )
+  .implement(async (query) => {
+    const searchParams = new URLSearchParams({
+      nsfw: '0',
+      include_over_18: 'off',
+      include_profiles: 'off',
+      query,
+    })
+    const url = `https://www.reddit.com/api/subreddit_autocomplete.json?${searchParams.toString()}`
+    const { subreddits: data } = await fetchAutocompleteResults(url)
+    const subreddits = data.filter((sr) => sr.allowedPostTypes.images)
+    return { subreddits }
+  })

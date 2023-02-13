@@ -1,27 +1,46 @@
-export interface ISubreddit {
-  allowedPostTypes: {
-    images: boolean
-  }
-  id: string
-  name: string
-}
+import z from 'zod'
+export const subredditSchema = z.object({
+  allowedPostTypes: z.object({
+    images: z.boolean(),
+  }),
+  id: z.string(),
+  name: z.string(),
+})
 
-export interface IRemoteSubredditAutocompleteData {
-  subreddits: ISubreddit[]
-}
+export const remoteSubredditAutocompleteDataSchema = z.object({
+  subreddits: subredditSchema.array(),
+})
 
-export interface IRemotePostsData {
-  children: { data: IPost }[]
-  after: string
-}
+export const postSchema = z.object({
+  is_self: z.boolean(),
+  is_video: z.boolean(),
+  media: z.unknown(),
+  media_metadata: z
+    .record(z.string(), z.object({ id: z.string(), m: z.string() }))
+    .optional(),
+  name: z.string(),
+  url: z.string().transform((url) => {
+    const newUrl = new URL(url)
+    newUrl.protocol = 'https'
+    return newUrl.toString()
+  }),
+  title: z.string(),
+  over_18: z.boolean(),
+})
 
-export interface IPost {
-  is_self: boolean
-  is_video: boolean
-  media: unknown
-  media_metadata: Record<string, any>
-  name: string
-  url: string
-  title: string
-  over_18: boolean
+export const remotePostsDataSchema = z.object({
+  children: z
+    .object({ data: postSchema })
+    .transform(({ data }) => data)
+    .array(),
+  after: z.string().nullable(),
+})
+
+declare global {
+  type TSubreddit = z.infer<typeof subredditSchema>
+  type TRemoteSubredditAutocompleteData = z.infer<
+    typeof remoteSubredditAutocompleteDataSchema
+  >
+  type TRemotePostsData = z.infer<typeof remotePostsDataSchema>
+  type TPost = z.infer<typeof postSchema>
 }

@@ -1,7 +1,7 @@
 export function getKeys<
   T extends Record<any, any> = any,
   Key extends keyof T = any
->(obj: T, keys: readonly Key[]): Pick<T, typeof keys[number]> {
+>(obj: T, keys: readonly Key[]): Pick<T, (typeof keys)[number]> {
   return Object.fromEntries(
     keys.map((key) => [key, obj[key]]).filter(([key, val]) => Boolean(val))
   )
@@ -28,8 +28,8 @@ export function formatBytes(bytes: number, base: number = 1024): string {
   return `${round(bytes / Math.pow(base, index))} ${byteMap[index]}`
 }
 
-export function isEmpty(obj: object): boolean {
-  return Object.values(obj).length === 0
+export function isEmpty(obj: object | undefined): obj is undefined {
+  return !!obj && Object.values(obj).length === 0
 }
 
 export function difference<T>(set1: Set<T>, set2: Set<T>): Set<T> {

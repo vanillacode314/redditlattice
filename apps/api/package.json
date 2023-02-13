@@ -11,12 +11,12 @@
     "build": "esbuild index.ts --minify --bundle --platform=node --external:./node_modules/*"
   },
   "dependencies": {
-    "@trpc/server": "10.0.0-proxy-beta.20",
-    "zod": "^3.19.1"
+    "@trpc/server": "10.11.1",
+    "zod": "^3.20.6"
   },
   "devDependencies": {
+    "esbuild": "^0.17.8",
     "tsconfig": "workspace:*",
-    "esbuild": "^0.15.11",
-    "typescript": "^4.8.4"
+    "typescript": "^4.9.5"
   }
 }
