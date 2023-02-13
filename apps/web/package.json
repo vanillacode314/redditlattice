@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "solid-start dev",
-    "prebuild": "patch ./node_modules/solid-start/root/Links.tsx ./bug-fix.diff",
-    "build": "npm run prebuild && solid-start build && workbox injectManifest workbox-config.cjs",
+    "prebuild": "patch ./node_modules/solid-start/root/Links.tsx ./bug-fix.diff --forward",
+    "build": "npm run prebuild; solid-start build && workbox injectManifest workbox-config.cjs",
     "start": "solid-start start",
     "lint": "eslint 'src/**/*(*.tsx|*.ts|*.js|*.jsx)'"
   },
@@ -19,8 +19,8 @@
     "@solid-primitives/storage": "^1.3.4",
     "@solidjs/meta": "^0.28.2",
     "@solidjs/router": "^0.7.0",
-    "@trpc/client": "10.11.0",
-    "@trpc/server": "10.11.0",
+    "@trpc/client": "10.11.1",
+    "@trpc/server": "10.11.1",
     "@unocss/reset": "^0.49.4",
     "@use-gesture/vanilla": "^10.2.24",
     "api": "workspace:*",

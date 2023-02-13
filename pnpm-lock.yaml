@@ -49,8 +49,8 @@ importers:
       '@solid-primitives/storage': ^1.3.4
       '@solidjs/meta': ^0.28.2
       '@solidjs/router': ^0.7.0
-      '@trpc/client': 10.11.0
-      '@trpc/server': 10.11.0
+      '@trpc/client': 10.11.1
+      '@trpc/server': 10.11.1
       '@types/lodash-es': ^4.17.6
       '@types/node': ^18.13.0
       '@types/web': ^0.0.91
@@ -93,8 +93,8 @@ importers:
       '@solid-primitives/storage': 1.3.4_solid-js@1.6.10
       '@solidjs/meta': 0.28.2_solid-js@1.6.10
       '@solidjs/router': 0.7.0_solid-js@1.6.10
-      '@trpc/client': 10.11.0_@trpc+server@10.11.0
-      '@trpc/server': 10.11.0
+      '@trpc/client': 10.11.1_@trpc+server@10.11.1
+      '@trpc/server': 10.11.1
       '@unocss/reset': 0.49.4
       '@use-gesture/vanilla': 10.2.24
       api: link:../api
@@ -2547,16 +2547,12 @@ packages:
       - supports-color
     dev: true
 
-  /@trpc/client/10.11.0_@trpc+server@10.11.0:
-    resolution: {integrity: sha512-GdSfyJxYI3Z9zyz2fEdJBGWLzqrpaonRtG1BtYLR5/63/eaW3/weA3JcEl2H3/CvqSNZfptNMZqLmaZyChTxdg==}
+  /@trpc/client/10.11.1_@trpc+server@10.11.1:
+    resolution: {integrity: sha512-6aHY27YomzyUAlKhJE4jJulzDjc6vAKAKoWqAmoYbEEhApvyDrMo52bdYqqsukjxvA/L/uPhjOcPU5OsO+x+pA==}
     peerDependencies:
-      '@trpc/server': 10.11.0
+      '@trpc/server': 10.11.1
     dependencies:
-      '@trpc/server': 10.11.0
-    dev: false
-
-  /@trpc/server/10.11.0:
-    resolution: {integrity: sha512-alV96Bjpa3bPgF+LZkJeQtrUJP/BM5EVpsB8S755RA3xtbudMw/lvLJFep8L/xTRw1HFZ7r4uRD31dKLOrMpaA==}
+      '@trpc/server': 10.11.1
     dev: false
 
   /@trpc/server/10.11.1:
