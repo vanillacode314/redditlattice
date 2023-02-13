@@ -54,7 +54,7 @@ export default function Home() {
   }
 
   function removeSearchTerm(term: string) {
-    setUserState('searchTerms', (searchTerms) => {
+    setUserState('redditQueries', (searchTerms) => {
       searchTerms.delete(term)
       return new Map([...searchTerms])
     })
@@ -243,7 +243,7 @@ export default function Home() {
             }}
             reverse
             title="recents"
-            items={[...userState.recents]
+            items={[...userState.redditRecents]
               .sort(([_q1, t1], [_q2, t2]) => t2 - t1)
               .map(([q, _]) => ({
                 id: q,
@@ -297,7 +297,7 @@ export default function Home() {
           {/* SEARCH TERMS LIST */}
           <List
             onClick={(id) => {
-              const sr = subreddit() || userState.searchTerms.get(id)
+              const sr = subreddit() || userState.redditQueries.get(id)
               if (!sr) return
               setSubreddit(sr)
               setSearchTerm(id)
@@ -306,7 +306,7 @@ export default function Home() {
             onRemove={(id) => removeSearchTerm(id)}
             reverse
             title="searches"
-            items={[...userState.searchTerms.keys()].sort().map((q) => ({
+            items={[...userState.redditQueries.keys()].sort().map((q) => ({
               id: q,
               title: q,
             }))}

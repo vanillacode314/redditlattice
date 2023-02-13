@@ -1,5 +1,7 @@
+import { Motion } from '@motionone/solid'
 import { del, get } from 'idb-keyval'
 import { uniq } from 'lodash-es'
+import { spring } from 'motion'
 import {
   batch,
   Component,
@@ -11,12 +13,10 @@ import {
 } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Portal } from 'solid-js/web'
-import { animated, config, createSpring } from 'solid-spring'
 import { useLocation, useNavigate } from 'solid-start'
 import { AutoResizingPicture, Button } from 'ui'
-import { TransitionFade } from 'ui/transitions'
 import { IMAGE_SERVER_BASE_PATH } from '~/consts'
-import { TImage, useUserState } from '~/stores'
+import { useUserState } from '~/stores'
 import { blobToDataURL, download, getExtension, nextFrame } from '~/utils'
 import { longpress } from '~/utils/use-longpress'
 import { outsideclick } from '~/utils/use-outsideclick'
@@ -47,11 +47,6 @@ export const ImageCard: Component<Props> = (props) => {
     Math.round(props.width / 100) * 100 * userState.imageSizeMultiplier
 
   const popupVisible = () => location.hash === '#popup-' + props.image.name
-
-  const scale = createSpring(() => ({
-    transform: `scale(${popupVisible() ? 1 : 0})`,
-    config: config.stiff,
-  }))
 
   const getProcessedImageURL = (
     url: string,
@@ -155,6 +150,7 @@ export const ImageCard: Component<Props> = (props) => {
             onCleanup(dispose)
           }}
           onContextMenu={(e: MouseEvent) => {
+            // @ts-ignore: property exists
             if (e.pointerType === 'touch') return
             e.preventDefault()
             batch(() => {
@@ -180,22 +176,26 @@ export const ImageCard: Component<Props> = (props) => {
             class="fixed inset-0 grid content-center"
             classList={{ 'pointer-events-none': !popupVisible() }}
           >
-            <TransitionFade>
-              <Show when={popupVisible()}>
-                <div
-                  class="absolute inset-0 z-10 bg-black/50 backdrop-blur-[30px]"
-                  onContextMenu={(e) => e.preventDefault()}
-                  onClick={() => removePopupImage()}
-                ></div>
-              </Show>
-            </TransitionFade>
-            <animated.div
+            <Show when={popupVisible()}>
+              <div
+                class="absolute inset-0 z-10 bg-black/50 backdrop-blur-[30px]"
+                onContextMenu={(e) => e.preventDefault()}
+                onClick={() => removePopupImage()}
+              ></div>
+            </Show>
+
+            <Motion.div
+              initial={{
+                transform: `scale(0)`,
+              }}
+              animate={{
+                transform: `scale(1)`,
+              }}
+              transition={{ easing: spring({ stiffness: 120 }) }}
               onContextMenu={(e) => e.preventDefault()}
               class="relative z-20 flex w-full flex-col bg-black"
-              style={scale()}
             >
               <img src={props.image.url} alt={props.image.title}></img>
-              <img />
               <span class="flex items-center gap-5 bg-black px-5 font-bold uppercase tracking-wide text-white">
                 <span class="grow py-5">{props.image.title}</span>
                 <button
@@ -220,7 +220,7 @@ export const ImageCard: Component<Props> = (props) => {
                   <span class="i-mdi-download text-2xl"></span>
                 </button>
               </span>
-            </animated.div>
+            </Motion.div>
           </div>
         </Portal>
       </Show>

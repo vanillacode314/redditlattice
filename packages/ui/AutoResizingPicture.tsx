@@ -1,4 +1,6 @@
+import { Motion } from '@motionone/solid'
 import { throttle } from 'lodash-es'
+import { spring } from 'motion'
 import {
   batch,
   Component,
@@ -12,7 +14,6 @@ import {
   Show,
   splitProps,
 } from 'solid-js'
-import { animated, config, createSpring } from 'solid-spring'
 
 interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   width: number
@@ -40,7 +41,6 @@ export const AutoResizingPicture: Component<Props> = (props) => {
     'onError',
     'ref',
     'fallback',
-    'style',
   ])
   const merged = mergeProps(
     {
@@ -73,12 +73,6 @@ export const AutoResizingPicture: Component<Props> = (props) => {
     onHasHeight?.(height)
   }, 100)
 
-  const expand = createSpring(() => ({
-    height: height(),
-    immediate: !animate(),
-    config: config.stiff,
-  }))
-
   createRenderEffect(
     on(
       () => props.width,
@@ -90,10 +84,17 @@ export const AutoResizingPicture: Component<Props> = (props) => {
   )
 
   return (
-    <animated.div
-      style={{ ...local.style, ...expand() }}
+    <Motion.div
       class="relative overflow-hidden"
       ref={props.ref}
+      animate={{ height: `${height()}px` }}
+      initial={false}
+      transition={{
+        easing: spring({
+          damping: 12,
+          stiffness: 120,
+        }),
+      }}
       {...others}
     >
       <Show when={!hasImage() && tries() > 1}>
@@ -122,7 +123,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
           referrerpolicy="no-referrer"
         />
       </picture>
-    </animated.div>
+    </Motion.div>
   )
 }
 

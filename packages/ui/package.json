@@ -8,25 +8,26 @@
     "lint": "eslint *.ts*"
   },
   "devDependencies": {
-    "@iconify-json/mdi": "^1.1.34",
+    "@iconify-json/mdi": "^1.1.47",
     "@types/lodash-es": "^4.17.6",
-    "@types/web": "^0.0.75",
-    "@unocss/vite": "^0.45.29",
-    "eslint": "^7.32.0",
+    "@types/web": "^0.0.91",
+    "@unocss/vite": "^0.49.4",
+    "eslint": "^8.34.0",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
-    "typescript": "^4.5.2",
-    "unocss": "^0.45.29"
+    "typescript": "^4.9.5",
+    "unocss": "^0.49.4"
   },
   "dependencies": {
-    "@solid-primitives/keyed": "^1.1.2",
-    "@solid-primitives/map": "^0.2.2",
-    "@solid-primitives/resize-observer": "^2.0.4",
-    "@solid-primitives/set": "^0.2.2",
+    "@motionone/solid": "^10.15.5",
+    "@solid-primitives/keyed": "^1.1.7",
+    "@solid-primitives/map": "^0.3.2",
+    "@solid-primitives/resize-observer": "^2.0.9",
+    "@solid-primitives/set": "^0.3.2",
     "lodash-es": "^4.17.21",
-    "solid-js": "^1.5.7",
-    "solid-spring": "^0.0.7",
-    "solid-start": "^0.1.6",
-    "solid-transition-group": "^0.0.11"
+    "motion": "^10.15.5",
+    "solid-js": "^1.6.10",
+    "solid-start": "^0.2.20",
+    "solid-transition-group": "^0.0.13"
   }
 }

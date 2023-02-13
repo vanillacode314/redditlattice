@@ -1,4 +1,6 @@
+import { Motion } from '@motionone/solid'
 import { throttle } from 'lodash-es'
+import { spring } from 'motion'
 import {
   batch,
   Component,
@@ -7,15 +9,12 @@ import {
   onCleanup,
   onMount,
 } from 'solid-js'
-import { animated, createSpring } from 'solid-spring'
-import { TransitionStaggeredEnter } from 'ui/transitions'
-import type { IAction } from '~/types'
 
 interface Props {
   icon: string
-  actions: IAction[]
-  selected: IAction['id']
-  onSelect: (id: IAction['id']) => void
+  actions: TAction[]
+  selected: TAction['id']
+  onSelect: (id: TAction['id']) => void
 }
 
 const Fab: Component<Props> = (props) => {
@@ -23,24 +22,26 @@ const Fab: Component<Props> = (props) => {
   const [open, setOpen] = createSignal<boolean>(false)
   const [hidden, setHidden] = createSignal<boolean>(false)
 
-  let last_known_scroll_position = 0
-  const threshold = 30 // in pixels
+  let scrollStart = 0
+  let lastKnownScrollPos = 0
+  let lastScrollDirection: 'up' | 'down' = 'down'
+  const threshold = 100 // in pixels
   const onScroll = throttle((e: Event) => {
     const el = e.currentTarget as HTMLElement
     if (!el) return
-    const dy = el.scrollTop - last_known_scroll_position
-    last_known_scroll_position = el.scrollTop
+    const dy = scrollStart - lastKnownScrollPos
+    const newScrollDirection =
+      el.scrollTop - lastKnownScrollPos > 0 ? 'down' : 'up'
+    lastKnownScrollPos = el.scrollTop
+    if (newScrollDirection !== lastScrollDirection) {
+      scrollStart = el.scrollTop
+      lastScrollDirection = newScrollDirection
+    }
     batch(() => {
       setOpen(false)
-      if (Math.abs(dy) > threshold) setHidden(dy > 0)
+      setHidden(dy < 0 && Math.abs(dy) > threshold)
     })
   }, 100)
-
-  const slide = createSpring(() => ({
-    to: { marginLeft: 0 },
-    from: { marginLeft: -2 * width() },
-    reverse: hidden(),
-  }))
 
   onMount(() => {
     const scroller = document.getElementById('scroller')
@@ -50,8 +51,12 @@ const Fab: Component<Props> = (props) => {
   })
 
   return (
-    <div flex fixed bottom-0 right-0 overflow-hidden>
-      <div p-5 grid gap-5>
+    <Motion.div
+      animate={{ transform: `scale(${hidden() ? 0 : 1})` }}
+      transition={{ duration: .25 }}
+      class="flex fixed bottom-0 right-0 overflow-hidden"
+    >
+      <div class="p-5 grid gap-3">
         <div
           ref={(el) => {
             if (width()) return
@@ -65,45 +70,29 @@ const Fab: Component<Props> = (props) => {
               setWidth(w)
             })
           }}
-          flex="~ col-reverse"
-          items-center
-          gap-2
+          class="flex flex-col-reverse items-center gap-2"
         >
-          <TransitionStaggeredEnter
-            length={props.actions.length}
-            duration={100}
-          >
-            <For each={open() ? props.actions : []}>
-              {({ icon, id }, index) => (
-                <button
-                  data-index={index()}
-                  text="2xl"
-                  grid
-                  place-items-center
-                  h-13
-                  w-13
-                  outline-none
-                  rounded-full
-                  shadow
-                  class={
-                    props.selected === id
-                      ? 'bg-purple-800 hover:bg-purple-700 focus:bg-purple-700'
-                      : 'bg-gray-900 hover:bg-gray-800 focus:bg-gray-800'
-                  }
-                  style={{
-                    transform: `translateY(100px)`,
-                  }}
-                  onClick={() => {
-                    if (props.selected === id) return
-                    props?.onSelect(id)
-                    setOpen(false)
-                  }}
-                >
-                  <div class={icon} />
-                </button>
-              )}
-            </For>
-          </TransitionStaggeredEnter>
+          <For each={open() ? props.actions : []}>
+            {({ icon, id }) => (
+              <Motion.button
+                animate={{ transform: [`scale(0)`, `scale(1)`] }}
+                transition={{ duration: 0.25 }}
+                class={
+                  'text-2xl grid place-items-center h-13 w-13 outline-none rounded-xl shadow ' +
+                  (props.selected === id
+                    ? 'bg-purple-800 hover:bg-purple-700 focus:bg-purple-700'
+                    : 'bg-gray-900 hover:bg-gray-800 focus:bg-gray-800')
+                }
+                onClick={() => {
+                  if (props.selected === id) return
+                  props?.onSelect(id)
+                  setOpen(false)
+                }}
+              >
+                <div class={icon} />
+              </Motion.button>
+            )}
+          </For>
         </div>
         <button
           classList={{
@@ -111,20 +100,13 @@ const Fab: Component<Props> = (props) => {
             'bg-gray-900': !open(),
           }}
           style={{ '-webkit-tap-highlight-color': 'transparent' }}
-          transition-transform
-          transition-colors
-          outline-none
-          w-15
-          h-15
-          shadow
-          rounded-full
+          class="transition-transform transition-colors outline-none w-15 h-15 shadow rounded-xl preserve-3d"
           onClick={() => setOpen(!open())}
         >
           <div class={open() ? 'i-mdi-close' : props.icon} text="2xl"></div>
         </button>
       </div>
-      <animated.div style={slide()}></animated.div>
-    </div>
+    </Motion.div>
   )
 }
 

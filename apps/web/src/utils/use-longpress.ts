@@ -3,9 +3,17 @@ import { throttle } from 'lodash-es'
 type Pos = { x: number; y: number }
 
 export interface Options {
-  callback?: () => any
+  callback?: () => unknown
   duration?: number
   moveCancelThreshold?: number
+}
+
+declare module 'solid-js' {
+  namespace JSX {
+    interface Directives {
+      longpress: Options
+    }
+  }
 }
 
 function distance(pos1: Pos, pos2: Pos): number {

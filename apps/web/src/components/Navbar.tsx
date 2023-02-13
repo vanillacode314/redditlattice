@@ -1,3 +1,4 @@
+import { Motion } from '@motionone/solid'
 import { throttle } from 'lodash-es'
 import screenfull from 'screenfull'
 import {
@@ -9,9 +10,7 @@ import {
   onMount,
   Show,
 } from 'solid-js'
-import { animated, createSpring } from 'solid-spring'
 import { useLocation, useNavigate, useSearchParams } from 'solid-start'
-import { TransitionFade } from 'ui/transitions'
 import AutoScrollModal, { showAutoScrollModal } from '~/modals/AutoScrollModal'
 import { useAppState } from '~/stores'
 
@@ -69,25 +68,22 @@ export const Navbar: Component = () => {
     })
   }
 
-  const slide = createSpring(() => ({
-    from: { marginBottom: -1 * height() },
-    to: { marginBottom: 0 },
-    reverse: !navVisible(),
-    immediate: !mounted(),
-  }))
-
-  let last_known_scroll_position = 0
-  const threshold = 30 // in pixels
+  let scrollStart = 0
+  let lastKnownScrollPos = 0
+  let lastScrollDirection: 'up' | 'down' = 'down'
+  const threshold = 10 // in pixels
   const onScroll = throttle((e: Event) => {
     const el = e.currentTarget as HTMLElement
     if (!el) return
-    const dy = el.scrollTop - last_known_scroll_position
-    last_known_scroll_position = el.scrollTop
-    if (el.scrollTop < 5) {
-      setNavVisible(true)
-      return
+    const dy = scrollStart - lastKnownScrollPos
+    const newScrollDirection =
+      el.scrollTop - lastKnownScrollPos > 0 ? 'down' : 'up'
+    lastKnownScrollPos = el.scrollTop
+    if (newScrollDirection !== lastScrollDirection) {
+      scrollStart = el.scrollTop
+      lastScrollDirection = newScrollDirection
     }
-    if (Math.abs(dy) > threshold) setNavVisible(dy <= 0)
+    setNavVisible((dy > 0 && Math.abs(dy) > threshold) || el.scrollTop < 50)
   }, 100)
 
   createEffect(
@@ -106,8 +102,12 @@ export const Navbar: Component = () => {
   onMount(() => setMounted(true))
 
   return (
-    <div class="relative z-20 shrink-0 overflow-hidden bg-black">
-      <animated.div style={slide()}></animated.div>
+    <Motion.div
+      animate={{
+        height: `${navVisible() ? height() : 0}px`,
+      }}
+      class="relative z-20 shrink-0 overflow-hidden bg-black"
+    >
       <nav
         ref={(el) => {
           if (height()) return
@@ -161,17 +161,15 @@ export const Navbar: Component = () => {
                 outline-none
               />
               <div grid class="[&_*]:grid-area-[1/-1]">
-                <TransitionFade blur duration={200}>
-                  <Show when={query()}>
-                    <button
-                      type="button"
-                      onClick={() => setQuery('')}
-                      onFocus={(e) => e.relatedTarget?.focus()}
-                    >
-                      <span text="2xl" class="i-mdi-close-circle"></span>
-                    </button>
-                  </Show>
-                </TransitionFade>
+                <Show when={query()}>
+                  <button
+                    type="button"
+                    onClick={() => setQuery('')}
+                    onFocus={(e) => e.relatedTarget?.focus()}
+                  >
+                    <span text="2xl" class="i-mdi-close-circle"></span>
+                  </button>
+                </Show>
               </div>
             </form>
           }
@@ -192,7 +190,6 @@ export const Navbar: Component = () => {
             {appState.title || 'RedditLattice'}
           </span>
           <span class="grow" />
-          {/* <TransitionFade blur duration={200}> */}
           <Show when={showBack()}>
             <button
               type="button"
@@ -225,10 +222,9 @@ export const Navbar: Component = () => {
               ></span>
             </button>
           </Show>
-          {/* </TransitionFade> */}
         </Show>
       </nav>
-    </div>
+    </Motion.div>
   )
 }
 

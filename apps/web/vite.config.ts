@@ -1,6 +1,7 @@
+import path from 'path'
+import netlify from 'solid-start-netlify'
+import node from 'solid-start-node'
 import solid from 'solid-start/vite'
-import { defineConfig } from 'vite'
-
 import {
   presetAttributify,
   presetIcons,
@@ -8,11 +9,7 @@ import {
   presetWebFonts,
 } from 'unocss'
 import Unocss from 'unocss/vite'
-
-import netlify from 'solid-start-netlify'
-import node from 'solid-start-node'
-
-import path from 'path'
+import { defineConfig } from 'vite'
 import pkgJson from './package.json' assert { type: 'json' }
 
 export default defineConfig({

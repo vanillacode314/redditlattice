@@ -1,3 +1,4 @@
+import { Motion } from '@motionone/solid'
 import { createConnectivitySignal } from '@solid-primitives/connectivity'
 import {
   Component,
@@ -9,7 +10,6 @@ import {
   Show,
   Suspense,
 } from 'solid-js'
-import { animated, createSpring } from 'solid-spring'
 import { ErrorBoundary, useLocation, useParams } from 'solid-start'
 import { Spinner } from 'ui'
 import Drawer from '~/components/Drawer'
@@ -20,7 +20,7 @@ interface Props {
   children: JSXElement
 }
 
-const [refresh, setRefresh] = createSignal<(done: () => {}) => void>(() => {})
+const [refresh, setRefresh] = createSignal<(done?: () => {}) => void>(() => {})
 export const useRefresh = () => [refresh, setRefresh] as const
 
 export const BaseLayout: Component<Props> = (props) => {
@@ -91,8 +91,8 @@ export const BaseLayout: Component<Props> = (props) => {
             shouldRefresh = false
             refresh()()
           }
-          setDown(false)
           setOffset(0)
+          setDown(false)
         }
 
         scroller.addEventListener('touchstart', onTouchStart, {
@@ -111,25 +111,21 @@ export const BaseLayout: Component<Props> = (props) => {
     )
   )
 
-  const move = createSpring(() => ({
-    from: {
-      transform: `translateY(0px) rotate(0deg)`,
-    },
-    to: {
-      transform: `translateY(${offset() - 200}%) rotate(${offset()}deg)`,
-    },
-    immediate: down(),
-  }))
-
   return (
     <div flex="~ col" h-full max-h-full relative>
       <div class="bg-tranparent pointer-events-none absolute inset-x-0 top-0 z-10 grid place-content-center p-6">
-        <animated.div
+        <Motion.div
           class="bg-purple relative z-10 rounded-full p-2"
-          style={move()}
+          animate={{
+            transform: [
+              `translateY(0px) rotate(0deg)`,
+              `translateY(${offset() - 200}%) rotate(${offset()}deg)`,
+            ],
+          }}
+          transition={{ duration: down() ? 0.000001 : 1 }}
         >
           <div text="3xl" class="i-mdi-refresh"></div>
-        </animated.div>
+        </Motion.div>
       </div>
       <Show when={!isOnline()}>
         <div

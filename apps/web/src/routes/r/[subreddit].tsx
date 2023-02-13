@@ -18,8 +18,8 @@ import Fab from '~/components/Fab'
 import ImageCard from '~/components/ImageCard'
 import { useRefresh } from '~/layouts/Base'
 import { startScroll } from '~/modals/AutoScrollModal'
-import { TAppState, useAppState, useUserState } from '~/stores'
-import { IAction } from '~/types'
+import { useAppState, useUserState } from '~/stores'
+import { actionSchema } from '~/types'
 import { parseSchema } from '~/utils'
 
 const [appState, setAppState] = useAppState()
@@ -29,7 +29,7 @@ export const CACHE: Map<
   Omit<TAppState['images'], 'key'> & { completed: boolean }
 > = new Map()
 
-const fabActions: IAction[] = [
+const fabActions = actionSchema.array().parse([
   {
     id: 'top',
     icon: 'i-mdi-arrow-up-bold',
@@ -42,9 +42,9 @@ const fabActions: IAction[] = [
     id: 'new',
     icon: 'i-mdi-new-box',
   },
-]
+])
 
-export default function Subreddit() {
+export default function SubredditPage() {
   const componentOwner = getOwner()!
 
   const location = useLocation()
@@ -57,13 +57,13 @@ export default function Subreddit() {
   const q = () => new URLSearchParams(location.search.toLowerCase()).getAll('q')
   const subreddits = () => params.subreddit.toLowerCase().split('+')
   const sort = createMemo(
-    () => userState.sort.get(subreddits().sort().join('+')) || 'hot'
+    () => userState.subredditSort.get(subreddits().sort().join('+')) || 'hot'
   )
   const key = createMemo(() => `${subreddits()}-${q().join('+')}-${sort()}`)
 
   const setSort = (sort: string) =>
     setUserState(
-      'sort',
+      'subredditSort',
       (current) =>
         new Map([...current.set(subreddits().sort().join('+'), sort)])
     )
@@ -106,7 +106,7 @@ export default function Subreddit() {
     )
 
     /* Update Recents */
-    setUserState('recents', (current) => {
+    setUserState('redditRecents', (current) => {
       current.set(
         q().length > 0 ? `${subreddits()[0]}?${q()[0]}` : subreddits()[0],
         Math.floor(Date.now() / 1000)
@@ -119,7 +119,7 @@ export default function Subreddit() {
     })
 
     /* Update Search Terms */
-    setUserState('searchTerms', (current) => {
+    setUserState('redditQueries', (current) => {
       if (q().length > 0) current.set(q()[0].toLowerCase(), subreddits()[0])
       return new Map([...current])
     })
@@ -145,7 +145,7 @@ export default function Subreddit() {
             q: q(),
             after: appState.images.after,
             subreddits: subreddits(),
-            sort: userState.sort.get(subreddits().sort().join('+')),
+            sort: userState.subredditSort.get(subreddits().sort().join('+')),
             nsfw: !userState.hideNSFW,
           },
           {
@@ -180,16 +180,14 @@ export default function Subreddit() {
         return
       }
       setState('completed')
-    } catch (e) {
-      if (e instanceof TRPCClientError) {
-        if (e.cause?.name !== 'ObservableAbortError') {
-          setState('error')
-          throw e
-        }
+    } catch (error) {
+      if (
+        error instanceof TRPCClientError &&
+        error.cause?.name === 'ObservableAbortError'
+      )
         return
-      }
       setState('error')
-      throw e
+      throw error
     }
   }
 

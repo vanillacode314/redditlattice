@@ -39,25 +39,30 @@ export default function Settings() {
     try {
       const content = await file.text()
       const data = parse(content) as typeof userState
-      const { collections, subreddits, sort, searchTerms } = data!
+      const {
+        redditCollections: redditCollections,
+        subreddits,
+        subredditSort: subredditSort,
+        redditQueries: redditQueries,
+      } = data!
 
       function appendKey<
-        K extends keyof typeof userState = any,
-        V extends (typeof userState)[K] = any
+        K extends keyof typeof userState,
+        V extends (typeof userState)[K]
       >(key: K, value: V) {
         if (value instanceof Set) {
-          const newValue = new Set([...value, ...userState[key]])
+          const newValue: V = new Set([...value, ...userState[key]])
           setUserState(key, newValue)
-        } else {
-          const newValue = new Map([...value, ...userState[key]])
+        } else if (value instanceof Map) {
+          const newValue: V = new Map([...value, ...userState[key]])
           setUserState(key, newValue)
         }
       }
       batch(() => {
         subreddits && appendKey('subreddits', subreddits)
-        sort && appendKey('sort', sort)
-        searchTerms && appendKey('searchTerms', searchTerms)
-        collections && appendKey('collections', collections)
+        subredditSort && appendKey('subredditSort', subredditSort)
+        redditQueries && appendKey('redditQueries', redditQueries)
+        redditCollections && appendKey('redditCollections', redditCollections)
       })
     } catch (e) {
       alert('Selected file contains invalid data')
@@ -90,9 +95,12 @@ export default function Settings() {
   onCleanup(() => {
     /* Update Recents */
     setUserState((state) => {
-      while (state.recents.size > state.recentsLimit) {
-        const [q, _] = minBy([...state.recents], ([_, timestamp]) => timestamp)!
-        state.recents.delete(q)
+      while (state.redditRecents.size > state.recentsLimit) {
+        const [q, _] = minBy(
+          [...state.redditRecents],
+          ([_, timestamp]) => timestamp
+        )!
+        state.redditRecents.delete(q)
       }
       return { ...state }
     })
@@ -193,7 +201,12 @@ export default function Settings() {
           <select
             value={userState.prefferedImageFormat}
             onChange={(e) =>
-              setUserState('prefferedImageFormat', e.currentTarget.value)
+              setUserState(
+                'prefferedImageFormat',
+                userStateSchema.shape.prefferedImageFormat.parse(
+                  e.currentTarget.value
+                )
+              )
             }
             class="bg-black outline-none"
           >
@@ -241,7 +254,9 @@ export default function Settings() {
           step="1"
           type="number"
           value={userState.recentsLimit}
-          onChange={(e) => setUserState('recentsLimit', +e.currentTarget.value)}
+          onChange={(e) =>
+            setUserState('recentsLimit', Number(e.currentTarget.value))
+          }
         />
       </label>
     </div>

@@ -46,7 +46,7 @@ export default function Home() {
 
   const setCollection = (id: string, value: string) =>
     setUserState((state) => {
-      state!.collections.set(id, value)
+      state!.redditCollections.set(id, value)
       return { ...state! }
     })
 
@@ -56,7 +56,7 @@ export default function Home() {
 
     const [subreddits, searchTerms] = getSubredditsAndSearchTerms(query())
     const id = subreddits + (searchTerms !== undefined ? '?' + searchTerms : '')
-    if (!userState.collections.has(id)) setCollection(id, id)
+    if (!userState.redditCollections.has(id)) setCollection(id, id)
 
     navigate(getURL(subreddits, searchTerms || ''))
   }
@@ -110,24 +110,24 @@ export default function Home() {
             bg-transparent
             outline-none
           />
-          <TransitionFade blur duration={100}>
-            <Show when={query()}>
-              <button
-                type="button"
-                onClick={() => {
-                  const name = prompt('Enter a nickname for the collection')
-                  if (!name) return
-                  const [sr, q] = query().toLowerCase().split('?')
-                  let id = sr.split('+').sort().join('+')
-                  if (q) id += `?${q.split('+').sort().join('+')}`
-                  setCollection(id, name)
-                }}
-                onFocus={(e) => e.relatedTarget?.focus()}
-              >
-                <span class="i-mdi-edit text-xl"></span>
-              </button>
-            </Show>
-          </TransitionFade>
+
+          <Show when={query()}>
+            <button
+              type="button"
+              onClick={() => {
+                const name = prompt('Enter a nickname for the collection')
+                if (!name) return
+                const [sr, q] = query().toLowerCase().split('?')
+                let id = sr.split('+').sort().join('+')
+                if (q) id += `?${q.split('+').sort().join('+')}`
+                setCollection(id, name)
+              }}
+              onFocus={(e) => e.relatedTarget?.focus()}
+            >
+              <span class="i-mdi-edit text-xl"></span>
+            </button>
+          </Show>
+
           <TransitionFade blur duration={100}>
             <Show when={query()}>
               <button
@@ -221,10 +221,12 @@ export default function Home() {
             onRemove={(id) => removeCollection(id)}
             reverse
             title="collections"
-            items={[...userState.collections].sort().map(([key, value]) => ({
-              id: key,
-              title: value,
-            }))}
+            items={[...userState.redditCollections]
+              .sort()
+              .map(([key, value]) => ({
+                id: key,
+                title: value,
+              }))}
           ></List>
         </Show>
       </div>

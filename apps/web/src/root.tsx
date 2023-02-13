@@ -1,5 +1,5 @@
 // @refresh reload
-import { DevtoolsOverlay } from '@solid-devtools/overlay'
+import { MetaProvider } from '@solidjs/meta'
 import '@unocss/reset/tailwind.css'
 import { delMany, entries } from 'idb-keyval'
 import { Component, onMount } from 'solid-js'
@@ -14,7 +14,7 @@ import {
   Scripts,
   Title,
 } from 'solid-start'
-import 'uno.css'
+import 'virtual:uno.css'
 import Base from '~/layouts/Base'
 import { useAppState, useUserState } from '~/stores'
 import './root.css'
@@ -41,7 +41,7 @@ export const Root: Component = () => {
       const searches = JSON.parse(localSearches)
       setUserState((_) => {
         for (const x of searches) {
-          _!.searchTerms.set(x, '')
+          _!.redditQueries.set(x, '')
         }
         return { ..._! }
       })
@@ -67,35 +67,36 @@ export const Root: Component = () => {
   onMount(() => cleanCache())
 
   return (
-    <Html lang="en">
-      <Head>
-        <Title>
-          {appState.title
-            ? `${appState.title} - RedditLattice`
-            : `RedditLattice`}
-        </Title>
-        <Meta charset="utf-8" />
-        <Meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, viewport-fit=cover"
-        />
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-XDR9E19TGZ"
-        ></script>
-        <Link rel="manifest" href="/manifest.webmanifest"></Link>
-        <Link rel="icon" href="/favicon.svg" />
-      </Head>
-      <Body>
-        <Base>
-          <Routes>
-            <FileRoutes />
-          </Routes>
-          <Scripts />
-        </Base>
-        <DevtoolsOverlay />
-      </Body>
-    </Html>
+    <MetaProvider tags={[]}>
+      <Html lang="en">
+        <Head>
+          <Title>
+            {appState.title
+              ? `${appState.title} - RedditLattice`
+              : `RedditLattice`}
+          </Title>
+          <Meta charset="utf-8" />
+          <Meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover"
+          />
+          <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-XDR9E19TGZ"
+          ></script>
+          <Link rel="manifest" href="/manifest.webmanifest"></Link>
+          <Link rel="icon" href="/favicon.svg" />
+        </Head>
+        <Body>
+          <Base>
+            <Routes>
+              <FileRoutes />
+            </Routes>
+            <Scripts />
+          </Base>
+        </Body>
+      </Html>
+    </MetaProvider>
   )
 }
 
