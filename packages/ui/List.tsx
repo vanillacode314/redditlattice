@@ -23,7 +23,7 @@ export const List: Component<Props> = (props) => {
 
   return (
     <div
-      class="flex flex-col gap-2"
+      class="flex flex-col gap-2 overflow-hidden"
       classList={{ 'flex-col-reverse': props.reverse }}
     >
       <Show when={props.title}>
@@ -32,7 +32,7 @@ export const List: Component<Props> = (props) => {
         </span>
       </Show>
       <ul
-        class="flex flex-col"
+        class="flex flex-col overflow-auto"
         classList={{ 'flex-col-reverse': props.reverse }}
       >
         <TransitionSlide duration={120}>
@@ -42,20 +42,18 @@ export const List: Component<Props> = (props) => {
               const id = () => item().id
 
               return (
-                <li class="w-full overflow-hidden">
-                  <ListItem
-                    id={id()}
-                    buttons={props.buttons}
-                    focusable={props.focusable}
-                    onClick={() => onClick(id())}
-                    onRemove={
-                      /* TODO: Possible bug */
-                      onRemove ? () => onRemove!(id()) : undefined
-                    }
-                  >
-                    {title()}
-                  </ListItem>
-                </li>
+                <ListItem
+                  id={id()}
+                  buttons={props.buttons}
+                  focusable={props.focusable}
+                  onClick={() => onClick(id())}
+                  onRemove={
+                    /* TODO: Possible bug */
+                    onRemove ? () => onRemove!(id()) : undefined
+                  }
+                >
+                  {title()}
+                </ListItem>
               )
             }}
           </Key>

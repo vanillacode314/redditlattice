@@ -4,7 +4,7 @@ import { minBy } from 'lodash-es'
 import { batch, For, onCleanup, onMount, Show } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Button } from 'ui'
-import { useAppState, useUserState } from '~/stores'
+import { useAppState, userStateSchema, useUserState } from '~/stores'
 import { download, filterStringKeys, formatBytes } from '~/utils'
 
 export default function Settings() {
@@ -38,31 +38,24 @@ export default function Settings() {
     }
     try {
       const content = await file.text()
-      const data = parse(content) as typeof userState
-      const {
-        redditCollections: redditCollections,
-        subreddits,
-        subredditSort: subredditSort,
-        redditQueries: redditQueries,
-      } = data!
 
-      function appendKey<
-        K extends keyof typeof userState,
-        V extends (typeof userState)[K]
-      >(key: K, value: V) {
+      function appendKey(key: any, value: any) {
         if (value instanceof Set) {
-          const newValue: V = new Set([...value, ...userState[key]])
+          const newValue = new Set([...value, ...userState[key]])
           setUserState(key, newValue)
         } else if (value instanceof Map) {
-          const newValue: V = new Map([...value, ...userState[key]])
+          const newValue = new Map([...value, ...userState[key]])
           setUserState(key, newValue)
+        } else {
+          setUserState(key, value)
         }
       }
       batch(() => {
-        subreddits && appendKey('subreddits', subreddits)
-        subredditSort && appendKey('subredditSort', subredditSort)
-        redditQueries && appendKey('redditQueries', redditQueries)
-        redditCollections && appendKey('redditCollections', redditCollections)
+        for (const [key, value] of Object.entries(
+          userStateSchema.parse(parse(content))
+        )) {
+          appendKey(key, value)
+        }
       })
     } catch (e) {
       alert('Selected file contains invalid data')
@@ -70,7 +63,7 @@ export default function Settings() {
   }
 
   const exportData = async () => {
-    const data = stringify(filterStringKeys(userState))
+    const data = stringify(userStateSchema.parse(userState))
     download(
       `data:text/plain;charset=utf-8,${encodeURIComponent(data)}`,
       `redditlattice-${new Date().toLocaleDateString()}.dat`

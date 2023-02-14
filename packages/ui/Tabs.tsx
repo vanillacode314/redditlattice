@@ -21,8 +21,8 @@ export const Tabs: Component<TabsProps> = (props) => {
   const tabs = children(() => props.children)
 
   return (
-    <div class="flex flex-col h-full overflow-hidden">
-      <div class="flex h-full items-end">
+    <div class="grid grid-rows-[1fr_auto] h-full overflow-hidden">
+      <div class="flex items-end overflow-hidden">
         <For each={tabs.toArray() as unknown as TabProps[]}>
           {(tab, index) => (
             <Motion.div
@@ -32,7 +32,7 @@ export const Tabs: Component<TabsProps> = (props) => {
               transition={{
                 easing: spring(),
               }}
-              class="w-full shrink-0 grow flex justify-end flex-col"
+              class="h-full w-full shrink-0 grow flex justify-end flex-col"
             >
               {tab.children}
             </Motion.div>
