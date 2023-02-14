@@ -46,6 +46,15 @@ html {
   background-color: rgb(255 255 255 / 20%);
 }
 
+.hidescrollbar {
+  scrollbar-width: none;
+}
+.hidescrollbar::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+  display: none;
+}
+
 img {
   display: block;
   width: 100%;

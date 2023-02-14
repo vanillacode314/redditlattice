@@ -14,7 +14,6 @@
   },
   "devDependencies": {
     "@alexanderniebuhr/prettier-plugin-unocss": "^0.0.4",
-    "@trivago/prettier-plugin-sort-imports": "^4.0.0",
     "eslint-config-custom": "workspace:0.0.0",
     "prettier": "latest",
     "prettier-plugin-organize-imports": "^3.2.2",

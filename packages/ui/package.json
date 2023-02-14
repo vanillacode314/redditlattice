@@ -28,6 +28,7 @@
     "motion": "^10.15.5",
     "solid-js": "^1.6.10",
     "solid-start": "^0.2.20",
-    "solid-transition-group": "^0.0.13"
+    "solid-transition-group": "^0.0.13",
+    "zod": "^3.20.6"
   }
 }
