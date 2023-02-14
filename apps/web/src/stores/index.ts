@@ -39,7 +39,7 @@ export const userStateSchema = z.object({
   columnMaxWidth: z.number().default(400),
 })
 const [userState, setUserState] = createLocalStorageStore(
-  'user-state',
+  'user-state-v2',
   userStateSchema.parse({}),
   {
     schema: userStateSchema,

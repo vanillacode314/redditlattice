@@ -1,6 +1,7 @@
 // @refresh reload
 import { MetaProvider } from '@solidjs/meta'
 import '@unocss/reset/tailwind.css'
+import * as devalue from 'devalue'
 import { delMany, entries } from 'idb-keyval'
 import { Component, onMount } from 'solid-js'
 import {
@@ -24,29 +25,18 @@ export const Root: Component = () => {
   const [appState] = useAppState()
   const [, setUserState] = useUserState()
 
-  const importLegacyState = () => {
-    const localSr = localStorage.getItem('subreddits')
-    if (localSr) {
-      const sr = JSON.parse(localSr)
-      setUserState((_) => {
-        for (const x of sr) {
-          _!.subreddits.add(x)
-        }
-        return { ..._! }
-      })
-      localStorage.removeItem('subreddits')
-    }
-    const localSearches = localStorage.getItem('searches')
-    if (localSearches) {
-      const searches = JSON.parse(localSearches)
-      setUserState((_) => {
-        for (const x of searches) {
-          _!.redditQueries.set(x, '')
-        }
-        return { ..._! }
-      })
-      localStorage.removeItem('searches')
-    }
+  const migrateV1toV2 = () => {
+    if (localStorage.getItem('migration-v1-to-v2-done')) return
+    let userStateV1: any = localStorage.getItem('user-state')
+    if (!userStateV1) return
+    userStateV1 = devalue.parse(userStateV1)
+    if (!userStateV1) return
+    userStateV1.redditQueries = userStateV1.searchTerms
+    userStateV1.subredditSort = userStateV1.sort
+    userStateV1.redditCollections = userStateV1.collections
+    userStateV1.redditRecents = userStateV1.recents
+    setUserState(userStateV1)
+    localStorage.setItem('migration-v1-to-v2-done', 'true')
   }
 
   const cleanCache = async () => {
@@ -63,7 +53,7 @@ export const Root: Component = () => {
     await delMany(urlsToDelete)
   }
 
-  onMount(() => importLegacyState())
+  onMount(() => migrateV1toV2())
   onMount(() => cleanCache())
 
   return (
