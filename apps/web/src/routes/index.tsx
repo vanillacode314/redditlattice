@@ -104,7 +104,7 @@ export default function Home() {
             onInput={(e) => {
               const inp = e.currentTarget
               const start = inp.selectionStart
-              setQuery(inp.value)
+              setQuery(inp.value.toLowerCase())
               inp.setSelectionRange(start, start)
             }}
             onFocus={() => setFocused(true)}
