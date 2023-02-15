@@ -7,8 +7,10 @@ const [speed, setSpeed] = createSignal<number>(150) // in pixels per second
 let cancelScroll: () => void
 let el!: HTMLDialogElement
 
+const [appState, setAppState] = useAppState()
 export const startScroll = () => {
-  cancelScroll = autoScroll('#scroller', speed())
+  if (!appState.scrollElement) return
+  cancelScroll = autoScroll(appState.scrollElement, speed())
 }
 
 let submitResolve: () => void
@@ -30,8 +32,6 @@ interface Props {
 }
 
 export const AutoScrollModal: Component<Props> = (props) => {
-  const [_appState, setAppState] = useAppState()
-
   const { onClose } = props
 
   return () => (
@@ -51,9 +51,10 @@ export const AutoScrollModal: Component<Props> = (props) => {
           onSubmit={() => {
             submitResolve?.()
             startScroll()
-            ;['touchstart', 'mousedown'].forEach((eventType) => {
-              const scroller = document.getElementById('scroller')
-              scroller?.addEventListener(
+            const scroller = appState.scrollElement
+            if (!scroller) return
+            for (const eventType of ['touchstart', 'mousedown']) {
+              scroller.addEventListener(
                 eventType,
                 () => {
                   setAppState('autoScrolling', false)
@@ -63,7 +64,18 @@ export const AutoScrollModal: Component<Props> = (props) => {
                   once: true,
                 }
               )
-            })
+            }
+            window.addEventListener(
+              'keydown',
+              (e) => {
+                if (e.key !== 'Escape') return
+                setAppState('autoScrolling', false)
+                cancelScroll?.()
+              },
+              {
+                once: true,
+              }
+            )
             onClose?.(true)
           }}
           method="dialog"

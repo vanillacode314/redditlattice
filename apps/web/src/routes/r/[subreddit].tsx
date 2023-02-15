@@ -195,7 +195,7 @@ export default function SubredditPage() {
     <div
       h-full
       max-h-full
-      id="scroller"
+      ref={(el) => setAppState('scrollElement', el)}
       style={{ padding: `${userState.gap}px` }}
     >
       <Masonry
@@ -212,7 +212,7 @@ export default function SubredditPage() {
       </Masonry>
       <InfiniteLoading
         onInfinite={onInfinite}
-        target="#scroller"
+        target={appState.scrollElement}
         distance={1280}
         key={appState.images.key}
       >

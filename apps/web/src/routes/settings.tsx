@@ -101,7 +101,14 @@ export default function Settings() {
   })
 
   return (
-    <div p-5 flex flex-col-reverse h-full gap-5 id="scroller">
+    <div
+      p-5
+      flex
+      flex-col-reverse
+      h-full
+      gap-5
+      ref={(el) => setAppState('scrollElement', el)}
+    >
       <Button
         onClick={() => filesInput.click()}
         class="transitions-colors bg-green-800 hover:bg-green-700"

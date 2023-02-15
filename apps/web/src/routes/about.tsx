@@ -6,7 +6,14 @@ export default function About() {
   onMount(() => setAppState('title', 'About'))
 
   return (
-    <div flex flex-col-reverse gap-5 py-5 h-full id="scroller">
+    <div
+      flex
+      flex-col-reverse
+      gap-5
+      py-5
+      h-full
+      ref={(el) => setAppState('scrollElement', el)}
+    >
       <div flex flex-col-reverse gap-2>
         <span px-5 text="xs gray-500" font="bold" uppercase v-if="title">
           Summary

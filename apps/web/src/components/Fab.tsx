@@ -4,11 +4,14 @@ import { spring } from 'motion'
 import {
   batch,
   Component,
+  createEffect,
   createSignal,
   For,
+  on,
   onCleanup,
   onMount,
 } from 'solid-js'
+import { useAppState } from '~/stores'
 
 interface Props {
   icon: string
@@ -18,6 +21,7 @@ interface Props {
 }
 
 const Fab: Component<Props> = (props) => {
+  const [appState, setAppState] = useAppState()
   const [width, setWidth] = createSignal<number>(0)
   const [open, setOpen] = createSignal<boolean>(false)
   const [hidden, setHidden] = createSignal<boolean>(false)
@@ -43,12 +47,16 @@ const Fab: Component<Props> = (props) => {
     })
   }, 100)
 
-  onMount(() => {
-    const scroller = document.getElementById('scroller')
-    if (!scroller) return
-    scroller.addEventListener('scroll', onScroll, { passive: true })
-    onCleanup(() => scroller.removeEventListener('scroll', onScroll))
-  })
+  createEffect(
+    on(
+      () => appState.scrollElement,
+      (scroller) => {
+        if (!scroller) return
+        scroller.addEventListener('scroll', onScroll, { passive: true })
+        onCleanup(() => scroller.removeEventListener('scroll', onScroll))
+      }
+    )
+  )
 
   return (
     <Motion.div

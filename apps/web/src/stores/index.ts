@@ -1,4 +1,5 @@
 import * as devalue from 'devalue'
+import { createEffect, on } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { z } from 'zod'
 import { imageSchema } from '~/types'
@@ -10,6 +11,7 @@ export const appStateSchema = z.object({
   navVisible: z.boolean().default(true),
   isSearching: z.boolean().default(false),
   autoScrolling: z.boolean().default(false),
+  scrollElement: z.instanceof(HTMLElement).optional(),
   images: z
     .object({
       key: z.string().default(''),
@@ -19,6 +21,15 @@ export const appStateSchema = z.object({
     .default({}),
 })
 const [appState, setAppState] = createStore<TAppState>(appStateSchema.parse({}))
+createEffect(
+  on(
+    () => appState.scrollElement,
+    (el) => {
+      if (!el) return
+      el.id = 'scroller'
+    }
+  )
+)
 export const useAppState = () => [appState, setAppState] as const
 
 export const userStateSchema = z.object({

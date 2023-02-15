@@ -148,7 +148,10 @@ export default function Home() {
           <div class="i-mdi-magnify"></div>
         </button>
       </form>
-      <div id="scroller" class="flex flex-col-reverse gap-2 py-5 shrink-1 grow">
+      <div
+        ref={(el) => setAppState('scrollElement', el)}
+        class="flex flex-col-reverse gap-2 py-5 shrink-1 grow"
+      >
         {/* AUTOCOMPLETE LIST */}
         <Show
           when={!query() || !(focused() && !query().includes('?'))}

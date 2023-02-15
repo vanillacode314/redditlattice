@@ -1,6 +1,15 @@
-export function autoScroll(elementSelector: string, speed: number): () => void {
-  // get the element
-  const element = document.querySelector(elementSelector) as HTMLElement
+export function autoScroll(
+  elementSelector: string | HTMLElement,
+  speed: number
+): () => void {
+  const element =
+    typeof elementSelector === 'string'
+      ? document.querySelector(elementSelector)
+      : elementSelector
+
+  if (!element) {
+    throw new Error('Element not found')
+  }
 
   // get the current scroll position
   const startY = element.scrollTop

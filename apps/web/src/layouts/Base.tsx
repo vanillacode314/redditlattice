@@ -25,13 +25,9 @@ const [refresh, setRefresh] = createSignal<(done?: () => {}) => void>(() => {})
 export const useRefresh = () => [refresh, setRefresh] as const
 
 export const BaseLayout: Component<Props> = (props) => {
-  const location = useLocation()
-  const params = useParams()
-
   const isOnline = createConnectivitySignal()
 
-  const [, setAppState] = useAppState()
-  const [userState] = useUserState()
+  const [appState, _setAppState] = useAppState()
 
   const [offset, setOffset] = createSignal(0)
   const [down, setDown] = createSignal<boolean>(false)
@@ -39,13 +35,12 @@ export const BaseLayout: Component<Props> = (props) => {
 
   createEffect(
     on(
-      () => location.pathname,
-      () => {
-        const scroller = document.getElementById('scroller')
+      () => appState.scrollElement,
+      (scroller) => {
+        if (!scroller) return
         let startY: number = 0
         let touchId: number = -1
         let shouldRefresh: boolean = false
-        if (!scroller) return
 
         const onTouchStart = (e: TouchEvent) => {
           if (touchId > -1) return

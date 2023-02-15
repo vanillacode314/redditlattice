@@ -19,7 +19,7 @@ export type InfiniteHandler = (
 interface Props {
   children: (state: State, load: (firstload?: boolean) => void) => JSXElement
   distance?: number
-  target?: string
+  target?: string | HTMLElement
   firstload?: boolean
   key?: string
   onInfinite: InfiniteHandler
@@ -38,7 +38,12 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
   const onScroll = throttle((e: Event) => {
     if (state() !== 'idle') return
 
-    const scrollTarget = document.querySelector(merged.target)
+    let scrollTarget: HTMLElement
+    if (merged.target instanceof HTMLElement) {
+      scrollTarget = merged.target
+    } else {
+      scrollTarget = document.querySelector(merged.target) as HTMLElement
+    }
     if (!scrollTarget)
       throw new Error(
         `scroll-target ${props.target} not found for infinite loading`
@@ -58,7 +63,12 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
       return
     }
 
-    const scrollTarget = document.querySelector(merged.target)
+    let scrollTarget: HTMLElement
+    if (merged.target instanceof HTMLElement) {
+      scrollTarget = merged.target
+    } else {
+      scrollTarget = document.querySelector(merged.target) as HTMLElement
+    }
     if (!scrollTarget)
       throw new Error(
         `scroll-target ${props.target} not found for infinite loading`
@@ -83,7 +93,12 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
   )
 
   onMount(() => {
-    const scrollTarget = document.querySelector(merged.target)
+    let scrollTarget: HTMLElement
+    if (merged.target instanceof HTMLElement) {
+      scrollTarget = merged.target
+    } else {
+      scrollTarget = document.querySelector(merged.target) as HTMLElement
+    }
     if (!scrollTarget)
       throw new Error(
         `scroll-target ${props.target} not found for infinite loading`

@@ -15,7 +15,6 @@ import AutoScrollModal, { showAutoScrollModal } from '~/modals/AutoScrollModal'
 import { useAppState } from '~/stores'
 
 export const Navbar: Component = () => {
-  const [mounted, setMounted] = createSignal<boolean>(false)
   const [height, setHeight] = createSignal<number>(0)
   const [appState, setAppState] = useAppState()
   const [query, setQuery] = createSignal<string>('')
@@ -91,15 +90,19 @@ export const Navbar: Component = () => {
       () => location.pathname,
       () => {
         setNavVisible(true)
-        const scroller = document.getElementById('scroller')
+      }
+    )
+  )
+  createEffect(
+    on(
+      () => appState.scrollElement,
+      (scroller) => {
         if (!scroller) return
         scroller.addEventListener('scroll', onScroll, { passive: true })
         onCleanup(() => scroller.removeEventListener('scroll', onScroll))
       }
     )
   )
-
-  onMount(() => setMounted(true))
 
   return (
     <Motion.div

@@ -158,7 +158,7 @@ export default function Home() {
         </button>
       </form>
       <div
-        id="scroller"
+        ref={(el) => setAppState('scrollElement', el)}
         flex="~ col-reverse"
         gap-2
         py-5
