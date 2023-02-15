@@ -11,7 +11,7 @@ export const appStateSchema = z.object({
   navVisible: z.boolean().default(true),
   isSearching: z.boolean().default(false),
   autoScrolling: z.boolean().default(false),
-  scrollElement: z.instanceof(HTMLElement).optional(),
+  scrollElement: z.any().optional(),
   images: z
     .object({
       key: z.string().default(''),

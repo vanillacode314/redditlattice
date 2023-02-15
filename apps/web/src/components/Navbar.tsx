@@ -179,7 +179,7 @@ export const Navbar: Component = () => {
         >
           <button
             type="button"
-            onClick={() => (showBack() ? history.go(-1) : toggleDrawer())}
+            onClick={() => (showBack() ? navigate('/') : toggleDrawer())}
           >
             <span
               text="2xl"
