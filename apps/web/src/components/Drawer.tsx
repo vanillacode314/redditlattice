@@ -1,6 +1,6 @@
 import { Motion, Presence } from '@motionone/solid'
-import {spring} from 'motion'
 import { DragGesture } from '@use-gesture/vanilla'
+import { spring } from 'motion'
 import { Component, createEffect, For, Show } from 'solid-js'
 import { A, useLocation, useNavigate } from 'solid-start'
 import { useAppState } from '~/stores'
@@ -53,9 +53,11 @@ export const Drawer: Component = () => {
 
   createEffect(() =>
     open()
-      ? navigate(location.pathname + '#drawer', { resolve: false })
+      ? navigate(location.pathname + location.search + '#drawer', {
+          resolve: false,
+        })
       : location.hash === '#drawer' &&
-        navigate(location.pathname, { resolve: false })
+        navigate(location.pathname + location.search, { resolve: false })
   )
 
   return (
@@ -89,7 +91,7 @@ export const Drawer: Component = () => {
             exit={{
               transform: [`translateX(0%)`, `translateX(-100%)`],
             }}
-            transition={{easing:spring()}}
+            transition={{ easing: spring() }}
             class="fixed inset-y-0 left-0 z-30 flex w-80 flex-col gap-5 bg-black"
           >
             <a href="https://raqueebuddinaziz.com" flex="~ col" gap-1 pt-5 px-5>
