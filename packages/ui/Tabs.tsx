@@ -1,11 +1,9 @@
 import { Motion } from '@motionone/solid'
-import { DragGesture, Gesture } from '@use-gesture/vanilla'
-import { spring } from 'motion'
+import { DragGesture } from '@use-gesture/vanilla'
 import {
   batch,
   children,
   Component,
-  createEffect,
   For,
   JSXElement,
   onCleanup,
@@ -124,39 +122,35 @@ export const Tabs: Component<TabsProps> = (props) => {
   }
 
   onMount(() => {
-    const gesture = new Gesture(
+    const gesture = new DragGesture(
       contentElement,
-      {
-        onDrag({ swipe, offset, direction, down }) {
-          batch(() => {
-            if (swipe[0] !== 0) {
-              handleSwipe(swipe[0])
-              return
-            }
-            handleDrag(offset[0])
-            if (down) return
-            const index = state.activeTab
-            const current = tabButtonElements[index].getBoundingClientRect()
-            setState({
-              down: false,
-              contentOffsetX: 0,
-              indicatorLeft:
-                current.left + current.width / 2 - INDICATOR_WIDTH_PIXELS / 2,
-              indicatorRight:
-                current.left + current.width / 2 + INDICATOR_WIDTH_PIXELS / 2,
-            })
-            if (Math.abs(offset[0]) < contentElement.clientWidth / 3) return
-            setActiveTab(
-              clamp(index - direction[0], 0, tabButtons.toArray().length - 1)
-            )
+      ({ movement, swipe, direction, down }) => {
+        batch(() => {
+          if (swipe[0] !== 0) {
+            handleSwipe(swipe[0])
+            return
+          }
+          handleDrag(movement[0])
+          if (down) return
+          const index = state.activeTab
+          const current = tabButtonElements[index].getBoundingClientRect()
+          setState({
+            down: false,
+            contentOffsetX: 0,
+            indicatorLeft:
+              current.left + current.width / 2 - INDICATOR_WIDTH_PIXELS / 2,
+            indicatorRight:
+              current.left + current.width / 2 + INDICATOR_WIDTH_PIXELS / 2,
           })
-        },
+          if (Math.abs(movement[0]) < contentElement.clientWidth / 3) return
+          setActiveTab(
+            clamp(index - direction[0], 0, tabButtons.toArray().length - 1)
+          )
+        })
       },
       {
-        drag: {
-          axis: 'x',
-          preventScroll: true,
-        },
+        axis: 'x',
+        preventScroll: true,
       }
     )
     onCleanup(() => gesture.destroy())
@@ -214,12 +208,12 @@ export const Tabs: Component<TabsProps> = (props) => {
             if (state.animating === 'none') return
             if (state.animating === 'forward') {
               setState({
-                indicatorLeft: state.indicatorRight - 80,
+                indicatorLeft: state.indicatorRight - INDICATOR_WIDTH_PIXELS,
                 animating: 'none',
               })
             } else {
               setState({
-                indicatorRight: state.indicatorLeft + 80,
+                indicatorRight: state.indicatorLeft + INDICATOR_WIDTH_PIXELS,
                 animating: 'none',
               })
             }
