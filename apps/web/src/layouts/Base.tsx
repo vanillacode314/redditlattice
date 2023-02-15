@@ -1,5 +1,6 @@
 import { Motion } from '@motionone/solid'
 import { createConnectivitySignal } from '@solid-primitives/connectivity'
+import { spring } from 'motion'
 import {
   Component,
   createEffect,
@@ -120,7 +121,7 @@ export const BaseLayout: Component<Props> = (props) => {
           animate={{
             transform: `translateY(${offset() - 200}%) rotate(${offset()}deg)`,
           }}
-          transition={{ duration: down() ? 0.000001 : 1 }}
+          transition={down() ? { duration: 0 } : { easing: spring() }}
         >
           <div text="3xl" class="i-mdi-refresh"></div>
         </Motion.div>

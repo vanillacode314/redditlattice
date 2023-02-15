@@ -8,7 +8,7 @@ importers:
       eslint-config-custom: workspace:0.0.0
       prettier: latest
       prettier-plugin-organize-imports: ^3.2.2
-      prettier-plugin-tailwindcss: ^0.2.2
+      prettier-plugin-tailwindcss: ^0.2.3
       turbo: latest
       typescript: ^4.9.5
     devDependencies:
@@ -16,7 +16,7 @@ importers:
       eslint-config-custom: link:packages/eslint-config-custom
       prettier: 2.8.4
       prettier-plugin-organize-imports: 3.2.2_silln3pw57har7jydmecgzoypa
-      prettier-plugin-tailwindcss: 0.2.2_tnxajtglrwt6ss4l7qpdnez62i
+      prettier-plugin-tailwindcss: 0.2.3_tnxajtglrwt6ss4l7qpdnez62i
       turbo: 1.7.4
       typescript: 4.9.5
 
@@ -66,10 +66,10 @@ importers:
       motion: ^10.15.5
       screenfull: ^6.0.2
       solid-devtools: ^0.25.0
-      solid-js: ^1.6.10
-      solid-start: ^0.2.20
-      solid-start-netlify: ^0.2.20
-      solid-start-node: ^0.2.20
+      solid-js: 1.6.10
+      solid-start: 0.2.20
+      solid-start-netlify: 0.2.20
+      solid-start-node: 0.2.20
       tsconfig: workspace:*
       typescript: ^4.9.5
       ui: workspace:*
@@ -172,6 +172,7 @@ importers:
       '@types/lodash-es': ^4.17.6
       '@types/web': ^0.0.91
       '@unocss/vite': ^0.49.4
+      '@use-gesture/vanilla': ^10.2.24
       eslint: ^8.34.0
       eslint-config-custom: workspace:*
       lodash-es: ^4.17.21
@@ -189,6 +190,7 @@ importers:
       '@solid-primitives/map': 0.3.2_solid-js@1.6.10
       '@solid-primitives/resize-observer': 2.0.9_solid-js@1.6.10
       '@solid-primitives/set': 0.3.2_solid-js@1.6.10
+      '@use-gesture/vanilla': 10.2.24
       lodash-es: 4.17.21
       motion: 10.15.5
       solid-js: 1.6.10
@@ -1815,8 +1817,8 @@ packages:
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
     dev: true
 
-  /@iconify/utils/2.1.1:
-    resolution: {integrity: sha512-H8xz74JDzDw8f0qLxwIaxFMnFkbXTZNWEufOk3WxaLFHV4h0A2FjIDgNk5LzC0am4jssnjdeJJdRs3UFu3582Q==}
+  /@iconify/utils/2.1.3:
+    resolution: {integrity: sha512-4rnzpZ2AWztPKDyWtw+DwJ9uko24it6YS+cnVpZveOrvLErwg22eXcGnIfuMFyECvsfbFhMqZW5YYWHe3CyEEg==}
     dependencies:
       '@antfu/install-pkg': 0.1.1
       '@antfu/utils': 0.7.2
@@ -2515,8 +2517,8 @@ packages:
       '@types/node': 18.13.0
     dev: true
 
-  /@types/trusted-types/2.0.2:
-    resolution: {integrity: sha512-F5DIZ36YVLE+PN+Zwws4kJogq47hNgX3Nx6WyDJ3kcplxyke3XIzB8uK5n/Lpm1HBsbGzd6nmGehL8cPekP+Tg==}
+  /@types/trusted-types/2.0.3:
+    resolution: {integrity: sha512-NfQ4gyz38SL8sDNrSixxU2Os1a5xcdFxipAFxYEuLUlvU2uDwS4NUpsImcf1//SlWItCVMMLiylsxbmNMToV/g==}
     dev: true
 
   /@types/web/0.0.91:
@@ -2817,7 +2819,7 @@ packages:
   /@unocss/preset-icons/0.49.4:
     resolution: {integrity: sha512-W+0zD1PlNXGSss3vy+RMKEVCl0Mncsyf58fv48YXzuKAldbyG9VeQ9hhs18nEL+1h4dQkSFMvoRqwJ053wVaeA==}
     dependencies:
-      '@iconify/utils': 2.1.1
+      '@iconify/utils': 2.1.3
       '@unocss/core': 0.49.4
       ofetch: 0.4.21
     transitivePeerDependencies:
@@ -3137,8 +3139,8 @@ packages:
       - debug
     dev: false
 
-  /babel-plugin-jsx-dom-expressions/0.35.15_@babel+core@7.20.12:
-    resolution: {integrity: sha512-33GQnanjYKefOTO2lQK6EaKXPJ1W8vtzvBneGfhKaOZHQJLqe61P93jP0TLTz67sqsA0m1ph1cNdGpLc/Nx2Xg==}
+  /babel-plugin-jsx-dom-expressions/0.35.16_@babel+core@7.20.12:
+    resolution: {integrity: sha512-Z8vaeXRdtI4qyq3bmQiLjiZnbjn2Rr0mjpXMwN+QxHbWjtlAFOJSHlkcxbrwPz/DdcfSgkmZM0Atvt/zMLeLyA==}
     peerDependencies:
       '@babel/core': ^7.20.12
     dependencies:
@@ -3189,7 +3191,7 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/core': 7.20.12
-      babel-plugin-jsx-dom-expressions: 0.35.15_@babel+core@7.20.12
+      babel-plugin-jsx-dom-expressions: 0.35.16_@babel+core@7.20.12
     dev: false
 
   /balanced-match/1.0.2:
@@ -3247,8 +3249,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001451
-      electron-to-chromium: 1.4.295
+      caniuse-lite: 1.0.30001452
+      electron-to-chromium: 1.4.296
       node-releases: 2.0.10
       update-browserslist-db: 1.0.10_browserslist@4.21.5
 
@@ -3334,8 +3336,8 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /caniuse-lite/1.0.30001451:
-    resolution: {integrity: sha512-XY7UbUpGRatZzoRft//5xOa69/1iGJRBlrieH6QYrkKLIFn3m7OVEJ81dSrKoy2BnKsdbX5cLrOispZNYo9v2w==}
+  /caniuse-lite/1.0.30001452:
+    resolution: {integrity: sha512-Lkp0vFjMkBB3GTpLR8zk4NwW5EdRdnitwYJHDOOKIU85x4ckYCPQ+9WlVvSVClHxVReefkUMtWZH2l9KGlD51w==}
 
   /chalk/2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
@@ -3711,8 +3713,8 @@ packages:
       jake: 10.8.5
     dev: true
 
-  /electron-to-chromium/1.4.295:
-    resolution: {integrity: sha512-lEO94zqf1bDA3aepxwnWoHUjA8sZ+2owgcSZjYQy0+uOSEclJX0VieZC+r+wLpSxUHRd6gG32znTWmr+5iGzFw==}
+  /electron-to-chromium/1.4.296:
+    resolution: {integrity: sha512-i/6Q+Y9bluDa2a0NbMvdtG5TuS/1Fr3TKK8L+7UUL9QjRS5iFJzCC3r70xjyOnLiYG8qGV4/mMpe6HuAbdJW4w==}
 
   /emoji-regex/8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -6095,10 +6097,11 @@ packages:
       typescript: 4.9.5
     dev: true
 
-  /prettier-plugin-tailwindcss/0.2.2_tnxajtglrwt6ss4l7qpdnez62i:
-    resolution: {integrity: sha512-5RjUbWRe305pUpc48MosoIp6uxZvZxrM6GyOgsbGLTce+ehePKNm7ziW2dLG2air9aXbGuXlHVSQQw4Lbosq3w==}
+  /prettier-plugin-tailwindcss/0.2.3_tnxajtglrwt6ss4l7qpdnez62i:
+    resolution: {integrity: sha512-s2N5Dh7Ao5KTV1mao5ZBnn8EKtUcDPJEkGViZIjI0Ij9TTI5zgTz4IHOxW33jOdjHKa8CSjM88scelUiC5TNRQ==}
     engines: {node: '>=12.17.0'}
     peerDependencies:
+      '@ianvs/prettier-plugin-sort-imports': '*'
       '@prettier/plugin-php': '*'
       '@prettier/plugin-pug': '*'
       '@shopify/prettier-plugin-liquid': '*'
@@ -6115,6 +6118,8 @@ packages:
       prettier-plugin-svelte: '*'
       prettier-plugin-twig-melody: '*'
     peerDependenciesMeta:
+      '@ianvs/prettier-plugin-sort-imports':
+        optional: true
       '@prettier/plugin-php':
         optional: true
       '@prettier/plugin-pug':
@@ -7343,7 +7348,7 @@ packages:
       acorn: 8.8.2
       estree-walker: 3.0.3
       magic-string: 0.27.0
-      unplugin: 1.0.1
+      unplugin: 1.1.0
     dev: true
 
   /undici/5.19.1:
@@ -7384,7 +7389,7 @@ packages:
       pkg-types: 1.0.1
       scule: 1.0.0
       strip-literal: 1.0.1
-      unplugin: 1.0.1
+      unplugin: 1.1.0
     transitivePeerDependencies:
       - rollup
     dev: true
@@ -7484,14 +7489,14 @@ packages:
       local-pkg: 0.4.3
       magic-string: 0.27.0
       unimport: 2.2.4
-      unplugin: 1.0.1
+      unplugin: 1.1.0
     transitivePeerDependencies:
       - rollup
       - supports-color
     dev: true
 
-  /unplugin/1.0.1:
-    resolution: {integrity: sha512-aqrHaVBWW1JVKBHmGo33T5TxeL0qWzfvjWokObHA9bYmN7eNDkwOxmLjhioHl9878qDFMAaT51XNroRyuz7WxA==}
+  /unplugin/1.1.0:
+    resolution: {integrity: sha512-I8obQ8Rs/hnkxokRV6g8JKOQFgYNnTd9DL58vcSt5IJ9AkK8wbrtsnzD5hi4BJlvcY536JzfEXj9L6h7j559/A==}
     dependencies:
       acorn: 8.8.2
       chokidar: 3.5.3
@@ -7953,7 +7958,7 @@ packages:
   /workbox-window/6.5.4:
     resolution: {integrity: sha512-HnLZJDwYBE+hpG25AQBO8RUWBJRaCsI9ksQJEp3aCOFCaG5kqaToAYXFRAHxzRluM2cQbGzdQF5rjKPWPA1fug==}
     dependencies:
-      '@types/trusted-types': 2.0.2
+      '@types/trusted-types': 2.0.3
       workbox-core: 6.5.4
     dev: true
 

@@ -70,3 +70,7 @@ export function updateKey<K = any, V = any>(
   map.set(key, cb(val))
   return map
 }
+
+export function clamp(num: number, min: number, max: number): number {
+  return Math.min(Math.max(num, min), max)
+}

@@ -194,112 +194,160 @@ export default function Home() {
         >
           <Tabs>
             <Tab title="favourites">
-              <List
-                onClick={(id) => {
-                  setSubreddit(id)
-                  flashSearchInput()
-                }}
-                reverse
-                buttons={[
-                  (id) => (
-                    <button
-                      class="group outline-none"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggleFavouriteSubreddit(id)
-                      }}
-                    >
-                      <div
-                        class="i-mdi-star text-xl transition-colors"
-                        classList={{
-                          'text-amber-500 group-hover:text-amber-400 group-focus:text-amber-400':
-                            userState.favouriteSubreddits.has(id),
-                          'text-gray-700 group-hover:text-white group-focus:text-white':
-                            !userState.favouriteSubreddits.has(id),
+              <Show
+                when={userState.favouriteSubreddits.size > 0}
+                fallback={
+                  <div class="grid place-content-center p-5">
+                    <h3 class="uppercase font-bold text-xl tracking-wide">
+                      No Favourites
+                    </h3>
+                  </div>
+                }
+              >
+                <List
+                  onClick={(id) => {
+                    setSubreddit(id)
+                    flashSearchInput()
+                  }}
+                  reverse
+                  buttons={[
+                    (id) => (
+                      <button
+                        class="group outline-none"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleFavouriteSubreddit(id)
                         }}
-                      />
-                    </button>
-                  ),
-                ]}
-                items={[...userState.favouriteSubreddits].sort().map((sr) => ({
-                  id: sr,
-                  title: sr,
-                }))}
-              ></List>
+                      >
+                        <div
+                          class="i-mdi-star text-xl transition-colors"
+                          classList={{
+                            'text-amber-500 group-hover:text-amber-400 group-focus:text-amber-400':
+                              userState.favouriteSubreddits.has(id),
+                            'text-gray-700 group-hover:text-white group-focus:text-white':
+                              !userState.favouriteSubreddits.has(id),
+                          }}
+                        />
+                      </button>
+                    ),
+                  ]}
+                  items={[...userState.favouriteSubreddits]
+                    .sort()
+                    .map((sr) => ({
+                      id: sr,
+                      title: sr,
+                    }))}
+                ></List>
+              </Show>
             </Tab>
             <Tab title="Recents">
-              <List
-                onClick={(id) => {
-                  setQuery(id)
-                  flashSearchInput()
-                }}
-                reverse
-                items={[...userState.redditRecents]
-                  .sort(([_q1, t1], [_q2, t2]) => t2 - t1)
-                  .map(([q, _]) => ({
-                    id: q,
-                    title: q,
-                  }))}
-              ></List>
+              <Show
+                when={userState.redditRecents.size > 0}
+                fallback={
+                  <div class="grid place-content-center p-5">
+                    <h3 class="uppercase font-bold text-xl tracking-wide">
+                      No Recents
+                    </h3>
+                  </div>
+                }
+              >
+                <List
+                  onClick={(id) => {
+                    setQuery(id)
+                    flashSearchInput()
+                  }}
+                  reverse
+                  items={[...userState.redditRecents]
+                    .sort(([_q1, t1], [_q2, t2]) => t2 - t1)
+                    .map(([q, _]) => ({
+                      id: q,
+                      title: q,
+                    }))}
+                ></List>
+              </Show>
             </Tab>
             <Tab title="subreddits">
-              <List
-                onClick={(id) => {
-                  setSubreddit(id)
-                  flashSearchInput()
-                }}
-                onRemove={(id) => removeSubreddit(id)}
-                reverse
-                buttons={[
-                  (id) => (
-                    <button
-                      class="group outline-none"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggleFavouriteSubreddit(id)
-                      }}
-                    >
-                      <div
-                        class="i-mdi-star text-xl transition-colors"
-                        classList={{
-                          'text-amber-500 group-hover:text-amber-400 group-focus:text-amber-400':
-                            userState.favouriteSubreddits.has(id),
-                          'text-gray-700 group-hover:text-white group-focus:text-white':
-                            !userState.favouriteSubreddits.has(id),
+              <Show
+                when={userState.subreddits.size > 0}
+                fallback={
+                  <div class="grid place-content-center p-5">
+                    <h3 class="uppercase font-bold text-3xl tracking-wide">
+                      No Subreddits
+                    </h3>
+                  </div>
+                }
+              >
+                <List
+                  onClick={(id) => {
+                    setSubreddit(id)
+                    flashSearchInput()
+                  }}
+                  onRemove={(id) => removeSubreddit(id)}
+                  reverse
+                  buttons={[
+                    (id) => (
+                      <button
+                        class="group outline-none"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleFavouriteSubreddit(id)
                         }}
-                      />
-                    </button>
-                  ),
-                ]}
-                items={[
-                  ...setDifference(
-                    userState.subreddits,
-                    userState.favouriteSubreddits
-                  ),
-                ]
-                  .sort()
-                  .map((sr) => ({
-                    id: sr,
-                    title: sr,
-                  }))}
-              ></List>
+                      >
+                        <div
+                          class="i-mdi-star text-xl transition-colors"
+                          classList={{
+                            'text-amber-500 group-hover:text-amber-400 group-focus:text-amber-400':
+                              userState.favouriteSubreddits.has(id),
+                            'text-gray-700 group-hover:text-white group-focus:text-white':
+                              !userState.favouriteSubreddits.has(id),
+                          }}
+                        />
+                      </button>
+                    ),
+                  ]}
+                  items={[
+                    ...setDifference(
+                      userState.subreddits,
+                      userState.favouriteSubreddits
+                    ),
+                  ]
+                    .sort()
+                    .map((sr) => ({
+                      id: sr,
+                      title: sr,
+                    }))}
+                ></List>
+              </Show>
             </Tab>
             <Tab title="searches">
-              <List
-                onClick={(id) => {
-                  const sr = subreddit() || userState.redditQueries.get(id)
-                  if (!sr) return
-                  setSubreddit(sr)
-                  setSearchTerm(id)
-                  flashSearchInput()
-                }}
-                onRemove={(id) => removeSearchTerm(id)}
-                reverse
-                items={[...userState.redditQueries.keys()].sort().map((q) => ({
-                  id: q,
-                  title: q,
-                }))}
-              ></List>
+              <Show
+                when={userState.redditQueries.size > 0}
+                fallback={
+                  <div class="grid place-content-center p-5">
+                    <h3 class="uppercase font-bold text-xl tracking-wide">
+                      No Searches
+                    </h3>
+                  </div>
+                }
+              >
+                <List
+                  onClick={(id) => {
+                    const sr = subreddit() || userState.redditQueries.get(id)
+                    if (!sr) return
+                    setSubreddit(sr)
+                    setSearchTerm(id)
+                    flashSearchInput()
+                  }}
+                  onRemove={(id) => removeSearchTerm(id)}
+                  reverse
+                  items={[...userState.redditQueries.keys()]
+                    .sort()
+                    .map((q) => ({
+                      id: q,
+                      title: q,
+                    }))}
+                ></List>
+              </Show>
             </Tab>
           </Tabs>
         </Show>

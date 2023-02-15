@@ -27,6 +27,12 @@ export default defineConfig({
   plugins: [
     solid({ ssr: false, adapter: process.env.NETLIFY ? netlify() : node() }),
     Unocss({
+      rules: [
+        [
+          'tap-highlight-none',
+          { '-webkit-tap-highlight-color': 'transparent' },
+        ],
+      ],
       presets: [
         presetUno(),
         presetAttributify(),

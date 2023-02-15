@@ -52,8 +52,7 @@ const Fab: Component<Props> = (props) => {
 
   return (
     <Motion.div
-      animate={{ transform: `scale(${hidden() ? 0 : 1})` }}
-      transition={{ duration: .25 }}
+      animate={{ transform: hidden() ? 'scale(0)' : 'scale(1)' }}
       class="flex fixed bottom-0 right-0 overflow-hidden"
     >
       <div class="p-5 grid gap-3">
@@ -75,8 +74,8 @@ const Fab: Component<Props> = (props) => {
           <For each={open() ? props.actions : []}>
             {({ icon, id }) => (
               <Motion.button
-                animate={{ transform: [`scale(0)`, `scale(1)`] }}
-                transition={{ duration: 0.25 }}
+                initial={{ transform: 'scale(0)' }}
+                animate={{ transform: 'scale(1)' }}
                 class={
                   'text-2xl grid place-items-center h-13 w-13 outline-none rounded-xl shadow ' +
                   (props.selected === id

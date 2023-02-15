@@ -24,6 +24,7 @@
     "@solid-primitives/map": "^0.3.2",
     "@solid-primitives/resize-observer": "^2.0.9",
     "@solid-primitives/set": "^0.3.2",
+    "@use-gesture/vanilla": "^10.2.24",
     "lodash-es": "^4.17.21",
     "motion": "^10.15.5",
     "solid-js": "^1.6.10",
