@@ -3,6 +3,7 @@ import { createConnectivitySignal } from '@solid-primitives/connectivity'
 import { spring } from 'motion'
 import {
   Component,
+  createComputed,
   createEffect,
   createSignal,
   JSXElement,
@@ -16,7 +17,6 @@ import { Spinner } from 'ui'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
 import { useAppState, useUserState } from '~/stores'
-
 interface Props {
   children: JSXElement
 }
@@ -26,6 +26,13 @@ export const useRefresh = () => [refresh, setRefresh] as const
 
 export const BaseLayout: Component<Props> = (props) => {
   const isOnline = createConnectivitySignal()
+  const location = useLocation()
+  createComputed(
+    on(
+      () => location.pathname,
+      () => setRefresh(() => () => {})
+    )
+  )
 
   const [appState, _setAppState] = useAppState()
 
