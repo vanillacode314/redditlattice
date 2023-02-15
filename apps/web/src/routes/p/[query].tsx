@@ -23,7 +23,7 @@ export default function Subreddit() {
 
   const [, setRefresh] = useRefresh()
 
-  const query = () => params.query.toLowerCase()
+  const query = () => decodeURIComponent(params.query).toLowerCase()
   const key = createMemo(() => `pinterest-${query()}`)
 
   const resetState = () => {
@@ -47,7 +47,7 @@ export default function Subreddit() {
 
   onMount(() => {
     setUserState('pinterestQueries', (queries) => {
-      queries.add(query().toLowerCase())
+      queries.add(query())
       return new Set(queries)
     })
   })

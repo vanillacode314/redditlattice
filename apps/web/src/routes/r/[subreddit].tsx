@@ -55,7 +55,8 @@ export default function SubredditPage() {
   const [, setRefresh] = useRefresh()
 
   const q = () => new URLSearchParams(location.search.toLowerCase()).getAll('q')
-  const subreddits = () => params.subreddit.toLowerCase().split('+')
+  const subreddits = () =>
+    decodeURIComponent(params.subreddit).toLowerCase().split('+')
   const sort = createMemo(
     () => userState.subredditSort.get(subreddits().sort().join('+')) || 'hot'
   )
@@ -120,7 +121,7 @@ export default function SubredditPage() {
 
     /* Update Search Terms */
     setUserState('redditQueries', (current) => {
-      if (q().length > 0) current.set(q()[0].toLowerCase(), subreddits()[0])
+      if (q().length > 0) current.set(q()[0], subreddits()[0])
       return new Map([...current])
     })
   })
