@@ -184,7 +184,7 @@ export const Tabs: Component<TabsProps> = (props) => {
         <For each={tabButtons.toArray() as unknown as TabProps[]}>
           {(tab, index) => (
             <button
-              class="uppercase font-bold text-sm tracking-wider shrink-0 transition-colors p-5 tap-highlight-none"
+              class="uppercase font-bold text-sm tracking-wider shrink-0 transition-colors px-5 py-3 tap-highlight-none"
               ref={tabButtonElements[index()]}
               classList={{
                 'text-gray-100': state.activeTab === index(),
@@ -197,7 +197,7 @@ export const Tabs: Component<TabsProps> = (props) => {
           )}
         </For>
         <Motion.div
-          class="border-b-2 absolute bottom-3 will-change-[left_width]"
+          class="border-b-2 absolute bottom-1 will-change-[left_width]"
           animate={{
             left: state.indicatorLeft + 'px',
             width: state.indicatorRight - state.indicatorLeft + 'px',

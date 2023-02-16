@@ -92,12 +92,16 @@ export const AutoResizingPicture: Component<Props> = (props) => {
       ref={props.ref}
       animate={{ height: `${height()}px` }}
       initial={false}
-      transition={{
-        easing: spring({
-          damping: 12,
-          stiffness: 210,
-        }),
-      }}
+      transition={
+        animate()
+          ? {
+              easing: spring({
+                damping: 12,
+                stiffness: 210,
+              }),
+            }
+          : { duration: 0 }
+      }
       {...others}
     >
       <Show when={!hasImage() && tries() > 1}>

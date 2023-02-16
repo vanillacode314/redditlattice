@@ -40,7 +40,7 @@ export default function Home() {
   }
 
   return (
-    <main pb-5 h-full flex flex-col-reverse overflow-hidden>
+    <main class="pb-5 h-full flex flex-col-reverse overflow-hidden gap-3">
       <form
         class="grid grid-cols-[1fr_auto]"
         gap-3
@@ -99,31 +99,13 @@ export default function Home() {
             </Show>
           </TransitionFade>
         </div>
-        <button
-          text="white xl"
-          rounded-full
-          w-13
-          h-13
-          outline-none
-          grid
-          place-items-center
-          bg="pink-800 hover:pink-700 focus:pink-700"
-          ring="focus:~ focus:blue"
-          transition-colors
-          shrink-0
-          style={{ '-webkit-tap-highlight-color': 'transparent' }}
-        >
+        <button class="rounded-full w-13 h-13 outline-none grid place-items-center bg-pink-800 hover:bg-pink-700 focus:bg-pink-700 focus:ring focus:ring-blue transition-colors shrink-0 tap-highlight-none text-white text-xl">
           <div class="i-mdi-magnify"></div>
         </button>
       </form>
       <div
         ref={(el) => setAppState('scrollElement', el)}
-        flex="~ col-reverse"
-        gap-2
-        py-5
-        grow
-        shrink-1
-        p="t-[70%]"
+        class="flex flex-col-reverse gap-2 grow shrink-1"
       >
         {/* RECENTS LIST */}
         <List

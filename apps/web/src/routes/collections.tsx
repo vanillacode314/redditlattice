@@ -85,7 +85,7 @@ export default function Home() {
   }
 
   return (
-    <main pb-5 h-full flex flex-col-reverse overflow-hidden>
+    <main class="pb-5 h-full flex flex-col-reverse overflow-hidden gap-3">
       <form
         class="grid grid-cols-[1fr_auto]"
         gap-3
@@ -185,10 +185,8 @@ export default function Home() {
         ref={(el) => setAppState('scrollElement', el)}
         flex="~ col-reverse"
         gap-2
-        py-5
         grow
         shrink-1
-        p="t-[70%]"
       >
         <Show
           when={!query() || !(focused() && !query().includes('?'))}

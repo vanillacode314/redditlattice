@@ -23,8 +23,11 @@ export const List: Component<Props> = (props) => {
 
   return (
     <div
-      class="flex flex-col gap-2 overflow-hidden"
-      classList={{ 'flex-col-reverse': props.reverse }}
+      class="flex gap-2 overflow-hidden"
+      classList={{
+        'flex-col': !props.reverse,
+        'flex-col-reverse': props.reverse,
+      }}
     >
       <Show when={props.title}>
         <span class="px-5 text-xs font-bold uppercase tracking-wide text-gray-500">

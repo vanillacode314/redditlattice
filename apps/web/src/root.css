@@ -1,5 +1,7 @@
 * {
   max-height: 999999px;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
