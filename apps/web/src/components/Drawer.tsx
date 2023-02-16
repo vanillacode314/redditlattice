@@ -7,6 +7,7 @@ import {
   createRenderEffect,
   createSignal,
   For,
+  onCleanup,
   onMount,
   Show,
 } from 'solid-js'
@@ -84,7 +85,7 @@ export const Drawer: Component = () => {
       <div
         ref={(el) => {
           setOpenOnMount(sessionState.drawerVisible)
-          new DragGesture(
+          const gesture = new DragGesture(
             el,
             ({ swipe: [swipeX], movement: [movementX], down }) => {
               batch(() => {
@@ -104,6 +105,7 @@ export const Drawer: Component = () => {
               preventScroll: true,
             }
           )
+          onCleanup(() => gesture.destroy())
         }}
         class="w-15 fixed left-0 top-20 z-20 h-40 touch-pan-right"
       ></div>

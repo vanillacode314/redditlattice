@@ -22,7 +22,6 @@ export const SearchInput: Component<Props> = (props) => {
     'value',
     'flashing',
     'prefix',
-    'placeholder',
     'setValue',
     'setFlashing',
   ])
