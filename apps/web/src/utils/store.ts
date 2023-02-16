@@ -83,8 +83,10 @@ export const createStorageStore = <
 
   function getStorageValue() {
     const storedValue = _storage.getItem(storageKey)
-    _storage.setItem(storageKey, serializer(schema.parse(defaultValue)))
-    if (!storedValue) return
+    if (!storedValue) {
+      _storage.setItem(storageKey, serializer(schema.parse(defaultValue)))
+      return
+    }
 
     try {
       setStore(schema.parse(deserializer(storedValue)))
