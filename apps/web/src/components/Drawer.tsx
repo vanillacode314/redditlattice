@@ -105,9 +105,15 @@ export const Drawer: Component = () => {
       <Presence>
         <Show when={offset() > 200}>
           <Motion.div
-            animate={{ opacity: [0, 1] }}
-            exit={{ opacity: [1, 0] }}
-            class="fixed inset-0 z-20 bg-white/5"
+            animate={{
+              opacity: [0, 1],
+              backdropFilter: [`blur(0)`, `blur(4px)`],
+            }}
+            exit={{
+              opacity: [1, 0],
+              backdropFilter: [`blur(4px)`, `blur(0)`],
+            }}
+            class="fixed inset-0 z-20 bg-white/8"
             onMouseDown={() => setOpen(false)}
             onTouchStart={() => setOpen(false)}
           />
@@ -137,8 +143,7 @@ export const Drawer: Component = () => {
           <For each={links}>
             {({ icon, href, title }) => (
               <A
-                style={{ '-webkit-tap-highlight-color': 'transparent' }}
-                class="flex items-center gap-3 bg-black px-5 py-3 text-sm font-bold uppercase tracking-wide transition-colors hover:bg-gray-900"
+                class="flex items-center gap-3 bg-black px-5 py-3 text-sm font-bold uppercase tracking-wide transition-colors hover:bg-gray-900 tap-highlight-none"
                 href={href}
                 onClick={() => setOpen(false)}
               >
