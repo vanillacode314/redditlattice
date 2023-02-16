@@ -26,6 +26,7 @@
     "@solid-primitives/set": "^0.3.2",
     "@use-gesture/vanilla": "^10.2.24",
     "clsx": "^1.2.1",
+    "lethargy": "^1.0.9",
     "lodash-es": "^4.17.21",
     "motion": "^10.15.5",
     "solid-js": "^1.6.10",

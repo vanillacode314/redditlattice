@@ -1,5 +1,6 @@
 import { Motion } from '@motionone/solid'
-import { DragGesture } from '@use-gesture/vanilla'
+import { Gesture } from '@use-gesture/vanilla'
+import { Lethargy } from 'lethargy'
 import {
   batch,
   children,
@@ -26,11 +27,14 @@ const stateSchema = z.object({
   indicatorLeft: z.number().default(0),
   indicatorRight: z.number().default(0),
   down: z.boolean().default(false),
+  mounted: z.boolean().default(false),
   animating: z.enum(['none', 'forward', 'backwards']).default('none'),
 })
 export const Tabs: Component<TabsProps> = (props) => {
   const [state, setState] = createStore<z.infer<typeof stateSchema>>(
-    stateSchema.parse({ activeTab: props.activeTab })
+    stateSchema.parse({
+      activeTab: props.activeTab,
+    })
   )
 
   let contentElement!: HTMLDivElement
@@ -124,41 +128,77 @@ export const Tabs: Component<TabsProps> = (props) => {
   }
 
   onMount(() => {
-    const gesture = new DragGesture(
+    const lethargy = new Lethargy()
+    const gesture = new Gesture(
       contentElement,
-      ({ movement, swipe, offset, down }) => {
-        setState('down', down)
-        batch(() => {
-          if (swipe[0] !== 0) {
-            handleSwipe(swipe[0])
-            return
+      {
+        onDrag: ({ movement, swipe, offset, down }) => {
+          setState('down', down)
+          batch(() => {
+            if (swipe[0] !== 0) {
+              handleSwipe(swipe[0])
+              return
+            }
+            handleDrag(movement[0], offset[0])
+            if (down) return
+            const shouldUpdate =
+              Math.abs(movement[0]) > contentElement.clientWidth / 3
+            const newIndex = shouldUpdate
+              ? state.activeTab - Math.sign(movement[0])
+              : state.activeTab
+            setActiveTab(clamp(newIndex, 0, tabButtons.toArray().length - 1))
+          })
+        },
+        onWheel: ({ event, memo: wait = false, last }) => {
+          if (last) return // event can be undefined as the last event is debounced
+          event.preventDefault() // this is needed to prevent the native browser scroll
+          const wheelDirection = lethargy.check(event)
+          if (wheelDirection) {
+            if (!wait)
+              setActiveTab(
+                clamp(
+                  state.activeTab - wheelDirection,
+                  0,
+                  tabButtons.toArray().length - 1
+                )
+              )
+            return true 
           }
-          handleDrag(movement[0], offset[0])
-          if (down) return
-          const shouldUpdate =
-            Math.abs(movement[0]) > contentElement.clientWidth / 3
-          const newIndex = shouldUpdate
-            ? state.activeTab - Math.sign(movement[0])
-            : state.activeTab
-          setActiveTab(clamp(newIndex, 0, tabButtons.toArray().length - 1))
-        })
+          return false 
+        },
       },
       {
-        axis: 'x',
-        preventScroll: true,
-        bounds: {
-          left: -contentElement.clientWidth * (tabButtons.toArray().length - 1),
-          right: 0,
+        drag: {
+          axis: 'x',
+          preventScroll: true,
+          bounds: {
+            left:
+              -contentElement.clientWidth * (tabButtons.toArray().length - 1),
+            right: 0,
+          },
+          from: () => [state.contentOffsetX, 0],
+          rubberband: true,
         },
-        from: () => [state.contentOffsetX, 0],
-        rubberband: true,
+        wheel: {
+          axis: 'x',
+          eventOptions: {
+            passive: false,
+          },
+        },
       }
     )
-    onCleanup(() => gesture.destroy())
     setActiveTab(state.activeTab)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setState('mounted', true)
+      })
+    })
     const onResize = () => setActiveTab(state.activeTab)
     window.addEventListener('resize', onResize)
-    onCleanup(() => window.removeEventListener('resize', onResize))
+    onCleanup(() => {
+      gesture.destroy()
+      window.removeEventListener('resize', onResize)
+    })
   })
 
   return (
@@ -173,7 +213,7 @@ export const Tabs: Component<TabsProps> = (props) => {
               animate={{
                 x: state.contentOffsetX,
               }}
-              transition={{ duration: state.down ? 0 : 0.5 }}
+              transition={{ duration: state.down || !state.mounted ? 0 : 0.5 }}
               class="h-full w-full shrink-0 grow flex justify-end flex-col"
             >
               {tab.children}
