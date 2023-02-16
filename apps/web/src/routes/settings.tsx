@@ -66,7 +66,7 @@ export default function Settings() {
     const data = stringify(userStateSchema.parse(userState))
     download(
       `data:text/plain;charset=utf-8,${encodeURIComponent(data)}`,
-      `redditlattice-${new Date().toLocaleDateString()}.dat`
+      `redditlattice-${new Date().toLocaleDateString()}.json`
     )
   }
 
