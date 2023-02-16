@@ -12,11 +12,13 @@ import {
 } from 'solid-js'
 import { useLocation, useNavigate, useSearchParams } from 'solid-start'
 import AutoScrollModal, { showAutoScrollModal } from '~/modals/AutoScrollModal'
-import { useAppState } from '~/stores'
+import { useAppState, useSessionState } from '~/stores'
 
 export const Navbar: Component = () => {
-  const [height, setHeight] = createSignal<number>(0)
   const [appState, setAppState] = useAppState()
+  const [sessionState, setSessionState] = useSessionState()
+
+  const [height, setHeight] = createSignal<number>(0)
   const [query, setQuery] = createSignal<string>('')
   const [fullscreen, setFullscreen] = createSignal<boolean>(false)
 
@@ -54,11 +56,7 @@ export const Navbar: Component = () => {
   const showBack = () =>
     location.pathname.startsWith('/r/') || location.pathname.startsWith('/p/')
 
-  const toggleDrawer = () => {
-    setAppState((_) => ({
-      drawerVisible: !_.drawerVisible,
-    }))
-  }
+  const toggleDrawer = () => setSessionState('drawerVisible', (_) => !_)
 
   const navVisible = () => appState.navVisible
   const setNavVisible = (val: boolean) => {

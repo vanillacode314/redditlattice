@@ -1,16 +1,17 @@
 import { Motion, Presence } from '@motionone/solid'
 import { DragGesture } from '@use-gesture/vanilla'
-import { spring } from 'motion'
 import {
   batch,
   Component,
   createEffect,
+  createRenderEffect,
   createSignal,
   For,
+  onMount,
   Show,
 } from 'solid-js'
 import { A, useLocation, useNavigate } from 'solid-start'
-import { useAppState } from '~/stores'
+import { useAppState, useSessionState } from '~/stores'
 import { clamp } from '~/utils'
 
 interface ILink {
@@ -53,21 +54,24 @@ export const Drawer: Component = () => {
   const location = useLocation()
 
   const [appState, setAppState] = useAppState()
+  const [sessionState, setSessionState] = useSessionState()
 
   const [down, setDown] = createSignal<boolean>(false)
   const [offset, setOffset] = createSignal<number>(0)
+  const [openOnMount, setOpenOnMount] = createSignal<boolean>(false)
+
   const setOpen = (value: boolean) => {
     batch(() => {
-      setAppState({
+      setSessionState({
         drawerVisible: value,
       })
-      setOffset(value ? drawerElement.clientWidth : 0)
+      setOffset(0)
     })
   }
 
-  createEffect(() => setOpen(appState.drawerVisible))
+  createRenderEffect(() => setOpen(sessionState.drawerVisible))
   createEffect(() =>
-    appState.drawerVisible
+    sessionState.drawerVisible
       ? navigate(location.pathname + location.search + '#drawer', {
           resolve: false,
         })
@@ -79,6 +83,7 @@ export const Drawer: Component = () => {
     <>
       <div
         ref={(el) => {
+          setOpenOnMount(sessionState.drawerVisible)
           new DragGesture(
             el,
             ({ swipe: [swipeX], movement: [movementX], down }) => {
@@ -103,11 +108,15 @@ export const Drawer: Component = () => {
         class="w-15 fixed left-0 top-20 z-20 h-40 touch-pan-right"
       ></div>
       <Presence>
-        <Show when={offset() > 0}>
+        <Show when={offset() > 0 || sessionState.drawerVisible}>
           <Motion.div
             animate={{
-              opacity: clamp(offset(), 0, 200) / 200,
-              backdropFilter: `blur(${(clamp(offset(), 0, 200) / 200) * 4}px)`,
+              opacity: sessionState.drawerVisible
+                ? 1
+                : clamp(offset(), 0, 200) / 200,
+              backdropFilter: `blur(${
+                sessionState.drawerVisible ? 4 : clamp(offset(), 0, 4) / 4
+              }px)`,
             }}
             exit={{
               opacity: 0,
@@ -122,13 +131,14 @@ export const Drawer: Component = () => {
       <Motion.div
         ref={drawerElement}
         initial={{
-          transform: `translateX(-100%)`,
+          transform: openOnMount() ? 'translateX(0)' : 'translateX(-100%)',
         }}
         animate={{
-          transform: `translateX(calc(${offset()}px - 100%))`,
+          transform: sessionState.drawerVisible
+            ? `translateX(0)`
+            : `translateX(calc(${offset()}px - 100%))`,
         }}
         transition={down() ? { duration: 0 } : { easing: 'ease-out' }}
-        onMotionComplete={() => offset() === 0 && setOpen(false)}
         class="fixed inset-y-0 left-0 z-30 flex w-80 flex-col gap-5 bg-black"
       >
         <a

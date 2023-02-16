@@ -7,7 +7,6 @@ import { createStorageStore } from '~/utils/store'
 
 export const appStateSchema = z.object({
   title: z.string().default(''),
-  drawerVisible: z.boolean().default(false),
   navVisible: z.boolean().default(true),
   isSearching: z.boolean().default(false),
   autoScrolling: z.boolean().default(false),
@@ -35,6 +34,7 @@ export const useAppState = () => [appState, setAppState] as const
 export const sessionStateSchema = z.object({
   currentTab: z.number().default(0),
   redditQuery: z.string().default(''),
+  drawerVisible: z.boolean().default(false),
   collectionQuery: z.string().default(''),
   pinterestQuery: z.string().default(''),
   focused: z.boolean().default(false),
