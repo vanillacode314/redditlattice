@@ -150,3 +150,20 @@ export const getFile = (accept: string = '') =>
 export function clamp(num: number, min: number, max: number): number {
   return Math.min(Math.max(num, min), max)
 }
+
+export function inertialScroll(
+  node: HTMLElement,
+  velocity: number,
+  deceleration: number = 0.95
+) {
+  let lastTimestamp: number
+  let rafId = requestAnimationFrame(function step(timestamp: number) {
+    if (Math.abs(velocity) <= 0.1) return
+    const elapsed = timestamp - (lastTimestamp ?? timestamp)
+    lastTimestamp = timestamp
+    node.scrollTop -= velocity * elapsed
+    velocity *= deceleration
+    rafId = requestAnimationFrame(step)
+  })
+  return () => cancelAnimationFrame(rafId)
+}

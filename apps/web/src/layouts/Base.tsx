@@ -18,6 +18,7 @@ import { Spinner } from 'ui'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
 import { useAppState } from '~/stores'
+import { clamp, inertialScroll } from '~/utils'
 interface Props {
   children: JSXElement
 }
@@ -44,11 +45,21 @@ export const BaseLayout: Component<Props> = (props) => {
     on(
       () => appState.scrollElement,
       (scroller) => {
+        let stopInertialScroll: () => void
         if (!scroller) return
         const gesture = new Gesture(
           scroller,
           {
-            onDrag: ({ offset, direction, memo = 0, movement, xy, down }) => {
+            onDrag: ({
+              velocity,
+              offset,
+              direction,
+              memo = 0,
+              movement,
+              xy,
+              down,
+            }) => {
+              stopInertialScroll?.()
               setDown(down)
               const _offset = Math.min(movement[1] - memo, 300)
               if (!down) {
@@ -56,7 +67,11 @@ export const BaseLayout: Component<Props> = (props) => {
                   refresh()()
                 }
                 setOffset(0)
-                return
+                stopInertialScroll = inertialScroll(
+                  scroller,
+                  velocity[1] * direction[1]
+                )
+                return movement[1]
               }
               let scrollPos = scroller.scrollTop
               if (
