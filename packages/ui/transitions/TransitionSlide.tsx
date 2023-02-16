@@ -45,9 +45,9 @@ export const TransitionSlide: Component<Props> = (props) => {
           const { width, height } = el.getBoundingClientRect()
           setSize(merged.direction === 'x' ? width : height)
           merged.direction === 'x'
-            ? (el.style.width = `0px`)
-            : (el.style.height = `0px`)
-          el.style.opacity = '0'
+            ? ((el as HTMLElement).style.width = `0px`)
+            : ((el as HTMLElement).style.height = `0px`)
+          ;(el as HTMLElement).style.opacity = '0'
         })
       }}
       onEnter={(el, done) => {
