@@ -88,7 +88,7 @@ const Fab: Component<Props> = (props) => {
                   'text-2xl grid place-items-center h-13 w-13 outline-none rounded-xl shadow ' +
                   (props.selected === id
                     ? 'bg-purple-800 hover:bg-purple-700 focus:bg-purple-700'
-                    : 'bg-gray-900 hover:bg-gray-800 focus:bg-gray-800')
+                    : 'bg-neutral-900 hover:bg-neutral-800 focus:bg-neutral-800')
                 }
                 onClick={() => {
                   if (props.selected === id) return
@@ -104,7 +104,7 @@ const Fab: Component<Props> = (props) => {
         <button
           classList={{
             'rotate-90 bg-pink-800': open(),
-            'bg-gray-900': !open(),
+            'bg-neutral-900': !open(),
           }}
           style={{ '-webkit-tap-highlight-color': 'transparent' }}
           class="transition-transform transition-colors outline-none w-15 h-15 shadow rounded-xl preserve-3d"
