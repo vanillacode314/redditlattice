@@ -103,7 +103,7 @@ export default function Settings() {
 
   return (
     <div
-      class="p-5 flex flex-col-reverse h-full gap-3 max-w-lg mx-auto"
+      class="p-5 flex flex-col-reverse h-full gap-3 max-w-xl mx-auto"
       ref={(el) => setAppState('scrollElement', el)}
     >
       <Button
