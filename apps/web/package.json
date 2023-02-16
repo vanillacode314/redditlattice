@@ -24,6 +24,7 @@
     "@unocss/reset": "^0.49.4",
     "@use-gesture/vanilla": "^10.2.24",
     "api": "workspace:*",
+    "clsx": "^1.2.1",
     "devalue": "^4.3.0",
     "idb-keyval": "^6.2.0",
     "motion": "^10.15.5",

@@ -52,7 +52,10 @@ export default function Home() {
 
   function onSubmit(e: SubmitEvent) {
     e.preventDefault()
-    if (!query().trim()) return
+    if (!query().trim()) {
+      flashSearchInput()
+      return
+    }
     if (query().startsWith('?')) return
 
     if (searchTerm()) {
@@ -86,7 +89,7 @@ export default function Home() {
   }
 
   return (
-    <main pb-5 h-full flex flex-col-reverse overflow-hidden>
+    <main class="pb-5 h-full flex flex-col-reverse overflow-hidden gap-3">
       <form
         class="grid grid-cols-[1fr_auto]"
         gap-3
@@ -95,22 +98,14 @@ export default function Home() {
         onSubmit={onSubmit}
       >
         <div
-          class="transitions-colors duration-250 grid grid-cols-[auto_1fr_auto]"
-          border="2 hover:pink-700 focus:pink-700"
+          class="transitions-colors duration-250 grid grid-cols-[auto_1fr_auto] gap-3 outline-none rounded-xl py-3 px-5 items-center hover:outline-2 hover:outline-pink-900 focus-within:outline-2 focus-within:outline-pink-900"
           classList={{
-            'border-pink-500': flashing(),
-            'border-pink-900': !flashing(),
+            'bg-neutral-800': flashing(),
+            'bg-neutral-900': !flashing(),
           }}
           onTransitionEnd={() => {
             if (flashing()) setFlashing(false)
           }}
-          gap-3
-          bg-black
-          outline-none
-          rounded-full
-          py-2
-          px-5
-          items-center
         >
           <span font="bold" text="gray-500">
             /r/
@@ -128,12 +123,9 @@ export default function Home() {
             onBlur={(e) => setFocused(false)}
             type="text"
             placeholder="e.g. wallpapers?red"
-            class="placeholder:text-gray-500"
             id="search"
             name="subreddit"
-            min-w-0
-            bg-transparent
-            outline-none
+            class="outline-none bg-transparent min-w-0 placeholder:text-gray-500"
           />
           <TransitionFade blur duration={100}>
             <Show when={query()}>
@@ -148,26 +140,13 @@ export default function Home() {
             </Show>
           </TransitionFade>
         </div>
-        <button
-          text="white xl"
-          rounded-full
-          w-13
-          h-13
-          outline-none
-          grid
-          place-items-center
-          bg="pink-800 hover:pink-700 focus:pink-700"
-          ring="focus:~ focus:blue"
-          transition-colors
-          shrink-0
-          style={{ '-webkit-tap-highlight-color': 'transparent' }}
-        >
+        <button class="text-white text-xl rounded-xl w-12 h-12 outline-none grid place-items-center bg-pink-800 hover:bg-pink-700 focus:bg-pink-700 focus:ring focus:ring-blue transition-colors shrink-0 tap-highlight-none">
           <div class="i-mdi-magnify"></div>
         </button>
       </form>
       <div
         ref={(el) => setAppState('scrollElement', el)}
-        class="flex flex-col-reverse gap-2 py-5 shrink-1 grow"
+        class="flex flex-col-reverse gap-2 shrink-1 grow"
       >
         {/* AUTOCOMPLETE LIST */}
         <Show

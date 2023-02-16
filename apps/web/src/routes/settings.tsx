@@ -3,9 +3,9 @@ import { clear } from 'idb-keyval'
 import { minBy } from 'lodash-es'
 import { batch, For, onCleanup, onMount, Show } from 'solid-js'
 import { createStore } from 'solid-js/store'
-import { Button } from 'ui'
+import { Button, Input } from 'ui'
 import { useAppState, userStateSchema, useUserState } from '~/stores'
-import { download, filterStringKeys, formatBytes } from '~/utils'
+import { download, filterStringKeys, formatBytes, getFile } from '~/utils'
 
 export default function Settings() {
   let filesInput: HTMLInputElement
@@ -31,14 +31,14 @@ export default function Settings() {
   }
 
   const handleImport = async () => {
-    const file = filesInput.files?.[0]
-    if (!file) {
+    const content = await getFile('application/json')
+
+    if (!content) {
       alert('Please select a file to import')
       return
     }
-    try {
-      const content = await file.text()
 
+    try {
       function appendKey(key: any, value: any) {
         if (value instanceof Set) {
           const newValue = new Set([...value, ...userState[key]])
@@ -50,6 +50,7 @@ export default function Settings() {
           setUserState(key, value)
         }
       }
+
       batch(() => {
         for (const [key, value] of Object.entries(
           userStateSchema.parse(parse(content))
@@ -102,11 +103,7 @@ export default function Settings() {
 
   return (
     <div
-      p-5
-      flex
-      flex-col-reverse
-      h-full
-      gap-5
+      class="p-5 flex flex-col-reverse h-full gap-3 max-w-lg mx-auto"
       ref={(el) => setAppState('scrollElement', el)}
     >
       <Button
@@ -126,10 +123,7 @@ export default function Settings() {
         class="transitions-colors relative overflow-hidden bg-blue-800 hover:bg-red-700"
       >
         <div
-          bg="red-800"
-          absolute
-          inset-y-0
-          left-0
+          class="bg-red-800 absolute inset-y-0 left-0"
           style={{ width: `${100 * (usageStats.used / usageStats.total)}%` }}
         ></div>
         <span z-10 relative>
@@ -137,63 +131,44 @@ export default function Settings() {
           {formatBytes(usageStats.total)})
         </span>
       </Button>
-      <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
-        <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
-          Column Max Width (in pixels)
-        </span>
-        <input
+      <Input
+        min="100"
+        step="10"
+        type="number"
+        value={userState.columnMaxWidth}
+        onChange={(e) => setUserState('columnMaxWidth', +e.currentTarget.value)}
+        label="Column Max Width (in pixels)"
+      />
+      <Input
+        class="bg-black outline-none"
+        label="Border Radius (in pixels)"
+        min="0"
+        step="1"
+        type="number"
+        value={userState.borderRadius}
+        onChange={(e) => setUserState('borderRadius', +e.currentTarget.value)}
+      />
+      <Input
+        class="bg-black outline-none"
+        label="Gaps (in pixels)"
+        min="0"
+        step="1"
+        type="number"
+        value={userState.gap}
+        onChange={(e) => setUserState('gap', +e.currentTarget.value)}
+      />
+      <Show when={userState.processImages}>
+        <Input
           class="bg-black outline-none"
-          min="100"
-          step="10"
+          label="Image Size Multiplier (relative to width)"
+          min="1"
+          step="0.1"
           type="number"
-          value={userState.columnMaxWidth}
+          value={userState.imageSizeMultiplier}
           onChange={(e) =>
-            setUserState('columnMaxWidth', +e.currentTarget.value)
+            setUserState('imageSizeMultiplier', +e.currentTarget.value)
           }
         />
-      </label>
-      <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
-        <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
-          Border Radius (in pixels)
-        </span>
-        <input
-          class="bg-black outline-none"
-          min="0"
-          step="1"
-          type="number"
-          value={userState.borderRadius}
-          onChange={(e) => setUserState('borderRadius', +e.currentTarget.value)}
-        />
-      </label>
-      <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
-        <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
-          Gaps (in pixels)
-        </span>
-        <input
-          class="bg-black outline-none"
-          min="0"
-          step="1"
-          type="number"
-          value={userState.gap}
-          onChange={(e) => setUserState('gap', +e.currentTarget.value)}
-        />
-      </label>
-      <Show when={userState.processImages}>
-        <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
-          <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
-            Image Size Multiplier (relative to width)
-          </span>
-          <input
-            class="bg-black outline-none"
-            min="1"
-            step="0.1"
-            type="number"
-            value={userState.imageSizeMultiplier}
-            onChange={(e) =>
-              setUserState('imageSizeMultiplier', +e.currentTarget.value)
-            }
-          />
-        </label>
         <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
           <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
             Preffered Image Format
@@ -222,18 +197,12 @@ export default function Settings() {
         onInput={() => handleImport()}
         ref={filesInput!}
       />
-      <label class="flex items-center justify-between rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
-        <span class="text-sm font-bold uppercase tracking-wide text-gray-300">
-          Process Images (Experimental)
-        </span>
-        <input
-          type="checkbox"
-          checked={userState.processImages}
-          onChange={(e) =>
-            setUserState('processImages', e.currentTarget.checked)
-          }
-        />
-      </label>
+      {/* <Input */}
+      {/*   type="checkbox" */}
+      {/*   label="Process Images (Experimental)" */}
+      {/*   checked={userState.processImages} */}
+      {/*   onChange={(e) => setUserState('processImages', e.currentTarget.checked)} */}
+      {/* /> */}
       {/* <label class="bg-black border-purple-800 focus-within:border-purple-700 border-2 px-5 py-3 rounded-lg flex items-center justify-between transition-colors"> */}
       {/*   <span class="uppercase text-sm tracking-wide font-bold text-gray-300"> */}
       {/*     Hide NSFW */}
@@ -244,21 +213,17 @@ export default function Settings() {
       {/*     onChange={(e) => setHideNSFW(e.currentTarget.checked)} */}
       {/*   /> */}
       {/* </label> */}
-      <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
-        <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
-          Recents Limit
-        </span>
-        <input
-          class="bg-black outline-none"
-          min="0"
-          step="1"
-          type="number"
-          value={userState.recentsLimit}
-          onChange={(e) =>
-            setUserState('recentsLimit', Number(e.currentTarget.value))
-          }
-        />
-      </label>
+      <Input
+        class="bg-black outline-none"
+        label="Recents Limit"
+        min="0"
+        step="1"
+        type="number"
+        value={userState.recentsLimit}
+        onChange={(e) =>
+          setUserState('recentsLimit', Number(e.currentTarget.value))
+        }
+      />
     </div>
   )
 }

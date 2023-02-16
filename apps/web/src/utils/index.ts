@@ -125,3 +125,24 @@ export function filterStringKeys<T extends Record<any, any>>(obj: T): T {
 export function setDifference<T>(set1: Set<T>, set2: Set<T>): Set<T> {
   return new Set([...set1].filter((x) => !set2.has(x)))
 }
+
+export const getFile = (accept: string = '') =>
+  new Promise<string | null>((resolve) => {
+    const inp = document.createElement('input')
+    inp.type = 'file'
+    if (accept) inp.accept = accept
+
+    inp.onchange = () => {
+      const file = inp.files?.[0]
+      if (!file) {
+        resolve(null)
+        return
+      }
+
+      file.text().then((text) => {
+        resolve(text)
+      })
+    }
+
+    inp.click()
+  })

@@ -58,6 +58,7 @@ importers:
       '@unocss/vite': ^0.49.4
       '@use-gesture/vanilla': ^10.2.24
       api: workspace:*
+      clsx: ^1.2.1
       devalue: ^4.3.0
       eslint: 8.34.0
       eslint-config-custom: workspace:*
@@ -96,6 +97,7 @@ importers:
       '@unocss/reset': 0.49.4
       '@use-gesture/vanilla': 10.2.24
       api: link:../api
+      clsx: 1.2.1
       devalue: 4.3.0
       idb-keyval: 6.2.0
       motion: 10.15.5
@@ -173,6 +175,7 @@ importers:
       '@types/web': ^0.0.91
       '@unocss/vite': ^0.49.4
       '@use-gesture/vanilla': ^10.2.24
+      clsx: ^1.2.1
       eslint: ^8.34.0
       eslint-config-custom: workspace:*
       lodash-es: ^4.17.21
@@ -191,6 +194,7 @@ importers:
       '@solid-primitives/resize-observer': 2.0.9_solid-js@1.6.10
       '@solid-primitives/set': 0.3.2_solid-js@1.6.10
       '@use-gesture/vanilla': 10.2.24
+      clsx: 1.2.1
       lodash-es: 4.17.21
       motion: 10.15.5
       solid-js: 1.6.10
@@ -3430,6 +3434,11 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
     dev: true
+
+  /clsx/1.2.1:
+    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
+    engines: {node: '>=6'}
+    dev: false
 
   /color-convert/1.9.3:
     resolution: {integrity: sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==}
