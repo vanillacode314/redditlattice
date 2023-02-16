@@ -41,22 +41,27 @@ export const Tabs: Component<TabsProps> = (props) => {
     const { width, left } = el.getBoundingClientRect()
     const scrollLeft = el.parentElement?.scrollLeft ?? 0
     const center = left + width / 2 + scrollLeft
-    el.scrollIntoView({ behavior: 'smooth' })
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: 'smooth' })
+    })
     if (state.activeTab < index) {
       setState({
         activeTab: index,
+        contentOffsetX: index * -contentElement.offsetWidth,
         indicatorRight: center + INDICATOR_WIDTH_PIXELS / 2,
         animating: 'forward',
       })
     } else if (state.activeTab > index) {
       setState({
         activeTab: index,
+        contentOffsetX: index * -contentElement.offsetWidth,
         indicatorLeft: center - INDICATOR_WIDTH_PIXELS / 2,
         animating: 'backwards',
       })
     } else {
       setState({
         activeTab: index,
+        contentOffsetX: index * -contentElement.offsetWidth,
         indicatorLeft: center - INDICATOR_WIDTH_PIXELS / 2,
         indicatorRight: center + INDICATOR_WIDTH_PIXELS / 2,
         animating: 'none',
@@ -65,23 +70,18 @@ export const Tabs: Component<TabsProps> = (props) => {
   }
 
   function handleSwipe(swipe: number) {
-    setState({ contentOffsetX: 0, down: false })
     setActiveTab(
       clamp(state.activeTab - swipe, 0, tabButtons.toArray().length - 1)
     )
   }
 
-  function handleDrag(offset: number) {
-    const distance = Math.abs(offset)
-    const direction = offset / distance
+  function handleDrag(movement: number, offset: number) {
+    const distance = Math.abs(movement)
     const index = state.activeTab
-    setState({
-      contentOffsetX: offset,
-      down: true,
-    })
+    setState({ contentOffsetX: offset })
     const scrollLeft = tabButtonElements[index].parentElement?.scrollLeft ?? 0
     const current = tabButtonElements[index].getBoundingClientRect()
-    if (direction < 0 && state.activeTab < tabButtons.toArray().length - 1) {
+    if (movement < 0 && state.activeTab < tabButtons.toArray().length - 1) {
       const currentIndicatorRight =
         current.left + current.width / 2 + INDICATOR_WIDTH_PIXELS / 2
 
@@ -95,7 +95,7 @@ export const Tabs: Component<TabsProps> = (props) => {
         currentIndicatorRight
       scrollLeft
       setState('indicatorRight', newIndicatorRight)
-    } else if (direction > 0 && state.activeTab > 0) {
+    } else if (movement > 0 && state.activeTab > 0) {
       const currentIndicatorLeft =
         current.left + current.width / 2 - INDICATOR_WIDTH_PIXELS / 2
 
@@ -111,7 +111,6 @@ export const Tabs: Component<TabsProps> = (props) => {
       setState('indicatorLeft', newIndicatorLeft)
     } else {
       const current = tabButtonElements[index].getBoundingClientRect()
-      setState({ down: false })
       setState({
         indicatorLeft:
           current.left + current.width / 2 - INDICATOR_WIDTH_PIXELS / 2,
@@ -124,33 +123,32 @@ export const Tabs: Component<TabsProps> = (props) => {
   onMount(() => {
     const gesture = new DragGesture(
       contentElement,
-      ({ movement, swipe, direction, down }) => {
+      ({ movement, swipe, offset, down }) => {
+        setState('down', down)
         batch(() => {
           if (swipe[0] !== 0) {
             handleSwipe(swipe[0])
             return
           }
-          handleDrag(movement[0])
+          handleDrag(movement[0], offset[0])
           if (down) return
-          const index = state.activeTab
-          const current = tabButtonElements[index].getBoundingClientRect()
-          setState({
-            down: false,
-            contentOffsetX: 0,
-            indicatorLeft:
-              current.left + current.width / 2 - INDICATOR_WIDTH_PIXELS / 2,
-            indicatorRight:
-              current.left + current.width / 2 + INDICATOR_WIDTH_PIXELS / 2,
-          })
-          if (Math.abs(movement[0]) < contentElement.clientWidth / 3) return
-          setActiveTab(
-            clamp(index - direction[0], 0, tabButtons.toArray().length - 1)
-          )
+          const shouldUpdate =
+            Math.abs(movement[0]) > contentElement.clientWidth / 3
+          const newIndex = shouldUpdate
+            ? state.activeTab - Math.sign(movement[0])
+            : state.activeTab
+          setActiveTab(clamp(newIndex, 0, tabButtons.toArray().length - 1))
         })
       },
       {
         axis: 'x',
         preventScroll: true,
+        bounds: {
+          left: -contentElement.clientWidth * (tabButtons.toArray().length - 1),
+          right: 0,
+        },
+        from: () => [state.contentOffsetX, 0],
+        rubberband: true,
       }
     )
     onCleanup(() => gesture.destroy())
@@ -170,9 +168,7 @@ export const Tabs: Component<TabsProps> = (props) => {
           {(tab) => (
             <Motion.div
               animate={{
-                transform: `translateX(calc(-${state.activeTab * 100}% + ${
-                  state.contentOffsetX
-                }px))`,
+                x: state.contentOffsetX,
               }}
               transition={{ duration: state.down ? 0 : 1 }}
               class="h-full w-full shrink-0 grow flex justify-end flex-col"
