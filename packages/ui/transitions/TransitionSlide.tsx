@@ -42,25 +42,22 @@ export const TransitionSlide: Component<Props> = (props) => {
     <TransitionGroup
       onBeforeEnter={(el) => {
         requestAnimationFrame(() => {
-          setSize(
-            merged.direction === 'x'
-              ? el.getBoundingClientRect().width
-              : el.getBoundingClientRect().height
-          )
+          const { width, height } = el.getBoundingClientRect()
+          setSize(merged.direction === 'x' ? width : height)
           merged.direction === 'x'
             ? (el.style.width = `0px`)
             : (el.style.height = `0px`)
+          el.style.opacity = '0'
         })
       }}
       onEnter={(el, done) => {
         el.animate(keyframes(), animationOptions).finished.then(done)
       }}
       onExit={(el, done) => {
-        setSize(
-          merged.direction === 'x'
-            ? el.getBoundingClientRect().width
-            : el.getBoundingClientRect().height
-        )
+        requestAnimationFrame(() => {
+          const { width, height } = el.getBoundingClientRect()
+          setSize(merged.direction === 'x' ? width : height)
+        })
         el.animate(keyframes(), {
           ...animationOptions,
           direction: 'reverse',
