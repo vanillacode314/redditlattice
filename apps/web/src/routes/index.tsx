@@ -5,6 +5,7 @@ import { useNavigate } from 'solid-start'
 import { AsyncList, List, Spinner, Tab, Tabs } from 'ui'
 import { TransitionFade } from 'ui/transitions'
 import { trpc } from '~/client'
+import SearchInput from '~/components/SearchInput'
 import { useAppState, useSessionState, useUserState } from '~/stores'
 import { parseSchema, setDifference } from '~/utils'
 
@@ -50,8 +51,7 @@ export default function Home() {
   const setSearchTerm = (searchTerm: string) =>
     setQuery(`${subreddit()}?${searchTerm}`)
 
-  function onSubmit(e: SubmitEvent) {
-    e.preventDefault()
+  function onSubmit() {
     if (!query().trim()) {
       flashSearchInput()
       return
@@ -90,60 +90,17 @@ export default function Home() {
 
   return (
     <main class="pb-5 h-full flex flex-col-reverse overflow-hidden gap-3 max-w-xl mx-auto">
-      <form
-        class="grid grid-cols-[1fr_auto]"
-        gap-3
-        items-center
-        px-5
+      <SearchInput
+        value={query()}
+        setValue={setQuery}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         onSubmit={onSubmit}
-      >
-        <div
-          class="transitions-colors duration-250 grid grid-cols-[auto_1fr_auto] gap-3 outline-none rounded-xl py-3 px-5 items-center hover:outline-2 hover:outline-pink-900 focus-within:outline-2 focus-within:outline-pink-900"
-          classList={{
-            'bg-neutral-800': flashing(),
-            'bg-neutral-900': !flashing(),
-          }}
-          onTransitionEnd={() => {
-            if (flashing()) setFlashing(false)
-          }}
-        >
-          <span font="bold" text="gray-500">
-            /r/
-          </span>
-          <input
-            ref={inputElement}
-            value={query()}
-            onInput={(e) => {
-              const inp = e.currentTarget
-              const start = inp.selectionStart
-              setQuery(inp.value.toLowerCase())
-              inp.setSelectionRange(start, start)
-            }}
-            onFocus={() => setFocused(true)}
-            onBlur={(e) => setFocused(false)}
-            type="text"
-            placeholder="e.g. wallpapers?red"
-            id="search"
-            name="subreddit"
-            class="outline-none bg-transparent min-w-0 placeholder:text-gray-500"
-          />
-          <TransitionFade blur duration={100}>
-            <Show when={query()}>
-              <button
-                type="button"
-                class="grid place-items-center"
-                onClick={() => setQuery('')}
-                onFocus={(e) => e.relatedTarget?.focus?.()}
-              >
-                <span class="i-mdi-close-circle text-xl"></span>
-              </button>
-            </Show>
-          </TransitionFade>
-        </div>
-        <button class="text-white text-xl rounded-xl w-12 h-12 outline-none grid place-items-center bg-pink-800 hover:bg-pink-700 focus:bg-pink-700 focus:ring focus:ring-blue transition-colors shrink-0 tap-highlight-none">
-          <div class="i-mdi-magnify"></div>
-        </button>
-      </form>
+        prefix="/r/"
+        placeholder="e.g wallpapers?red"
+        flashing={flashing()}
+        setFlashing={setFlashing}
+      />
       <div
         ref={(el) => setAppState('scrollElement', el)}
         class="flex flex-col-reverse gap-2 shrink-1 grow"
@@ -264,7 +221,9 @@ export default function Home() {
               >
                 <List
                   onClick={(id) => {
-                    setQuery(id)
+                    const [subreddit, searchTerm] = id.split('?')
+                    setSubreddit(subreddit)
+                    setSearchTerm(searchTerm || '')
                     flashSearchInput()
                   }}
                   reverse

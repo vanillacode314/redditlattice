@@ -1,14 +1,8 @@
 import { clsx } from 'clsx'
-import { Component, JSX, Show, splitProps } from 'solid-js'
+import { Component, JSX, splitProps } from 'solid-js'
 
-interface Props extends JSX.HTMLAttributes<HTMLInputElement> {
+interface Props extends JSX.InputHTMLAttributes<HTMLInputElement> {
   label: string
-  min?: string
-  step?: string
-  max?: string
-  minlength?: string
-  maxlength?: string
-  type?: string
   children?: JSX.Element
 }
 export const Input: Component<Props> = (props) => {
