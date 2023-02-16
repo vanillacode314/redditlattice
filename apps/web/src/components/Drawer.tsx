@@ -83,7 +83,6 @@ export const Drawer: Component = () => {
             ({ swipe: [swipeX], movement: [movementX], down }) => {
               batch(() => {
                 setDown(down)
-                console.log(movementX)
                 setOffset(movementX)
                 if (down) return
                 setOpen(movementX > 200 || swipeX === 1)
@@ -121,8 +120,11 @@ export const Drawer: Component = () => {
       </Presence>
       <Motion.div
         ref={drawerElement}
+        initial={{
+          transform: `translateX(-100%)`,
+        }}
         animate={{
-          x: offset() - (drawerElement?.clientWidth ?? 0),
+          transform: `translateX(calc(${offset()}px - 100%))`,
         }}
         transition={down() ? { duration: 0 } : { easing: 'ease-out' }}
         onMotionComplete={() => offset() === 0 && setOpen(false)}
