@@ -89,7 +89,7 @@ export default function Home() {
   }
 
   return (
-    <main class="pb-5 h-full flex flex-col-reverse overflow-hidden gap-3">
+    <main class="pb-5 h-full flex flex-col-reverse overflow-hidden gap-3 max-w-xl mx-auto">
       <form
         class="grid grid-cols-[1fr_auto]"
         gap-3

@@ -11,6 +11,7 @@ import {
 } from 'solid-js'
 import { A, useLocation, useNavigate } from 'solid-start'
 import { useAppState } from '~/stores'
+import { clamp } from '~/utils'
 
 interface ILink {
   title: string
@@ -102,15 +103,15 @@ export const Drawer: Component = () => {
         class="w-15 fixed left-0 top-20 z-20 h-40 touch-pan-right"
       ></div>
       <Presence>
-        <Show when={offset() > 200}>
+        <Show when={offset() > 0}>
           <Motion.div
             animate={{
-              opacity: [0, 1],
-              backdropFilter: [`blur(0)`, `blur(4px)`],
+              opacity: clamp(offset(), 0, 200) / 200,
+              backdropFilter: `blur(${(clamp(offset(), 0, 200) / 200) * 4}px)`,
             }}
             exit={{
-              opacity: [1, 0],
-              backdropFilter: [`blur(4px)`, `blur(0)`],
+              opacity: 0,
+              backdropFilter: 'blur(0px)',
             }}
             class="fixed inset-0 z-20 bg-white/8"
             onMouseDown={() => setOpen(false)}
@@ -135,17 +136,21 @@ export const Drawer: Component = () => {
           class="flex flex-col gap-1 pt-5 px-5"
           href="https://raqueebuddinaziz.com"
         >
-          <span text="lg">RedditLattice </span>
-          <span text="xs gray-500" font="bold" uppercase tracking-wide>
+          <span class="text-lg uppercase font-black tracking-wider">
+            RedditLattice{' '}
+          </span>
+          <span class="text-xs text-gray-500 font-bold uppercase tracking-wide">
             Made by Raqueebuddin Aziz
           </span>
         </a>
-        <div border="b gray-700" w-full></div>
+        <div class="border-b border-neutral-800 w-full"></div>
         <ul flex="~ col">
           <For each={links}>
             {({ icon, href, title }) => (
               <A
-                class="flex items-center gap-3 bg-black px-5 py-3 text-sm font-bold uppercase tracking-wide transition-colors hover:bg-gray-900 tap-highlight-none"
+                class="flex items-center gap-3 bg-black px-5 py-3 text-sm font-bold uppercase tracking-wider transition-colors hover:bg-neutral-900 tap-highlight-none text-gray-100"
+                activeClass="bg-neutral-800"
+                end={true}
                 href={href}
                 onClick={() => setOpen(false)}
               >

@@ -39,7 +39,7 @@ export default defineConfig({
         presetWebFonts({
           provider: 'google',
           fonts: {
-            sans: ['Roboto:400,500,600,700'],
+            sans: ['Roboto:400,500,600,700,800,900'],
           },
         }),
         presetIcons({

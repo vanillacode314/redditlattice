@@ -16,8 +16,7 @@ export const ListItem: Component<Props> = (props) => {
 
   return (
     <div
-      class="flex cursor-pointer items-center gap-5 px-5 py-2 transition-colors focus-within:bg-gray-800 hover:bg-gray-800"
-      style={{ '-webkit-tap-highlight-color': 'transparent' }}
+      class="flex cursor-pointer items-center gap-5 px-5 py-2 transition-colors focus-within:bg-neutral-800 hover:bg-neutral-800 tap-highlight-none"
       onClick={onClick}
       tabindex="-1"
       onMouseDown={(e) => merged.focusable || e.preventDefault()}
@@ -28,8 +27,7 @@ export const ListItem: Component<Props> = (props) => {
       <For each={props.buttons}>{(Comp) => Comp(props.id)}</For>
       <Show when={onRemove}>
         <button
-          class="group outline-none"
-          style={{ '-webkit-tap-highlight-color': 'transparent' }}
+          class="group outline-none tap-highlight-none"
           onClick={(e) => {
             e.stopPropagation()
             onRemove!()
