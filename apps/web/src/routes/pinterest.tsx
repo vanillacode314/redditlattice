@@ -1,17 +1,25 @@
-import { createSignal, onMount, Show } from 'solid-js'
+import { createEffect, createSignal, onMount, Show } from 'solid-js'
+import { untrack } from 'solid-js/web'
 import { useNavigate } from 'solid-start'
 import { List } from 'ui'
 import { TransitionFade } from 'ui/transitions'
-import { useAppState, useUserState } from '~/stores'
+import { useAppState, useSessionState, useUserState } from '~/stores'
 
 export default function Home() {
   const [userState, setUserState] = useUserState()
+  const [sessionState, setSessionState] = useSessionState()
   const [, setAppState] = useAppState()
   const navigate = useNavigate()
 
   onMount(() => setAppState('title', 'Pinterest'))
 
-  const [query, setQuery] = createSignal<string>('')
+  const [query, setQuery] = createSignal<string>(sessionState.pinterestQuery)
+  createEffect(() => {
+    const q = query()
+    untrack(() => {
+      setSessionState('pinterestQuery', q)
+    })
+  })
 
   const [flashing, setFlashing] = createSignal<boolean>(false)
   const flashSearchInput = () => setFlashing(true)

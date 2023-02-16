@@ -1,24 +1,40 @@
 import { TRPCClientError } from '@trpc/client'
-import { createSignal, onMount, Show, Suspense } from 'solid-js'
+import { createEffect, createSignal, onMount, Show, Suspense } from 'solid-js'
+import { untrack } from 'solid-js/web'
 import { useNavigate } from 'solid-start'
 import { AsyncList, List, Spinner, Tab, Tabs } from 'ui'
 import { TransitionFade } from 'ui/transitions'
 import { trpc } from '~/client'
-import { useAppState, useUserState } from '~/stores'
+import { useAppState, useSessionState, useUserState } from '~/stores'
 import { parseSchema, setDifference } from '~/utils'
 
 export default function Home() {
+  let inputElement!: HTMLInputElement
   const [userState, setUserState] = useUserState()
+  const [sessionState, setSessionState] = useSessionState()
   const [, setAppState] = useAppState()
   onMount(() => setAppState('title', 'Home'))
 
   const navigate = useNavigate()
 
-  const [focused, setFocused] = createSignal<boolean>(false)
+  const [focused, setFocused] = createSignal<boolean>(sessionState.focused)
   const [flashing, setFlashing] = createSignal<boolean>(false)
   const flashSearchInput = () => setFlashing(true)
 
-  const [query, setQuery] = createSignal<string>('')
+  const [query, setQuery] = createSignal<string>(sessionState.redditQuery)
+  createEffect(() => {
+    const q = query()
+    untrack(() => {
+      setSessionState('redditQuery', q)
+    })
+  })
+  createEffect(() => {
+    const _focused = focused()
+    untrack(() => {
+      if (_focused) inputElement.focus()
+      setSessionState('focused', _focused)
+    })
+  })
 
   const subreddit = () => query().split('?')[0]
   const setSubreddit = (subreddit: string) => {
@@ -100,6 +116,7 @@ export default function Home() {
             /r/
           </span>
           <input
+            ref={inputElement}
             value={query()}
             onInput={(e) => {
               const inp = e.currentTarget
@@ -108,7 +125,7 @@ export default function Home() {
               inp.setSelectionRange(start, start)
             }}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onBlur={(e) => setFocused(false)}
             type="text"
             placeholder="e.g. wallpapers?red"
             class="placeholder:text-gray-500"
@@ -168,6 +185,13 @@ export default function Home() {
                   setQuery(id.toLowerCase())
                   flashSearchInput()
                 }}
+                fallback={
+                  <div class="grid place-content-center p-5">
+                    <h3 class="uppercase font-bold text-xl tracking-wide">
+                      No Results
+                    </h3>
+                  </div>
+                }
                 focusable={false}
                 reverse
                 title="subreddits"
@@ -195,7 +219,12 @@ export default function Home() {
             </Suspense>
           }
         >
-          <Tabs>
+          <Tabs
+            activeTab={sessionState.currentTab}
+            onChange={(index) => {
+              setSessionState('currentTab', index)
+            }}
+          >
             <Tab title="favourites">
               <Show
                 when={userState.favouriteSubreddits.size > 0}
@@ -274,7 +303,7 @@ export default function Home() {
                 when={userState.subreddits.size > 0}
                 fallback={
                   <div class="grid place-content-center p-5">
-                    <h3 class="uppercase font-bold text-3xl tracking-wide">
+                    <h3 class="uppercase font-bold text-xl tracking-wide">
                       No Subreddits
                     </h3>
                   </div>

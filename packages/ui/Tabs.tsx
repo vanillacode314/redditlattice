@@ -16,6 +16,7 @@ import { clamp } from './utils'
 interface TabsProps {
   activeTab?: number
   children: JSXElement
+  onChange?: (index: number) => void
 }
 
 const INDICATOR_WIDTH_PIXELS = 80
@@ -37,6 +38,7 @@ export const Tabs: Component<TabsProps> = (props) => {
   let tabButtonElements: HTMLButtonElement[] = []
   const tabButtons = children(() => props.children)
   const setActiveTab = (index: number) => {
+    props.onChange?.(index)
     const el = tabButtonElements[index]
     const { width, left } = el.getBoundingClientRect()
     const scrollLeft = el.parentElement?.scrollLeft ?? 0
@@ -170,7 +172,7 @@ export const Tabs: Component<TabsProps> = (props) => {
               animate={{
                 x: state.contentOffsetX,
               }}
-              transition={{ duration: state.down ? 0 : 1 }}
+              transition={{ duration: state.down ? 0 : 0.5 }}
               class="h-full w-full shrink-0 grow flex justify-end flex-col"
             >
               {tab.children}

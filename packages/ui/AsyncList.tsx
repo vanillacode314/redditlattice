@@ -1,4 +1,4 @@
-import { Component, createResource, JSXElement } from 'solid-js'
+import { Component, createResource, JSXElement, Show } from 'solid-js'
 import List from './List'
 
 interface Item {
@@ -15,6 +15,7 @@ interface Props {
   title?: string
   reverse?: boolean
   focusable?: boolean
+  fallback?: JSXElement
 }
 
 export const AsyncList: Component<Props> = (props) => {
@@ -36,15 +37,17 @@ export const AsyncList: Component<Props> = (props) => {
   )
 
   return (
-    <List
-      buttons={props.buttons}
-      items={items()}
-      focusable={props.focusable}
-      title={props.title}
-      reverse={props.reverse}
-      onClick={onClick}
-      onRemove={onRemove}
-    />
+    <Show when={items().length > 0} fallback={props.fallback}>
+      <List
+        buttons={props.buttons}
+        items={items()}
+        focusable={props.focusable}
+        title={props.title}
+        reverse={props.reverse}
+        onClick={onClick}
+        onRemove={onRemove}
+      />
+    </Show>
   )
 }
 

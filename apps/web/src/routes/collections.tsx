@@ -1,10 +1,17 @@
 import { TRPCClientError } from '@trpc/client'
-import { createSignal, onMount, Show, Suspense } from 'solid-js'
+import {
+  createEffect,
+  createSignal,
+  onMount,
+  Show,
+  Suspense,
+  untrack,
+} from 'solid-js'
 import { useNavigate } from 'solid-start'
 import { AsyncList, List, Spinner } from 'ui'
 import { TransitionFade } from 'ui/transitions'
 import { trpc } from '~/client'
-import { useAppState, useUserState } from '~/stores'
+import { useAppState, useSessionState, useUserState } from '~/stores'
 import { parseSchema } from '~/utils'
 
 const getSubredditsAndSearchTerms = (
@@ -25,13 +32,29 @@ const getURL = (subreddits: string, searchTerms: string) =>
     : `/r/${subreddits}`
 
 export default function Home() {
+  let inputElement!: HTMLInputElement
   const [userState, setUserState] = useUserState()
+  const [sessionState, setSessionState] = useSessionState()
   const [, setAppState] = useAppState()
 
   onMount(() => setAppState('title', 'Collections'))
 
-  const [focused, setFocused] = createSignal<boolean>(false)
-  const [query, setQuery] = createSignal<string>('')
+  const [focused, setFocused] = createSignal<boolean>(sessionState.focused)
+  const [query, setQuery] = createSignal<string>(sessionState.collectionQuery)
+  createEffect(() => {
+    const q = query()
+    untrack(() => {
+      setSessionState('collectionQuery', q)
+    })
+  })
+  createEffect(() => {
+    const _focused = focused()
+    untrack(() => {
+      if (_focused) inputElement.focus()
+
+      setSessionState('focused', _focused)
+    })
+  })
 
   const [flashing, setFlashing] = createSignal<boolean>(false)
   const flashSearchInput = () => setFlashing(true)
@@ -39,7 +62,7 @@ export default function Home() {
   const navigate = useNavigate()
 
   const removeCollection = (id: string) =>
-    setUserState('collections', (collections) => {
+    setUserState('redditCollections', (collections) => {
       collections.delete(id)
       return new Map([...collections])
     })
@@ -92,6 +115,7 @@ export default function Home() {
             /r/
           </span>
           <input
+            ref={inputElement}
             value={query()}
             onInput={(e) => {
               const inp = e.currentTarget

@@ -3,7 +3,7 @@ import { createEffect, on } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { z } from 'zod'
 import { imageSchema } from '~/types'
-import { createLocalStorageStore } from '~/utils/store'
+import { createStorageStore } from '~/utils/store'
 
 export const appStateSchema = z.object({
   title: z.string().default(''),
@@ -32,6 +32,23 @@ createEffect(
 )
 export const useAppState = () => [appState, setAppState] as const
 
+export const sessionStateSchema = z.object({
+  currentTab: z.number().default(0),
+  redditQuery: z.string().default(''),
+  collectionQuery: z.string().default(''),
+  pinterestQuery: z.string().default(''),
+  focused: z.boolean().default(false),
+})
+const [sessionState, setSessionState] = createStorageStore(
+  'session-state',
+  sessionStateSchema.parse({}),
+  {
+    storage: 'sessionStorage',
+    schema: sessionStateSchema,
+  }
+)
+export const useSessionState = () => [sessionState, setSessionState] as const
+
 export const userStateSchema = z.object({
   subreddits: z.set(z.string()).default(() => new Set<string>()),
   pinterestQueries: z.set(z.string()).default(() => new Set<string>()),
@@ -49,7 +66,7 @@ export const userStateSchema = z.object({
   recentsLimit: z.number().default(5),
   columnMaxWidth: z.number().default(400),
 })
-const [userState, setUserState] = createLocalStorageStore(
+const [userState, setUserState] = createStorageStore(
   'user-state-v2',
   userStateSchema.parse({}),
   {
@@ -63,4 +80,5 @@ export const useUserState = () => [userState, setUserState] as const
 declare global {
   type TAppState = z.infer<typeof appStateSchema>
   type TUserState = z.infer<typeof userStateSchema>
+  type TSessionState = z.infer<typeof sessionStateSchema>
 }
