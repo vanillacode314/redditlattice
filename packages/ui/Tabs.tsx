@@ -162,9 +162,9 @@ export const Tabs: Component<TabsProps> = (props) => {
                   tabButtons.toArray().length - 1
                 )
               )
-            return true 
+            return true
           }
-          return false 
+          return false
         },
       },
       {
@@ -202,9 +202,9 @@ export const Tabs: Component<TabsProps> = (props) => {
   })
 
   return (
-    <div class="grid grid-rows-[1fr_auto] h-full overflow-hidden">
+    <div class="grid grid-rows-[1fr_auto] h-full">
       <div
-        class="flex items-end overflow-hidden touch-none"
+        class="flex items-end overflow-x-hidden touch-none min-h-full"
         ref={contentElement}
       >
         <For each={tabButtons.toArray() as unknown as TabProps[]}>
@@ -213,7 +213,9 @@ export const Tabs: Component<TabsProps> = (props) => {
               animate={{
                 x: state.contentOffsetX,
               }}
-              transition={{ duration: state.down || !state.mounted ? 0 : 0.5 }}
+              transition={{
+                duration: state.down || !state.mounted ? 0 : 0.5,
+              }}
               class="h-full w-full shrink-0 grow flex justify-end flex-col"
             >
               {tab.children}

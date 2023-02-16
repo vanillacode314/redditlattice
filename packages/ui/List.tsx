@@ -16,6 +16,7 @@ interface Props {
   items: Item[]
   reverse?: boolean
   focusable?: boolean
+  ref?: (el: HTMLUListElement) => void | HTMLUListElement
 }
 
 export const List: Component<Props> = (props) => {
@@ -35,6 +36,7 @@ export const List: Component<Props> = (props) => {
         </span>
       </Show>
       <ul
+        ref={props.ref}
         class="flex overflow-auto"
         classList={{
           'flex-col': !props.reverse,

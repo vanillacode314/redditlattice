@@ -26,6 +26,7 @@ html {
 }
 
 #scroller {
+  touch-action: none;
   overflow: auto;
   overflow: overlay;
 }

@@ -16,6 +16,7 @@ interface Props {
   reverse?: boolean
   focusable?: boolean
   fallback?: JSXElement
+  ref?: (el: HTMLUListElement) => void | HTMLUListElement
 }
 
 export const AsyncList: Component<Props> = (props) => {
@@ -39,6 +40,7 @@ export const AsyncList: Component<Props> = (props) => {
   return (
     <Show when={items().length > 0} fallback={props.fallback}>
       <List
+        ref={props.ref}
         buttons={props.buttons}
         items={items()}
         focusable={props.focusable}

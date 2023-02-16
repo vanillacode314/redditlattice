@@ -3,7 +3,6 @@ import { createEffect, createSignal, onMount, Show, Suspense } from 'solid-js'
 import { untrack } from 'solid-js/web'
 import { useNavigate } from 'solid-start'
 import { AsyncList, List, Spinner, Tab, Tabs } from 'ui'
-import { TransitionFade } from 'ui/transitions'
 import { trpc } from '~/client'
 import SearchInput from '~/components/SearchInput'
 import { useAppState, useSessionState, useUserState } from '~/stores'
@@ -21,6 +20,8 @@ export default function Home() {
   const [focused, setFocused] = createSignal<boolean>(sessionState.focused)
   const [flashing, setFlashing] = createSignal<boolean>(false)
   const flashSearchInput = () => setFlashing(true)
+
+  let listRefs: HTMLElement[] = []
 
   const [query, setQuery] = createSignal<string>(sessionState.redditQuery)
   createEffect(() => {
@@ -101,10 +102,7 @@ export default function Home() {
         flashing={flashing()}
         setFlashing={setFlashing}
       />
-      <div
-        ref={(el) => setAppState('scrollElement', el)}
-        class="flex flex-col-reverse gap-2 shrink-1 grow"
-      >
+      <div class="flex flex-col-reverse gap-2 shrink-1 grow overflow-hidden">
         {/* AUTOCOMPLETE LIST */}
         <Show
           when={!query() || !(focused() && !query().includes('?'))}
@@ -117,6 +115,7 @@ export default function Home() {
               }
             >
               <AsyncList
+                ref={(el) => setAppState('scrollElement', el)}
                 onClick={(id) => {
                   setQuery(id.toLowerCase())
                   flashSearchInput()
@@ -159,6 +158,7 @@ export default function Home() {
             activeTab={sessionState.currentTab}
             onChange={(index) => {
               setSessionState('currentTab', index)
+              setAppState('scrollElement', listRefs[index])
             }}
           >
             <Tab title="favourites">
@@ -173,6 +173,7 @@ export default function Home() {
                 }
               >
                 <List
+                  ref={listRefs[0]}
                   onClick={(id) => {
                     setSubreddit(id)
                     flashSearchInput()
@@ -220,6 +221,7 @@ export default function Home() {
                 }
               >
                 <List
+                  ref={listRefs[1]}
                   onClick={(id) => {
                     const [subreddit, searchTerm] = id.split('?')
                     setSubreddit(subreddit)
@@ -248,6 +250,7 @@ export default function Home() {
                 }
               >
                 <List
+                  ref={listRefs[2]}
                   onClick={(id) => {
                     setSubreddit(id)
                     flashSearchInput()
@@ -301,6 +304,7 @@ export default function Home() {
                 }
               >
                 <List
+                  ref={listRefs[3]}
                   onClick={(id) => {
                     const sr = subreddit() || userState.redditQueries.get(id)
                     if (!sr) return

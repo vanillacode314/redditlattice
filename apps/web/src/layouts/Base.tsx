@@ -1,5 +1,6 @@
 import { Motion } from '@motionone/solid'
 import { createConnectivitySignal } from '@solid-primitives/connectivity'
+import { Gesture } from '@use-gesture/vanilla'
 import { spring } from 'motion'
 import {
   Component,
@@ -12,16 +13,16 @@ import {
   Show,
   Suspense,
 } from 'solid-js'
-import { ErrorBoundary, useLocation, useParams } from 'solid-start'
+import { ErrorBoundary, useLocation } from 'solid-start'
 import { Spinner } from 'ui'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
-import { useAppState, useUserState } from '~/stores'
+import { useAppState } from '~/stores'
 interface Props {
   children: JSXElement
 }
 
-const [refresh, setRefresh] = createSignal<(done?: () => {}) => void>(() => {})
+const [refresh, setRefresh] = createSignal<() => void>(() => {})
 export const useRefresh = () => [refresh, setRefresh] as const
 
 export const BaseLayout: Component<Props> = (props) => {
@@ -36,80 +37,52 @@ export const BaseLayout: Component<Props> = (props) => {
 
   const [appState, _setAppState] = useAppState()
 
-  const [offset, setOffset] = createSignal(0)
+  const [offset, setOffset] = createSignal<number>(0)
   const [down, setDown] = createSignal<boolean>(false)
-  const threshold = 300
 
   createEffect(
     on(
       () => appState.scrollElement,
       (scroller) => {
         if (!scroller) return
-        let startY: number = 0
-        let touchId: number = -1
-        let shouldRefresh: boolean = false
-
-        const onTouchStart = (e: TouchEvent) => {
-          if (touchId > -1) return
-          const touch = e.changedTouches[0]
-          let scrollPos = scroller.scrollTop
-          if (scrollPos < 0)
-            scrollPos += scroller.scrollHeight - scroller.clientHeight
-          startY = touch.screenY + scrollPos
-          touchId = touch.identifier
-          setDown(true)
-        }
-
-        let ticking: boolean = false
-        const onTouchMove = (e: TouchEvent) => {
-          if (ticking) return
-          requestAnimationFrame(() => {
-            if (touchId < 0) {
-              ticking = false
-              return
-            }
-            const touch = e.changedTouches[0]
-            if (touchId != touch.identifier) {
-              ticking = false
-              return
-            }
-            let scrollPos = scroller.scrollTop
-            if (scrollPos < 0)
-              scrollPos += scroller.scrollHeight - scroller.clientHeight
-            const distance = touch.screenY - startY - scrollPos
-            shouldRefresh = scroller.scrollTop < 2 && distance >= threshold
-            setOffset(Math.min(threshold, distance))
-            ticking = false
-          })
-          ticking = true
-        }
-
-        const onTouchEnd = (e: TouchEvent) => {
-          if (touchId < 0) return
-          const touch = e.changedTouches[0]
-          if (!touch) return
-          if (touchId != touch.identifier) return
-          touchId = -1
-          if (shouldRefresh) {
-            shouldRefresh = false
-            refresh()()
+        const gesture = new Gesture(
+          scroller,
+          {
+            onDrag: ({ offset, direction, memo = 0, movement, xy, down }) => {
+              setDown(down)
+              const _offset = Math.min(movement[1] - memo, 300)
+              if (!down) {
+                if (_offset === 300) {
+                  refresh()()
+                }
+                setOffset(0)
+                return
+              }
+              let scrollPos = scroller.scrollTop
+              if (
+                getComputedStyle(scroller)['flex-direction'] ===
+                'column-reverse'
+              )
+                scrollPos += scroller.scrollHeight - scroller.clientHeight
+              scrollPos = Math.floor(scrollPos)
+              if (scrollPos === 0 && _offset > 0) {
+                setOffset(_offset)
+                return memo
+              } else {
+                setOffset(0)
+                scroller.scrollTop = -offset[1]
+                return movement[1]
+              }
+            },
+          },
+          {
+            drag: {
+              axis: 'y',
+              from: () => [0, -scroller.scrollTop],
+            },
           }
-          setOffset(0)
-          setDown(false)
-        }
-
-        scroller.addEventListener('touchstart', onTouchStart, {
-          passive: true,
-        })
-        scroller.addEventListener('touchmove', onTouchMove, { passive: true })
-        scroller.addEventListener('touchend', onTouchEnd, { passive: true })
-        scroller.addEventListener('touchcancel', onTouchEnd, { passive: true })
-        onCleanup(() => {
-          scroller.removeEventListener('touchstart', onTouchStart)
-          scroller.removeEventListener('touchmove', onTouchMove)
-          scroller.removeEventListener('touchend', onTouchEnd)
-          scroller.removeEventListener('touchcancel', onTouchEnd)
-        })
+        )
+        onCleanup(() => gesture.destroy())
       }
     )
   )
