@@ -42,7 +42,8 @@ export const Tabs: Component<TabsProps> = (props) => {
     const el = tabButtonElements[index]
     const { width, left } = el.getBoundingClientRect()
     const scrollLeft = el.parentElement?.scrollLeft ?? 0
-    const center = left + width / 2 + scrollLeft
+    const offsetLeft = el.parentElement?.offsetLeft ?? 0
+    const center = left + width / 2 + scrollLeft - offsetLeft
     requestAnimationFrame(() => {
       el.scrollIntoView({ behavior: 'smooth' })
     })
