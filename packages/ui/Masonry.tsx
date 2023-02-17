@@ -5,6 +5,8 @@ import {
   Accessor,
   batch,
   createEffect,
+  For,
+  Index,
   JSXElement,
   mergeProps,
   on,
@@ -13,7 +15,7 @@ import {
   Show,
   untrack,
 } from 'solid-js'
-import { createStore, unwrap } from 'solid-js/store'
+import { createStore } from 'solid-js/store'
 import { sum } from './utils'
 
 const BOUNDS: number = 1000
@@ -42,7 +44,7 @@ export interface Props<T> {
 interface State<T> {
   numberOfColumns: number
   columnWidth: number
-  columnToItemsMap: Record<number, T[]>
+  columns: T[][]
   masonryRef?: HTMLDivElement
   top: number
   bottom: number
@@ -60,7 +62,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     bottom: 0,
     heightMap: [],
     visibleItems: [],
-    columnToItemsMap: {},
+    columns: [],
     get numberOfColumns(): number {
       return state.masonrySize.width
         ? Math.ceil(state.masonrySize.width / props.maxWidth)
@@ -115,8 +117,8 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   })
 
   const appendToColumn = (idx: number, ...val: TItem[]) => {
-    const old = state.columnToItemsMap[idx] || []
-    setState('columnToItemsMap', idx, [...old, ...val])
+    const old = state.columns[idx] || []
+    setState('columns', idx, [...old, ...val])
   }
 
   function getShortestColumnIndex(): number {
@@ -149,13 +151,9 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
 
   function deleteItems(...itemsToRemove: Item[]) {
     batch(() => {
-      for (const [columnIndex, items] of Object.entries(
-        state.columnToItemsMap
-      )) {
+      for (const [columnIndex, items] of state.columns.entries()) {
         const remainingItems = differenceBy(items, itemsToRemove, (v) => v.id)
-        setState('columnToItemsMap', {
-          [columnIndex]: remainingItems || undefined,
-        })
+        setState('columns', columnIndex, remainingItems || undefined)
       }
     })
   }
@@ -177,7 +175,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     setState({
       heightMap: [],
       visibleItems: [],
-      columnToItemsMap: {},
+      columns: [],
       top: 0,
       bottom: 0,
     })
@@ -203,83 +201,81 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
       }}
     >
       {/* COLUMNS */}
-      <Entries of={state.columnToItemsMap}>
-        {(columnIndex, items) => (
-          <div
-            class="relative"
-            style={{
-              width: state.columnWidth + 'px',
-              height: `${
-                sum(state.heightMap[+columnIndex] ?? []) +
-                ((state.heightMap[+columnIndex] ?? []).length - 0) * merged.gap
-              }px`,
-            }}
-          >
-            <Key each={items()} by="id">
-              {(item, rowIndex) => {
-                const _item = item()
-                return (
-                  <Show
-                    when={
-                      state.visibleItems[+columnIndex]?.[rowIndex()] ===
-                        undefined ||
-                      state.visibleItems[+columnIndex][rowIndex()]
-                    }
-                  >
-                    {props.children({
-                      ref: (el) => {
-                        setState(
-                          'heightMap',
-                          +columnIndex,
-                          (value) => value || []
-                        )
-                        queueMicrotask(() => {
-                          const rect = el.getBoundingClientRect()
+      <Key each={[...state.columns.entries()]} by={([index]) => index}>
+        {(entries, columnIndex) => {
+          setState('heightMap', columnIndex(), [])
+          return (
+            <div
+              class="relative"
+              style={{
+                width: state.columnWidth + 'px',
+                height: `${
+                  sum(state.heightMap[columnIndex()] ?? []) +
+                  ((state.heightMap[columnIndex()] ?? []).length - 0) *
+                    merged.gap
+                }px`,
+              }}
+            >
+              <Key each={entries()[1]} by="id">
+                {(item, rowIndex) => {
+                  const _item = item()
+                  const isVisible = () =>
+                    state.visibleItems[columnIndex()]?.[rowIndex()] ===
+                      undefined || state.visibleItems[columnIndex()][rowIndex()]
+                  return (
+                    <Show when={isVisible()}>
+                      {props.children({
+                        ref: (el) => {
+                          queueMicrotask(() => {
+                            const rect = el.getBoundingClientRect()
+                            setState(
+                              'heightMap',
+                              columnIndex(),
+                              rowIndex(),
+                              rect.height
+                            )
+                          })
+                        },
+                        id: _item.id,
+                        data: _item.data,
+                        style: () => ({
+                          position: 'absolute',
+                          left: '0px',
+                          width: state.columnWidth + 'px',
+                          top:
+                            Math.floor(
+                              sum(
+                                (state.heightMap[columnIndex()] ?? []).slice(
+                                  0,
+                                  rowIndex()
+                                )
+                              ) +
+                                merged.gap * rowIndex()
+                            ) + 'px',
+                        }),
+                        width: () => state.columnWidth,
+                        lastHeight: () =>
+                          state.heightMap[columnIndex()]?.[rowIndex()] ??
+                          undefined,
+                        updateHeight: (rect) => {
+                          if (!state.heightMap[columnIndex()]?.[rowIndex()])
+                            return
                           setState(
                             'heightMap',
-                            +columnIndex,
+                            columnIndex(),
                             rowIndex(),
                             rect.height
                           )
-                        })
-                      },
-                      id: _item.id,
-                      data: _item.data,
-                      style: () => ({
-                        position: 'absolute',
-                        left: '0px',
-                        width: state.columnWidth + 'px',
-                        top:
-                          Math.floor(
-                            sum(
-                              (state.heightMap[+columnIndex] ?? []).slice(
-                                0,
-                                rowIndex()
-                              )
-                            ) +
-                              merged.gap * rowIndex()
-                          ) + 'px',
-                      }),
-                      width: () => state.columnWidth,
-                      lastHeight: () =>
-                        state.heightMap[+columnIndex]?.[rowIndex()] ??
-                        undefined,
-                      updateHeight: (rect) => {
-                        setState(
-                          'heightMap',
-                          +columnIndex,
-                          rowIndex(),
-                          rect.height
-                        )
-                      },
-                    })}
-                  </Show>
-                )
-              }}
-            </Key>
-          </div>
-        )}
-      </Entries>
+                        },
+                      })}
+                    </Show>
+                  )
+                }}
+              </Key>
+            </div>
+          )
+        }}
+      </Key>
     </div>
   )
 }

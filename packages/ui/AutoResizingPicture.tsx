@@ -70,6 +70,10 @@ export const AutoResizingPicture: Component<Props> = (props) => {
 
     const height =
       (imgElement.naturalHeight / imgElement.naturalWidth) * local.width
+    onHasHeight?.({
+      ...imgElement.getBoundingClientRect().toJSON(),
+      height,
+    })
     setHeight(height)
     setHasImage(true)
   }, 100)
@@ -100,12 +104,6 @@ export const AutoResizingPicture: Component<Props> = (props) => {
               }),
             }
           : { duration: 0 }
-      }
-      onMotionStart={() =>
-        onHasHeight?.({
-          ...imgElement.getBoundingClientRect().toJSON(),
-          height: height(),
-        })
       }
       {...others}
     >
