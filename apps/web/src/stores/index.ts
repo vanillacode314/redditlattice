@@ -18,6 +18,7 @@ export const appStateSchema = z.object({
       data: z.set(imageSchema).default(() => new Set<TImage>()),
     })
     .default({}),
+  drawerDocked: z.boolean().default(false),
 })
 const [appState, setAppState] = createStore<TAppState>(appStateSchema.parse({}))
 createEffect(

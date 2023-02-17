@@ -1,5 +1,6 @@
 import { Motion } from '@motionone/solid'
 import { createConnectivitySignal } from '@solid-primitives/connectivity'
+import { createMediaQuery } from '@solid-primitives/media'
 import { Gesture } from '@use-gesture/vanilla'
 import { spring } from 'motion'
 import {
@@ -36,10 +37,18 @@ export const BaseLayout: Component<Props> = (props) => {
     )
   )
 
-  const [appState, _setAppState] = useAppState()
+  const [appState, setAppState] = useAppState()
 
   const [offset, setOffset] = createSignal<number>(0)
   const [down, setDown] = createSignal<boolean>(false)
+  const isMobile = createMediaQuery('(max-width: 768px)')
+
+  createComputed(() => {
+    setAppState(
+      'drawerDocked',
+      !isMobile() && !/^\/(r|p)\//.test(location.pathname)
+    )
+  })
 
   createEffect(
     on(
@@ -56,7 +65,6 @@ export const BaseLayout: Component<Props> = (props) => {
               direction,
               memo = 0,
               movement,
-              xy,
               down,
             }) => {
               stopInertialScroll?.()
@@ -70,7 +78,7 @@ export const BaseLayout: Component<Props> = (props) => {
                 setOffset(0)
                 stopInertialScroll = inertialScroll(
                   scroller,
-                  velocity[1] * direction[1],
+                  velocity[1] * direction[1]
                 )
                 return movement[1]
               }
@@ -124,9 +132,7 @@ export const BaseLayout: Component<Props> = (props) => {
           Not Online
         </div>
       </Show>
-      <Navbar />
-      <Drawer />
-      <div grow overflow-hidden>
+      <div class="grid grid-row-[auto_1fr] grid-cols-[auto_1fr] grow overflow-hidden">
         <Suspense
           fallback={
             <div class="grid place-items-center p-5">
@@ -134,7 +140,15 @@ export const BaseLayout: Component<Props> = (props) => {
             </div>
           }
         >
-          <ErrorBoundary>{props.children}</ErrorBoundary>
+          <ErrorBoundary>
+            <div class="col-start-2 col-end-3 grid">
+              <Navbar />
+            </div>
+            <div class="row-start-1 row-end-3 col-span-1 grid">
+              <Drawer />
+            </div>
+            {props.children}
+          </ErrorBoundary>
         </Suspense>
       </div>
     </div>

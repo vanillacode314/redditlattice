@@ -1,5 +1,6 @@
 import { Motion } from '@motionone/solid'
-import { throttle } from 'lodash-es'
+import { Gesture } from '@use-gesture/vanilla'
+import { spring } from 'motion'
 import screenfull from 'screenfull'
 import {
   Component,
@@ -13,10 +14,11 @@ import {
 import { useLocation, useNavigate, useSearchParams } from 'solid-start'
 import AutoScrollModal, { showAutoScrollModal } from '~/modals/AutoScrollModal'
 import { useAppState, useSessionState } from '~/stores'
+import { clamp } from '~/utils'
 
 export const Navbar: Component = () => {
   const [appState, setAppState] = useAppState()
-  const [sessionState, setSessionState] = useSessionState()
+  const [_sessionState, setSessionState] = useSessionState()
 
   const [height, setHeight] = createSignal<number>(0)
   const [query, setQuery] = createSignal<string>('')
@@ -65,23 +67,8 @@ export const Navbar: Component = () => {
     })
   }
 
-  let scrollStart = 0
-  let lastKnownScrollPos = 0
-  let lastScrollDirection: 'up' | 'down' = 'down'
-  const threshold = 10 // in pixels
-  const onScroll = throttle((e: Event) => {
-    const el = e.currentTarget as HTMLElement
-    if (!el) return
-    const dy = scrollStart - lastKnownScrollPos
-    const newScrollDirection =
-      el.scrollTop - lastKnownScrollPos > 0 ? 'down' : 'up'
-    lastKnownScrollPos = el.scrollTop
-    if (newScrollDirection !== lastScrollDirection) {
-      scrollStart = el.scrollTop
-      lastScrollDirection = newScrollDirection
-    }
-    setNavVisible((dy > 0 && Math.abs(dy) > threshold) || el.scrollTop < 50)
-  }, 100)
+  const [down, setDown] = createSignal<boolean>(false)
+  const [offset, setOffset] = createSignal<number>(0)
 
   createEffect(
     on(
@@ -91,141 +78,173 @@ export const Navbar: Component = () => {
       }
     )
   )
+
+  createEffect(
+    on(navVisible, () => {
+      setOffset(navVisible() ? 0 : height())
+    })
+  )
+
   createEffect(
     on(
       () => appState.scrollElement,
       (scroller) => {
         if (!scroller) return
-        scroller.addEventListener('scroll', onScroll, { passive: true })
-        onCleanup(() => scroller.removeEventListener('scroll', onScroll))
+        const gesture = new Gesture(
+          scroller,
+          {
+            onDrag: ({ delta, down }) => {
+              setDown(down)
+              const _delta = clamp(offset() - delta[1], 0, height())
+              if (!down) {
+                setNavVisible(offset() === 0)
+              }
+              setOffset(_delta)
+            },
+          },
+          {
+            drag: {
+              axis: 'y',
+              from: () => [0, -scroller.scrollTop],
+            },
+          }
+        )
+        onCleanup(() => gesture.destroy())
       }
     )
   )
 
   return (
-    <Motion.div
-      animate={{
-        height: `${navVisible() ? height() : 0}px`,
-      }}
-      class="relative z-20 shrink-0 overflow-hidden bg-black"
-    >
-      <nav
-        ref={(el) => {
-          if (height()) return
-          requestAnimationFrame(function handler() {
-            const style = getComputedStyle(el)
-            const h = parseFloat(style.height)
-            if (!h) {
-              requestAnimationFrame(handler)
-              return
+    <>
+      <div class="relative z-20 shrink-0 overflow-hidden bg-black">
+        <Motion.div
+          animate={{
+            marginBottom: -offset() + 'px',
+          }}
+          transition={
+            down() ? { duration: 0 } : { easing: spring({ stiffness: 200 }) }
+          }
+        />
+        <nav
+          ref={(el) => {
+            requestAnimationFrame(function handler() {
+              const style = getComputedStyle(el)
+              const h = parseFloat(style.height)
+              if (!h) {
+                requestAnimationFrame(handler)
+                return
+              }
+              setHeight(h)
+            })
+          }}
+          class="relative sticky top-0 z-20 flex items-center gap-5 px-5 py-3 text-white md:border-b border-neutral-800"
+        >
+          <Show
+            when={!appState.isSearching}
+            fallback={
+              <form
+                class="contents"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  if (location.pathname.startsWith('/p/')) {
+                    navigate(`/p/${query()}`)
+                  }
+                  if (location.pathname.startsWith('/r/')) {
+                    setSearchParams({ q: query() })
+                  }
+                  setQuery('')
+                  setAppState({ isSearching: false })
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setAppState({ isSearching: false })}
+                >
+                  <span text="2xl" class="i-mdi-arrow-left"></span>
+                </button>
+                <input
+                  ref={(el) => {
+                    requestAnimationFrame(() => {
+                      el.focus()
+                    })
+                  }}
+                  value={query()}
+                  onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
+                  required
+                  text="xl"
+                  grow
+                  bg="black"
+                  outline-none
+                />
+                <div grid class="[&_*]:grid-area-[1/-1]">
+                  <Show when={query()}>
+                    <button
+                      type="button"
+                      onClick={() => setQuery('')}
+                      onFocus={(e) => e.relatedTarget?.focus()}
+                    >
+                      <span text="2xl" class="i-mdi-close-circle"></span>
+                    </button>
+                  </Show>
+                </div>
+              </form>
             }
-            setHeight(h)
-          })
-        }}
-        class="relative sticky top-0 z-20 flex items-center gap-5 px-5 py-3 text-white"
-      >
-        <Show
-          when={!appState.isSearching}
-          fallback={
-            <form
-              class="contents"
-              onSubmit={(e) => {
-                e.preventDefault()
-                if (location.pathname.startsWith('/p/')) {
-                  navigate(`/p/${query()}`)
-                }
-                if (location.pathname.startsWith('/r/')) {
-                  setSearchParams({ q: query() })
-                }
-                setQuery('')
-                setAppState({ isSearching: false })
+          >
+            <button
+              classList={{
+                hidden: appState.drawerDocked,
               }}
+              type="button"
+              onClick={() => (showBack() ? navigate('/') : toggleDrawer())}
             >
+              <span
+                text="2xl"
+                classList={{
+                  'i-mdi-menu': !showBack(),
+                  'i-mdi-arrow-left': showBack(),
+                }}
+              ></span>
+            </button>
+            <span class="text-semibold truncate font-semibold">
+              {appState.title || 'RedditLattice'}
+            </span>
+            <span class="grow" />
+            <Show when={showBack()}>
               <button
                 type="button"
-                onClick={() => setAppState({ isSearching: false })}
+                title="search"
+                onClick={() => setAppState({ isSearching: true })}
               >
-                <span text="2xl" class="i-mdi-arrow-left"></span>
+                <span text="2xl" class="i-mdi-magnify"></span>
               </button>
-              <input
-                ref={(el) => {
-                  requestAnimationFrame(() => {
-                    el.focus()
-                  })
-                }}
-                value={query()}
-                onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
-                required
-                text="xl"
-                grow
-                bg="black"
-                outline-none
-              />
-              <div grid class="[&_*]:grid-area-[1/-1]">
-                <Show when={query()}>
-                  <button
-                    type="button"
-                    onClick={() => setQuery('')}
-                    onFocus={(e) => e.relatedTarget?.focus()}
-                  >
-                    <span text="2xl" class="i-mdi-close-circle"></span>
-                  </button>
-                </Show>
-              </div>
-            </form>
-          }
-        >
-          <button
-            type="button"
-            onClick={() => (showBack() ? navigate('/') : toggleDrawer())}
-          >
-            <span
-              text="2xl"
-              classList={{
-                'i-mdi-menu': !showBack(),
-                'i-mdi-arrow-left': showBack(),
-              }}
-            ></span>
-          </button>
-          <span class="text-semibold truncate font-semibold">
-            {appState.title || 'RedditLattice'}
-          </span>
-          <span class="grow" />
-          <Show when={showBack()}>
-            <button
-              type="button"
-              title="search"
-              onClick={() => setAppState({ isSearching: true })}
-            >
-              <span text="2xl" class="i-mdi-magnify"></span>
-            </button>
-            <AutoScrollModal onClose={(success) => setScrolling(success)} />
-            <button type="button" title="autoscroll" onClick={toggleScroll}>
-              <span
-                text="2xl"
-                classList={{
-                  'i-mdi-play': !scrolling(),
-                  'i-mdi-pause': scrolling(),
-                }}
-              ></span>
-            </button>
-            <button
-              title="fullscreen"
-              type="button"
-              onClick={() => setFullscreen((_) => !_)}
-            >
-              <span
-                text="2xl"
-                classList={{
-                  'i-mdi-fullscreen': !fullscreen(),
-                  'i-mdi-fullscreen-exit': fullscreen(),
-                }}
-              ></span>
-            </button>
+              <AutoScrollModal onClose={(success) => setScrolling(success)} />
+              <button type="button" title="autoscroll" onClick={toggleScroll}>
+                <span
+                  text="2xl"
+                  classList={{
+                    'i-mdi-play': !scrolling(),
+                    'i-mdi-pause': scrolling(),
+                  }}
+                ></span>
+              </button>
+              <button
+                title="fullscreen"
+                type="button"
+                onClick={() => setFullscreen((_) => !_)}
+              >
+                <span
+                  text="2xl"
+                  classList={{
+                    'i-mdi-fullscreen': !fullscreen(),
+                    'i-mdi-fullscreen-exit': fullscreen(),
+                  }}
+                ></span>
+              </button>
+            </Show>
           </Show>
-        </Show>
-      </nav>
-    </Motion.div>
+        </nav>
+      </div>
+    </>
   )
 }
 

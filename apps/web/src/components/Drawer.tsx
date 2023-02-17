@@ -1,4 +1,5 @@
 import { Motion, Presence } from '@motionone/solid'
+import { createMediaQuery } from '@solid-primitives/media'
 import { DragGesture } from '@use-gesture/vanilla'
 import {
   batch,
@@ -54,6 +55,11 @@ export const Drawer: Component = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
+  const isMobile = createMediaQuery('(max-width: 768px)')
+  createEffect(
+    () => !appState.drawerDocked && setSessionState('drawerVisible', false)
+  )
+
   const [appState, setAppState] = useAppState()
   const [sessionState, setSessionState] = useSessionState()
 
@@ -80,11 +86,13 @@ export const Drawer: Component = () => {
         navigate(location.pathname + location.search, { resolve: false })
   )
 
+  onMount(() => setOpenOnMount(sessionState.drawerVisible))
+
   return (
     <>
+      {/* Drawer Handle */}
       <div
         ref={(el) => {
-          setOpenOnMount(sessionState.drawerVisible)
           const gesture = new DragGesture(
             el,
             ({ swipe: [swipeX], movement: [movementX], down }) => {
@@ -109,6 +117,7 @@ export const Drawer: Component = () => {
         }}
         class="w-15 fixed left-0 top-20 z-20 h-40 touch-pan-right"
       ></div>
+      {/* Overlay */}
       <Presence>
         <Show when={offset() > 0 || sessionState.drawerVisible}>
           <Motion.div
@@ -130,22 +139,31 @@ export const Drawer: Component = () => {
           />
         </Show>
       </Presence>
+      {/* Drawer */}
       <Motion.div
         ref={drawerElement}
         initial={{
-          transform: openOnMount() ? 'translateX(0)' : 'translateX(-100%)',
+          transform:
+            openOnMount() || appState.drawerDocked
+              ? 'translateX(0)'
+              : 'translateX(-100%)',
         }}
         animate={{
-          transform: sessionState.drawerVisible
-            ? `translateX(0)`
-            : `translateX(calc(${offset()}px - 100%))`,
+          transform:
+            sessionState.drawerVisible || appState.drawerDocked
+              ? `translateX(0)`
+              : `translateX(calc(${offset()}px - 100%))`,
         }}
         transition={down() ? { duration: 0 } : { easing: 'ease-out' }}
-        class="fixed inset-y-0 left-0 z-30 flex w-80 flex-col gap-5 bg-black"
+        class="inset-y-0 left-0 z-30 flex w-80 flex-col gap-5 bg-black border-r-0 md:border-r border-neutral-800"
+        classList={{
+          fixed: !appState.drawerDocked,
+          relative: appState.drawerDocked,
+        }}
       >
         <a
           target="_blank"
-          class="flex flex-col gap-1 pt-5 px-5"
+          class="flex flex-col gap-1 pt-5 px-5 hover:underline focus:underline outline-none"
           href="https://raqueebuddinaziz.com"
         >
           <span class="text-lg uppercase font-black tracking-wider">
