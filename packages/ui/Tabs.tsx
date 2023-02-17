@@ -5,6 +5,7 @@ import {
   batch,
   children,
   Component,
+  createEffect,
   For,
   JSXElement,
   onCleanup,
@@ -83,46 +84,64 @@ export const Tabs: Component<TabsProps> = (props) => {
   }
 
   function handleDrag(movement: number, offset: number) {
+    if (movement === 0) return
     const distance = Math.abs(movement)
     const index = state.activeTab
     setState({ contentOffsetX: offset })
-    const scrollLeft = tabButtonElements[index].parentElement?.scrollLeft ?? 0
-    const current = tabButtonElements[index].getBoundingClientRect()
+    const currentEl = tabButtonElements[index]
+    const current = currentEl.getBoundingClientRect()
+    const scrollLeft = currentEl.parentElement?.scrollLeft ?? 0
+    const offsetLeft = currentEl.parentElement?.offsetLeft ?? 0
+    const currentIndicatorRight =
+      current.left +
+      current.width / 2 +
+      scrollLeft -
+      offsetLeft +
+      INDICATOR_WIDTH_PIXELS / 2
+    const currentIndicatorLeft =
+      current.left +
+      current.width / 2 +
+      scrollLeft -
+      offsetLeft -
+      INDICATOR_WIDTH_PIXELS / 2
     if (movement < 0 && state.activeTab < tabButtons.toArray().length - 1) {
-      const currentIndicatorRight =
-        current.left + current.width / 2 + INDICATOR_WIDTH_PIXELS / 2
-
       const next = tabButtonElements[index + 1].getBoundingClientRect()
       const nextIndicatorRight =
-        next.left + next.width / 2 + INDICATOR_WIDTH_PIXELS / 2
+        next.left +
+        next.width / 2 +
+        scrollLeft -
+        offsetLeft +
+        INDICATOR_WIDTH_PIXELS / 2
 
       const newIndicatorRight =
         clamp(distance / contentElement.clientWidth, 0, 1) *
           (nextIndicatorRight - currentIndicatorRight) +
         currentIndicatorRight
-      scrollLeft
-      setState('indicatorRight', newIndicatorRight)
+      setState({
+        indicatorRight: newIndicatorRight,
+        indicatorLeft: currentIndicatorLeft,
+      })
     } else if (movement > 0 && state.activeTab > 0) {
-      const currentIndicatorLeft =
-        current.left + current.width / 2 - INDICATOR_WIDTH_PIXELS / 2
-
       const previous = tabButtonElements[index - 1].getBoundingClientRect()
       const previousIndicatorLeft =
-        previous.left + previous.width / 2 - INDICATOR_WIDTH_PIXELS / 2
+        previous.left +
+        previous.width / 2 +
+        scrollLeft -
+        offsetLeft -
+        INDICATOR_WIDTH_PIXELS / 2
 
       const newIndicatorLeft =
         clamp(distance / contentElement.clientWidth, 0, 1) *
           (previousIndicatorLeft - currentIndicatorLeft) +
         currentIndicatorLeft
-      scrollLeft
-      setState('indicatorLeft', newIndicatorLeft)
-    } else {
-      const current = tabButtonElements[index].getBoundingClientRect()
       setState({
-        indicatorLeft:
-          current.left + current.width / 2 - INDICATOR_WIDTH_PIXELS / 2,
-        indicatorRight:
-          current.left + current.width / 2 + INDICATOR_WIDTH_PIXELS / 2,
+        indicatorLeft: newIndicatorLeft,
+        indicatorRight: currentIndicatorRight,
+      })
+    } else {
+      setState({
+        indicatorLeft: currentIndicatorLeft,
+        indicatorRight: currentIndicatorRight,
       })
     }
   }
