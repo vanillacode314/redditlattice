@@ -49,7 +49,6 @@ interface State<T> {
   masonrySize: { readonly height: number | null; readonly width: number | null }
   heightMap: number[][]
   visibleItems: boolean[][]
-  offsets: number[]
 }
 
 export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
@@ -57,7 +56,6 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   const merged = mergeProps({ gap: 0 }, props)
   const masonrySize = createElementSize(() => state.masonryRef)
   const [state, setState] = createStore<State<TItem>>({
-    offsets: [],
     top: 0,
     bottom: 0,
     heightMap: [],
@@ -71,7 +69,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     get columnWidth(): number {
       const gaps = merged.gap * (state.numberOfColumns - 1)
       const width = state.masonrySize.width
-      return width ? (width - gaps) / state.numberOfColumns : 0
+      return Math.floor(width ? (width - gaps) / state.numberOfColumns : 0)
     },
     get masonrySize(): {
       readonly height: number | null
@@ -86,28 +84,19 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
       const top = state.top
       const bottom = state.bottom
       untrack(() => {
-        const offsets: number[] = []
-        batch(() => {
-          setState('visibleItems', (value) => {
-            value = new Array(state.numberOfColumns).fill(Array)
-            state.heightMap.forEach((column, i) => {
-              offsets[i] = 0
-              let heightAccumulator = 0
-              column.forEach((itemHeight, j) => {
-                heightAccumulator += itemHeight
-                if (heightAccumulator <= top) {
-                  // offsets[i] = heightAccumulator
-                }
-                value[i][j] =
-                  heightAccumulator >= top - BOUNDS &&
-                  heightAccumulator - itemHeight <= bottom + BOUNDS
-              })
+        setState('visibleItems', (value) => {
+          value = new Array(state.numberOfColumns).fill(Array)
+          state.heightMap.forEach((column, i) => {
+            let heightAccumulator = 0
+            column.forEach((itemHeight, j) => {
+              heightAccumulator += itemHeight
+              value[i][j] =
+                heightAccumulator >= top - BOUNDS &&
+                heightAccumulator - itemHeight <= bottom + BOUNDS
             })
-            return value
           })
-          setState('offsets', offsets)
+          return value
         })
-        // console.log(unwrap(state.offsets))
       })
     },
     { immediate: true }
@@ -189,7 +178,6 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
       heightMap: [],
       visibleItems: [],
       columnToItemsMap: {},
-      offsets: [],
       top: 0,
       bottom: 0,
     })
@@ -262,15 +250,15 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
                         left: '0px',
                         width: state.columnWidth + 'px',
                         top:
-                          sum(
-                            (state.heightMap[+columnIndex] ?? []).slice(
-                              0,
-                              rowIndex()
-                            )
-                          ) +
-                          merged.gap * rowIndex() +
-                          (state.offsets[+columnIndex] ?? 0) +
-                          'px',
+                          Math.floor(
+                            sum(
+                              (state.heightMap[+columnIndex] ?? []).slice(
+                                0,
+                                rowIndex()
+                              )
+                            ) +
+                              merged.gap * rowIndex()
+                          ) + 'px',
                       }),
                       width: () => state.columnWidth,
                       lastHeight: () =>

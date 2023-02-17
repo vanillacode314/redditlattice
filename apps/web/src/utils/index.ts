@@ -162,18 +162,19 @@ export function getScrollTop(node: Element): number {
 export function inertialScroll(
   node: HTMLElement,
   velocity: number,
-  deceleration: number = 0.95
+  deceleration: number = 0.97
 ) {
   let lastTimestamp: number
   let rafId = requestAnimationFrame(function step(timestamp: number) {
-    if (Math.abs(velocity) <= 0.1) return
+    if (Math.abs(velocity) <= 0.01) return
+    const direction = Math.sign(velocity)
     const elapsed = timestamp - (lastTimestamp ?? timestamp)
     lastTimestamp = timestamp
     node.scrollTop -= Math.floor(velocity * elapsed)
     const scrollTop = getScrollTop(node)
-    if (Math.sign(velocity) > 0 && scrollTop <= 10) return
+    if (direction > 0 && scrollTop <= 10) return
     if (
-      Math.sign(velocity) < 0 &&
+      direction < 0 &&
       Math.abs(scrollTop + node.clientHeight - node.scrollHeight) <= 10
     )
       return
