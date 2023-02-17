@@ -1,17 +1,25 @@
 import { Entries, Key } from '@solid-primitives/keyed'
-import { createElementSize } from '@solid-primitives/resize-observer'
+import {
+  createElementSize,
+  createResizeObserver,
+} from '@solid-primitives/resize-observer'
 import { differenceBy, minBy, range } from 'lodash-es'
 import {
   Accessor,
   batch,
+  children,
+  Component,
   createEffect,
   createMemo,
   createSignal,
   JSXElement,
   mergeProps,
   on,
+  onCleanup,
+  onMount,
+  Show,
 } from 'solid-js'
-import { createStore } from 'solid-js/store'
+import { createStore, unwrap } from 'solid-js/store'
 
 interface Item<T = any> {
   id: string
@@ -25,66 +33,82 @@ export interface Props<T> {
   children: (
     id: Item<T>['id'],
     data: Props<T>['items'][number]['data'],
-    width: Accessor<number>
+    width: Accessor<number>,
+    updateHeight: (rect: DOMRect) => void
   ) => JSXElement
+  attachScrollHandler?: (handler: (e: Event) => void) => () => void
 }
 
 function getColumnHeight(idx: number): number {
-  const colEl = document.getElementById(`__masonry-col-${idx}`)
-  const height = colEl?.getBoundingClientRect().height ?? 0
+  const columnElement = document.getElementById(`__masonry-col-${idx}`)
+  const height = columnElement?.getBoundingClientRect().height ?? 0
   return height
 }
 
 export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
-  type I = (typeof props.items)[number]
+  type TItem = (typeof props.items)[number]
 
   const merged = mergeProps({ gap: 0 }, props)
 
-  const [el, setEl] = createSignal<HTMLElement>()
-  const size = createElementSize(el)
-  const cols = createMemo<number>(() =>
-    size.width ? Math.ceil(size.width / props.maxWidth) : 1
+  const [masonryRef, setMasonryRef] = createSignal<HTMLElement>()
+  const masonrySize = createElementSize(masonryRef)
+  const numberOfColumns = createMemo<number>(() =>
+    masonrySize.width ? Math.ceil(masonrySize.width / props.maxWidth) : 1
   )
-  const colWidth = createMemo<number>(
+  const columnWidth = createMemo<number>(
     () =>
-      (size.width ? size.width / cols() : 0) - (merged.gap * (cols() - 1)) / 2
+      (masonrySize.width ? masonrySize.width / numberOfColumns() : 0) -
+      (merged.gap * (numberOfColumns() - 1)) / 2
   )
-  const [columns, setColumns] = createStore<Record<number, I[]>>()
+  const [columnToItemsMap, setColumnsToItemsMap] =
+    createStore<Record<number, TItem[]>>()
+  const [aMap, setAMap] = createStore<Record<`${string}-${string}`, DOMRect>>()
+  const [top, setTop] = createSignal<number>()
+  const [bottom, setBottom] = createSignal<number>()
 
-  const appendToColumn = (idx: number, ...val: I[]) => {
-    const old = columns[idx] || []
-    setColumns(idx, [...old, ...val])
+  onMount(() => {
+    const detach = props.attachScrollHandler?.((e) => {
+      const el = e.target as HTMLElement
+      setTop(el.scrollTop + el.offsetTop)
+      setBottom(el.scrollTop + el.offsetTop + el.offsetHeight)
+    })
+    onCleanup(() => detach?.())
+  })
+
+  const appendToColumn = (idx: number, ...val: TItem[]) => {
+    const old = columnToItemsMap[idx] || []
+    setColumnsToItemsMap(idx, [...old, ...val])
   }
 
   function getShortestColumnIndex(): number {
     return minBy(
-      range(cols()).map((idx) => [idx, getColumnHeight(idx)]),
+      range(numberOfColumns()).map((index) => [index, getColumnHeight(index)]),
       ([, height]) => height
     )![0]
   }
 
   function addItems(...items: Item[]) {
-    if (cols() === 1) {
+    if (numberOfColumns() === 1) {
       appendToColumn(0, ...items)
       return
     }
 
-    const len = items.length
-    let idx = 0
+    const length = items.length
+    let index = 0
     requestAnimationFrame(function handler() {
-      if (idx === len) return
-      appendToColumn(getShortestColumnIndex(), items[idx])
-      idx++
+      if (index === length) return
+      appendToColumn(getShortestColumnIndex(), items[index])
+      index++
       requestAnimationFrame(handler)
     })
   }
 
   function deleteItems(...itemsToRemove: Item[]) {
     batch(() => {
-      for (const [idx, items] of Object.entries(columns)) {
+      for (const [columnIndex, items] of Object.entries(columnToItemsMap)) {
         const remainingItems = differenceBy(items, itemsToRemove, (v) => v.id)
-        setColumns({
-          [idx]: remainingItems || undefined,
+        setColumnsToItemsMap({
+          [columnIndex]: remainingItems || undefined,
         })
       }
     })
@@ -108,32 +132,101 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     addItems(...props.items)
   }
 
-  createEffect(on(cols, () => resetGrid(), { defer: true }))
+  createEffect(on(numberOfColumns, () => resetGrid(), { defer: true }))
 
   return (
     <div
       class="grid place-items-start"
-      ref={setEl}
+      ref={setMasonryRef}
       style={{
         'column-gap': `${props.gap}px`,
-        'grid-template-columns': `repeat(${cols()},1fr)`,
+        'grid-template-columns': `repeat(${numberOfColumns()},1fr)`,
       }}
     >
       {/* COLUMNS */}
-      <Entries of={columns}>
-        {(key, items) => (
+      <Entries of={columnToItemsMap}>
+        {(columnIndex, items) => (
           <div
+            id={`__masonry-col-${columnIndex}`}
             class="flex w-full flex-col"
-            id={`__masonry-col-${key}`}
             style={{
               'row-gap': `${props.gap}px`,
             }}
           >
             {/* ROWS */}
             <Key each={items()} by="id">
-              {(item) => {
-                const i = item()
-                return props.children(i.id, i.data, colWidth)
+              {(item, rowIndex) => {
+                const _item = item()
+                return (
+                  <div
+                    class="grid"
+                    id={`__masonry-col-${columnIndex}-row-${rowIndex()}`}
+                    ref={(el) => {
+                      queueMicrotask(() => {
+                        const rect = el.getBoundingClientRect().toJSON()
+                        setAMap(`${columnIndex}-${rowIndex()}`, {
+                          ...rect,
+                          top: el.offsetTop,
+                          bottom: el.offsetTop + el.offsetHeight,
+                          height: el.offsetHeight,
+                          width: columnWidth(),
+                        })
+                      })
+                    }}
+                  >
+                    <Show
+                      when={
+                        aMap[`${columnIndex}-${rowIndex()}`] === undefined ||
+                        ((top() ?? 0) <=
+                          aMap[`${columnIndex}-${rowIndex()}`].bottom + 500 &&
+                          (bottom() ?? Infinity) >=
+                            aMap[`${columnIndex}-${rowIndex()}`].top - 500)
+                      }
+                      fallback={
+                        <div
+                          class="bg-red"
+                          style={{
+                            height: `${
+                              aMap[`${columnIndex}-${rowIndex()}`].height
+                            }px`,
+                            width: `${
+                              aMap[`${columnIndex}-${rowIndex()}`].width
+                            }px`,
+                          }}
+                        ></div>
+                      }
+                    >
+                      {props.children(
+                        _item.id,
+                        _item.data,
+                        columnWidth,
+                        (rect) => {
+                          const diff =
+                            rect.height -
+                            (aMap[`${columnIndex}-${rowIndex()}`].height ?? 0)
+
+                          if (diff === 0) return
+                          for (const [key, value] of Object.entries(aMap)) {
+                            const [column, row] = key.split('-').map(Number)
+                            if (column !== +columnIndex) continue
+                            if (row > rowIndex()) {
+                              console.log(key, value.top, diff)
+                              setAMap(`${column}-${row}`, {
+                                top: value.top + diff,
+                                bottom: value.bottom + diff,
+                              })
+                            }
+                          }
+                          setAMap(`${columnIndex}-${rowIndex()}`, (value) => ({
+                            height: rect.height,
+                            bottom: value.bottom + diff,
+                            top: value.top + diff,
+                          }))
+                        }
+                      )}
+                    </Show>
+                  </div>
+                )
               }}
             </Key>
           </div>

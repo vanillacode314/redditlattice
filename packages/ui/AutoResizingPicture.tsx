@@ -21,7 +21,7 @@ interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   alt?: string
   src?: string
   srcSets?: Map<string, string>
-  onHasHeight?: (height: number) => void
+  onHasHeight?: (rect: DOMRect) => void
   onLoad?: (e: Event) => void
   onError?: (e: Event) => void
   fallback?: JSXElement
@@ -72,7 +72,6 @@ export const AutoResizingPicture: Component<Props> = (props) => {
       (imgElement.naturalHeight / imgElement.naturalWidth) * local.width
     setHeight(height)
     setHasImage(true)
-    onHasHeight?.(height)
   }, 100)
 
   createRenderEffect(
@@ -101,6 +100,12 @@ export const AutoResizingPicture: Component<Props> = (props) => {
               }),
             }
           : { duration: 0 }
+      }
+      onMotionComplete={() =>
+        onHasHeight?.({
+          ...imgElement.getBoundingClientRect().toJSON(),
+          height: height(),
+        })
       }
       {...others}
     >

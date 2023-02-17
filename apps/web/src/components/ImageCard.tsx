@@ -25,6 +25,7 @@ interface Props {
   width: number
   image: TImage
   onLoad?: () => void
+  onHasHeight?: (rect: DOMRect) => void
 }
 
 export const ImageCard: Component<Props> = (props) => {
@@ -132,6 +133,7 @@ export const ImageCard: Component<Props> = (props) => {
       >
         <AutoResizingPicture
           style={{ 'border-radius': `${userState.borderRadius}px` }}
+          onHasHeight={props.onHasHeight}
           fallback={
             <div class="grid h-full place-items-center">
               <div

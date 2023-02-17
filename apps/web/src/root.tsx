@@ -3,7 +3,7 @@ import { MetaProvider } from '@solidjs/meta'
 import '@unocss/reset/tailwind.css'
 import * as devalue from 'devalue'
 import { delMany, entries } from 'idb-keyval'
-import { Show, Component, onMount } from 'solid-js'
+import { Component, onMount } from 'solid-js'
 import {
   Body,
   FileRoutes,
@@ -14,9 +14,7 @@ import {
   Routes,
   Scripts,
   Title,
-  useIsRouting,
 } from 'solid-start'
-import { Spinner } from 'ui'
 import 'virtual:uno.css'
 import Base from '~/layouts/Base'
 import { useAppState, useUserState } from '~/stores'
@@ -24,8 +22,6 @@ import './root.css'
 import { asyncFilter } from './utils'
 
 export const Root: Component = () => {
-  const isRouting = useIsRouting()
-
   const [appState] = useAppState()
   const [, setUserState] = useUserState()
 
@@ -84,16 +80,7 @@ export const Root: Component = () => {
         <Body>
           <Base>
             <Routes>
-              <Show
-                when={!isRouting()}
-                fallback={
-                  <div class="grid place-items-center p-5">
-                    <Spinner></Spinner>
-                  </div>
-                }
-              >
-                <FileRoutes />
-              </Show>
+              <FileRoutes />
             </Routes>
             <Scripts />
           </Base>

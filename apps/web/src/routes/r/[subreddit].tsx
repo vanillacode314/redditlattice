@@ -194,8 +194,7 @@ export default function SubredditPage() {
 
   return (
     <div
-      h-full
-      max-h-full
+      class="max-h-full h-full overflow-auto"
       ref={(el) => setAppState('scrollElement', el)}
       style={{ padding: `${userState.gap}px` }}
     >
@@ -206,9 +205,16 @@ export default function SubredditPage() {
         }))}
         maxWidth={userState.columnMaxWidth}
         gap={userState.gap}
+        attachScrollHandler={(handler) => {
+          appState.scrollElement.addEventListener('scroll', handler, {
+            passive: true,
+          })
+          return () =>
+            appState.scrollElement.removeEventListener('scroll', handler)
+        }}
       >
-        {(_, image, width) => (
-          <ImageCard width={width()} image={image}></ImageCard>
+        {(_, image, width, updateHeight) => (
+          <ImageCard width={width()} image={image} onHasHeight={updateHeight} />
         )}
       </Masonry>
       <InfiniteLoading
