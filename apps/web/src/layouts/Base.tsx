@@ -4,6 +4,7 @@ import { createMediaQuery } from '@solid-primitives/media'
 import { Gesture } from '@use-gesture/vanilla'
 import { spring } from 'motion'
 import {
+  batch,
   Component,
   createComputed,
   createEffect,
@@ -18,8 +19,8 @@ import { ErrorBoundary, useLocation } from 'solid-start'
 import { Spinner } from 'ui'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
-import { useAppState } from '~/stores'
-import { clamp, getScrollTop, inertialScroll } from '~/utils'
+import { useAppState, useSessionState } from '~/stores'
+import { getScrollTop, inertialScroll } from '~/utils'
 interface Props {
   children: JSXElement
 }
@@ -38,16 +39,22 @@ export const BaseLayout: Component<Props> = (props) => {
   )
 
   const [appState, setAppState] = useAppState()
+  const [sessionState, setSessionState] = useSessionState()
 
   const [offset, setOffset] = createSignal<number>(0)
   const [down, setDown] = createSignal<boolean>(false)
   const isMobile = createMediaQuery('(max-width: 768px)')
 
   createComputed(() => {
-    setAppState(
-      'drawerDocked',
-      !isMobile() && !/^\/(r|p)\//.test(location.pathname)
-    )
+    const route = location.pathname
+    if (isMobile()) {
+      setAppState('drawerDocked', false)
+      return
+    }
+    batch(() => {
+      setSessionState('drawerVisible', false)
+      setAppState('drawerDocked', !/^\/(r|p)\//.test(route))
+    })
   })
 
   createEffect(
@@ -106,7 +113,7 @@ export const BaseLayout: Component<Props> = (props) => {
   )
 
   return (
-    <div flex="~ col" h-full max-h-full relative>
+    <div class="flex flex-col h-full max-h-full relative">
       <div class="bg-tranparent pointer-events-none absolute inset-x-0 top-0 z-10 grid place-content-center p-6">
         <Motion.div
           class="bg-purple relative z-10 rounded-full p-2"

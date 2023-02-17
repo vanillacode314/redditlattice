@@ -1,5 +1,4 @@
 import { Motion, Presence } from '@motionone/solid'
-import { createMediaQuery } from '@solid-primitives/media'
 import { DragGesture } from '@use-gesture/vanilla'
 import {
   batch,
@@ -11,6 +10,7 @@ import {
   onCleanup,
   onMount,
   Show,
+  untrack,
 } from 'solid-js'
 import { A, useLocation, useNavigate } from 'solid-start'
 import { useAppState, useSessionState } from '~/stores'
@@ -55,28 +55,22 @@ export const Drawer: Component = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const isMobile = createMediaQuery('(max-width: 768px)')
-  createEffect(
-    () => !appState.drawerDocked && setSessionState('drawerVisible', false)
-  )
-
   const [appState, setAppState] = useAppState()
   const [sessionState, setSessionState] = useSessionState()
 
   const [down, setDown] = createSignal<boolean>(false)
   const [offset, setOffset] = createSignal<number>(0)
-  const [openOnMount, setOpenOnMount] = createSignal<boolean>(false)
+  const [mounted, setMounted] = createSignal<boolean>(false)
 
   const setOpen = (value: boolean) => {
     batch(() => {
-      setSessionState({
-        drawerVisible: value,
-      })
-      setOffset(0)
+      setSessionState({ drawerVisible: value })
+      setOffset(!value ? 0 : drawerElement.clientWidth)
     })
   }
+  createEffect(() => setOpen(sessionState.drawerVisible))
+  onMount(() => setTimeout(() => setMounted(true)))
 
-  createRenderEffect(() => setOpen(sessionState.drawerVisible))
   createEffect(() =>
     sessionState.drawerVisible
       ? navigate(location.pathname + location.search + '#drawer', {
@@ -85,8 +79,6 @@ export const Drawer: Component = () => {
       : location.hash === '#drawer' &&
         navigate(location.pathname + location.search, { resolve: false })
   )
-
-  onMount(() => setOpenOnMount(sessionState.drawerVisible))
 
   return (
     <>
@@ -119,15 +111,11 @@ export const Drawer: Component = () => {
       ></div>
       {/* Overlay */}
       <Presence>
-        <Show when={offset() > 0 || sessionState.drawerVisible}>
+        <Show when={offset() > 0}>
           <Motion.div
             animate={{
-              opacity: sessionState.drawerVisible
-                ? 1
-                : clamp(offset(), 0, 200) / 200,
-              backdropFilter: `blur(${
-                sessionState.drawerVisible ? 4 : clamp(offset(), 0, 4) / 4
-              }px)`,
+              opacity: clamp(offset(), 0, 200) / 200,
+              backdropFilter: `blur(${clamp(offset(), 0, 4)}px)`,
             }}
             exit={{
               opacity: 0,
@@ -142,19 +130,14 @@ export const Drawer: Component = () => {
       {/* Drawer */}
       <Motion.div
         ref={drawerElement}
-        initial={{
-          transform:
-            openOnMount() || appState.drawerDocked
-              ? 'translateX(0)'
-              : 'translateX(-100%)',
-        }}
         animate={{
-          transform:
-            sessionState.drawerVisible || appState.drawerDocked
-              ? `translateX(0)`
-              : `translateX(calc(${offset()}px - 100%))`,
+          transform: appState.drawerDocked
+            ? `translateX(0)`
+            : `translateX(calc(${offset()}px - 100%))`,
         }}
-        transition={down() ? { duration: 0 } : { easing: 'ease-out' }}
+        transition={
+          down() || !mounted() ? { duration: 0 } : { easing: 'ease-out' }
+        }
         class="inset-y-0 left-0 z-30 flex w-80 flex-col gap-5 bg-black border-r-0 md:border-r border-neutral-800"
         classList={{
           fixed: !appState.drawerDocked,

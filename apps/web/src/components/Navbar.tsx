@@ -1,6 +1,4 @@
-import { Motion } from '@motionone/solid'
 import { Gesture } from '@use-gesture/vanilla'
-import { spring } from 'motion'
 import screenfull from 'screenfull'
 import {
   Component,
@@ -14,7 +12,7 @@ import {
 import { useLocation, useNavigate, useSearchParams } from 'solid-start'
 import AutoScrollModal, { showAutoScrollModal } from '~/modals/AutoScrollModal'
 import { useAppState, useSessionState } from '~/stores'
-import { clamp } from '~/utils'
+import { clamp, getScrollTop } from '~/utils'
 
 export const Navbar: Component = () => {
   const [appState, setAppState] = useAppState()
@@ -68,38 +66,34 @@ export const Navbar: Component = () => {
   }
 
   const [down, setDown] = createSignal<boolean>(false)
-  const [offset, setOffset] = createSignal<number>(0)
 
   createEffect(
     on(
       () => location.pathname,
-      () => {
-        setNavVisible(true)
-      }
+      () => setNavVisible(true)
     )
   )
 
-  createEffect(
-    on(navVisible, () => {
-      setOffset(navVisible() ? 0 : height())
-    })
-  )
+  createEffect(() => setAppState('navOffset', navVisible() ? 0 : height()))
 
   createEffect(
     on(
       () => appState.scrollElement,
       (scroller) => {
         if (!scroller) return
+        const originalPaddingTop = +scroller.style.paddingTop.replace('px', '')
         const gesture = new Gesture(
           scroller,
           {
-            onDrag: ({ delta, down }) => {
-              setDown(down)
-              const _delta = clamp(offset() - delta[1], 0, height())
-              if (!down) {
-                setNavVisible(offset() === 0)
-              }
-              setOffset(_delta)
+            onScroll: ({ delta }) => {
+              setDown(true)
+              setAppState('navOffset', (value) =>
+                clamp(value + delta[1], 0, height())
+              )
+              scroller.style.paddingTop = `${
+                appState.navOffset + originalPaddingTop
+              }px`
+              // setNavVisible(offset() === 0)
             },
           },
           {
@@ -117,14 +111,7 @@ export const Navbar: Component = () => {
   return (
     <>
       <div class="relative z-20 shrink-0 overflow-hidden bg-black">
-        <Motion.div
-          animate={{
-            marginBottom: -offset() + 'px',
-          }}
-          transition={
-            down() ? { duration: 0 } : { easing: spring({ stiffness: 200 }) }
-          }
-        />
+        <div style={{ 'margin-bottom': -appState.navOffset + 'px' }} />
         <nav
           ref={(el) => {
             requestAnimationFrame(function handler() {
@@ -137,7 +124,7 @@ export const Navbar: Component = () => {
               setHeight(h)
             })
           }}
-          class="relative sticky top-0 z-20 flex items-center gap-5 px-5 py-3 text-white md:border-b border-neutral-800"
+          class="relative z-20 flex items-center gap-5 px-5 py-3 text-white md:border-b border-neutral-800"
         >
           <Show
             when={!appState.isSearching}
