@@ -18,7 +18,7 @@ import { Spinner } from 'ui'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
 import { useAppState } from '~/stores'
-import { clamp, inertialScroll } from '~/utils'
+import { clamp, getScrollTop, inertialScroll } from '~/utils'
 interface Props {
   children: JSXElement
 }
@@ -45,7 +45,7 @@ export const BaseLayout: Component<Props> = (props) => {
     on(
       () => appState.scrollElement,
       (scroller) => {
-        let stopInertialScroll: () => void
+        let stopInertialScroll: (() => void) | undefined
         if (!scroller) return
         const gesture = new Gesture(
           scroller,
@@ -60,6 +60,7 @@ export const BaseLayout: Component<Props> = (props) => {
               down,
             }) => {
               stopInertialScroll?.()
+              stopInertialScroll = undefined
               setDown(down)
               const _offset = Math.min(movement[1] - memo, 300)
               if (!down) {
@@ -69,18 +70,11 @@ export const BaseLayout: Component<Props> = (props) => {
                 setOffset(0)
                 stopInertialScroll = inertialScroll(
                   scroller,
-                  velocity[1] * direction[1] * 1.8,
-                  .99
+                  velocity[1] * direction[1],
                 )
                 return movement[1]
               }
-              let scrollPos = scroller.scrollTop
-              if (
-                getComputedStyle(scroller)['flex-direction'] ===
-                'column-reverse'
-              )
-                scrollPos += scroller.scrollHeight - scroller.clientHeight
-              scrollPos = Math.floor(scrollPos)
+              const scrollPos = getScrollTop(scroller)
               if (scrollPos === 0 && _offset > 0) {
                 setOffset(_offset)
                 return memo

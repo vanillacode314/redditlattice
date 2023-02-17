@@ -1,9 +1,6 @@
 import { Entries, Key } from '@solid-primitives/keyed'
-import {
-  createElementSize,
-  createResizeObserver,
-} from '@solid-primitives/resize-observer'
-import { differenceBy, minBy, range } from 'lodash-es'
+import { createElementSize } from '@solid-primitives/resize-observer'
+import { differenceBy, minBy, range, throttle } from 'lodash-es'
 import {
   Accessor,
   batch,
@@ -68,14 +65,15 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   const [bottom, setBottom] = createSignal<number>()
 
   onMount(() => {
-    const detach = props.attachScrollHandler?.((e) => {
-      const el = e.target as HTMLElement
-      batch(() => {
-        setTop(el.scrollTop + el.offsetTop)
-        setBottom(el.scrollTop + el.offsetTop + el.offsetHeight)
-      })
-      // console.log(bottom(), unwrap(aMap))
-    })
+    const detach = props.attachScrollHandler?.(
+      throttle((e) => {
+        const el = e.target as HTMLElement
+        batch(() => {
+          setTop(el.scrollTop + el.offsetTop)
+          setBottom(el.scrollTop + el.offsetTop + el.offsetHeight)
+        })
+      }, 16)
+    )
     onCleanup(() => detach?.())
   })
 

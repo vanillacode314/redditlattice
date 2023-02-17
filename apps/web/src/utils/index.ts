@@ -151,6 +151,14 @@ export function clamp(num: number, min: number, max: number): number {
   return Math.min(Math.max(num, min), max)
 }
 
+export function getScrollTop(node: Element): number {
+  let scrollTop = node.scrollTop
+  if (getComputedStyle(node)['flex-direction'] === 'column-reverse')
+    scrollTop += node.scrollHeight - node.clientHeight
+  scrollTop = Math.floor(scrollTop)
+  return scrollTop
+}
+
 export function inertialScroll(
   node: HTMLElement,
   velocity: number,
@@ -161,7 +169,14 @@ export function inertialScroll(
     if (Math.abs(velocity) <= 0.1) return
     const elapsed = timestamp - (lastTimestamp ?? timestamp)
     lastTimestamp = timestamp
-    node.scrollTop -= velocity * elapsed
+    node.scrollTop -= Math.floor(velocity * elapsed)
+    const scrollTop = getScrollTop(node)
+    if (Math.sign(velocity) > 0 && scrollTop <= 10) return
+    if (
+      Math.sign(velocity) < 0 &&
+      Math.abs(scrollTop + node.clientHeight - node.scrollHeight) <= 10
+    )
+      return
     velocity *= deceleration
     rafId = requestAnimationFrame(step)
   })

@@ -93,9 +93,21 @@ export default function Subreddit() {
         }))}
         maxWidth={userState.columnMaxWidth}
         gap={userState.gap}
+        attachScrollHandler={(handler) => {
+          appState.scrollElement.addEventListener('scroll', handler, {
+            passive: true,
+          })
+          return () =>
+            appState.scrollElement.removeEventListener('scroll', handler)
+        }}
       >
-        {(_, image, width) => (
-          <ImageCard width={width()} image={image}></ImageCard>
+        {(_, image, width, lastHeight, updateHeight) => (
+          <ImageCard
+            width={width()}
+            height={lastHeight()}
+            image={image}
+            onHasHeight={updateHeight}
+          />
         )}
       </Masonry>
       <InfiniteLoading
