@@ -69,7 +69,8 @@ export const BaseLayout: Component<Props> = (props) => {
                 setOffset(0)
                 stopInertialScroll = inertialScroll(
                   scroller,
-                  velocity[1] * direction[1]
+                  velocity[1] * direction[1] * 1.8,
+                  .99
                 )
                 return movement[1]
               }
