@@ -13,9 +13,6 @@ import { defineConfig } from 'vite'
 import pkgJson from './package.json' assert { type: 'json' }
 
 export default defineConfig({
-  build: {
-    sourcemap: true,
-  },
   define: {
     __version__: JSON.stringify(pkgJson.version),
   },
