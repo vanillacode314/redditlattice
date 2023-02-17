@@ -213,8 +213,13 @@ export default function SubredditPage() {
             appState.scrollElement.removeEventListener('scroll', handler)
         }}
       >
-        {(_, image, width, updateHeight) => (
-          <ImageCard width={width()} image={image} onHasHeight={updateHeight} />
+        {(_, image, width, lastHeight, updateHeight) => (
+          <ImageCard
+            width={width()}
+            height={lastHeight()}
+            image={image}
+            onHasHeight={updateHeight}
+          />
         )}
       </Masonry>
       <InfiniteLoading

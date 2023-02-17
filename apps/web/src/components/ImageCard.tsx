@@ -23,6 +23,7 @@ import { outsideclick } from '~/utils/use-outsideclick'
 
 interface Props {
   width: number
+  height?: number
   image: TImage
   onLoad?: () => void
   onHasHeight?: (rect: DOMRect) => void
@@ -146,7 +147,7 @@ export const ImageCard: Component<Props> = (props) => {
             </div>
           }
           width={props.width}
-          fallbackHeight={props.width}
+          fallbackHeight={props.height || props.width}
           ref={(el) => {
             const dispose = longpress(el, { callback: showPopup })
             onCleanup(dispose)

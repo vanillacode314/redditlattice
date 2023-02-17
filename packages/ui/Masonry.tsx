@@ -34,6 +34,7 @@ export interface Props<T> {
     id: Item<T>['id'],
     data: Props<T>['items'][number]['data'],
     width: Accessor<number>,
+    lastHeight: Accessor<number>,
     updateHeight: (rect: DOMRect) => void
   ) => JSXElement
   attachScrollHandler?: (handler: (e: Event) => void) => () => void
@@ -69,8 +70,11 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   onMount(() => {
     const detach = props.attachScrollHandler?.((e) => {
       const el = e.target as HTMLElement
-      setTop(el.scrollTop + el.offsetTop)
-      setBottom(el.scrollTop + el.offsetTop + el.offsetHeight)
+      batch(() => {
+        setTop(el.scrollTop + el.offsetTop)
+        setBottom(el.scrollTop + el.offsetTop + el.offsetHeight)
+      })
+      // console.log(bottom(), unwrap(aMap))
     })
     onCleanup(() => detach?.())
   })
@@ -178,9 +182,9 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
                       when={
                         aMap[`${columnIndex}-${rowIndex()}`] === undefined ||
                         ((top() ?? 0) <=
-                          aMap[`${columnIndex}-${rowIndex()}`].bottom + 500 &&
+                          aMap[`${columnIndex}-${rowIndex()}`].bottom + 5000 &&
                           (bottom() ?? Infinity) >=
-                            aMap[`${columnIndex}-${rowIndex()}`].top - 500)
+                            aMap[`${columnIndex}-${rowIndex()}`].top - 5000)
                       }
                       fallback={
                         <div
@@ -200,6 +204,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
                         _item.id,
                         _item.data,
                         columnWidth,
+                        () => aMap[`${columnIndex}-${rowIndex()}`]?.height,
                         (rect) => {
                           const diff =
                             rect.height -
@@ -210,7 +215,6 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
                             const [column, row] = key.split('-').map(Number)
                             if (column !== +columnIndex) continue
                             if (row > rowIndex()) {
-                              console.log(key, value.top, diff)
                               setAMap(`${column}-${row}`, {
                                 top: value.top + diff,
                                 bottom: value.bottom + diff,
