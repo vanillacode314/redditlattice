@@ -74,3 +74,5 @@ export function updateKey<K = any, V = any>(
 export function clamp(num: number, min: number, max: number): number {
   return Math.min(Math.max(num, min), max)
 }
+
+export const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0)

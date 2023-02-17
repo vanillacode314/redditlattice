@@ -86,10 +86,10 @@ export const AutoResizingPicture: Component<Props> = (props) => {
 
   return (
     <Motion.div
-      style={{ ...local.style, 'will-change': 'height' }}
+      style={{ 'will-change': 'height' }}
       class="relative overflow-hidden"
       ref={props.ref}
-      animate={{ height: `${height()}px` }}
+      animate={{ height: `${height()}px`, ...local.style }}
       initial={false}
       transition={
         animate()
@@ -101,7 +101,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
             }
           : { duration: 0 }
       }
-      onMotionComplete={() =>
+      onMotionStart={() =>
         onHasHeight?.({
           ...imgElement.getBoundingClientRect().toJSON(),
           height: height(),

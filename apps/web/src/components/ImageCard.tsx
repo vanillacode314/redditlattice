@@ -27,6 +27,8 @@ interface Props {
   image: TImage
   onLoad?: () => void
   onHasHeight?: (rect: DOMRect) => void
+  style: Record<string, string>
+  ref?: HTMLDivElement | ((instance: HTMLDivElement) => void)
 }
 
 export const ImageCard: Component<Props> = (props) => {
@@ -133,7 +135,10 @@ export const ImageCard: Component<Props> = (props) => {
         }
       >
         <AutoResizingPicture
-          style={{ 'border-radius': `${userState.borderRadius}px` }}
+          style={{
+            ...props.style,
+            'border-radius': `${userState.borderRadius}px`,
+          }}
           onHasHeight={props.onHasHeight}
           fallback={
             <div class="grid h-full place-items-center">
@@ -151,6 +156,7 @@ export const ImageCard: Component<Props> = (props) => {
           ref={(el) => {
             const dispose = longpress(el, { callback: showPopup })
             onCleanup(dispose)
+            typeof props.ref === 'function' ? props.ref(el) : (props.ref = el)
           }}
           onContextMenu={(e: MouseEvent) => {
             // @ts-ignore: property exists
