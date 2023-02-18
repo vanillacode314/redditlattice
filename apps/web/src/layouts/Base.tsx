@@ -73,7 +73,9 @@ export const BaseLayout: Component<Props> = (props) => {
               memo = 0,
               movement,
               down,
+              tap,
             }) => {
+              if (tap) return
               stopInertialScroll?.()
               stopInertialScroll = undefined
               setDown(down)
@@ -104,6 +106,7 @@ export const BaseLayout: Component<Props> = (props) => {
             drag: {
               axis: 'y',
               from: () => [0, -scroller.scrollTop],
+              filterTaps: true,
             },
           }
         )

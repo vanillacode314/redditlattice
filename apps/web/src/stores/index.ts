@@ -58,7 +58,10 @@ export const userStateSchema = z.object({
   subredditSort: z.map(z.string(), z.string()).default(() => new Map()),
   imageSizeMultiplier: z.number().default(2),
   prefferedImageFormat: z.enum(['avif', 'webp']).default('webp'),
-  processImages: z.boolean().default(false),
+  processImages: z
+    .boolean()
+    .optional()
+    .transform(() => false),
   hideNSFW: z.boolean().default(true),
   gap: z.number().default(10),
   borderRadius: z.number().default(10),
