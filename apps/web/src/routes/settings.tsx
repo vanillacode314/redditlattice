@@ -140,6 +140,14 @@ export default function Settings() {
         label="Column Max Width (in pixels)"
       />
       <Input
+        min="1"
+        step="1"
+        type="number"
+        value={userState.maxColumns}
+        onChange={(e) => setUserState('maxColumns', +e.currentTarget.value)}
+        label="Max Columns"
+      />
+      <Input
         class="bg-black outline-none"
         label="Border Radius (in pixels)"
         min="0"

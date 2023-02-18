@@ -91,6 +91,8 @@ export default function Subreddit() {
           data: image,
         }))}
         maxWidth={userState.columnMaxWidth}
+        maxColumns={userState.maxColumns}
+        align="center"
         gap={userState.gap}
         attachScrollHandler={(handler) => {
           appState.scrollElement.addEventListener('scroll', handler, {

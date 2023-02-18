@@ -26,8 +26,10 @@ interface Item<T = any> {
 }
 
 export interface Props<T> {
+  align?: 'start' | 'center' | 'end'
   items: Array<Item<T>>
   maxWidth: number
+  maxColumns?: number
   gap?: number
   children: (data: {
     id: Item<T>['id']
@@ -56,17 +58,26 @@ interface State<T> {
 
 export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   type TItem = (typeof props.items)[number]
-  const merged = mergeProps({ gap: 0 }, props)
+  const merged = mergeProps(
+    { align: 'center', gap: 0, maxColumns: Infinity },
+    props
+  )
   const [masonryRef, setMasonryRef] = createSignal<HTMLDivElement>()
   const masonrySize = createElementSize(masonryRef)
   const numberOfColumns = createMemo(() =>
-    masonrySize.width ? Math.ceil(masonrySize.width / props.maxWidth) : 1
+    Math.min(
+      masonrySize.width ? Math.ceil(masonrySize.width / props.maxWidth) : 1,
+      merged.maxColumns
+    )
   )
   const columnWidth = createMemo(() => {
     const cols = numberOfColumns()
     const gaps = merged.gap * (cols - 1)
     const width = masonrySize.width
-    return Math.floor(width ? (width - gaps) / cols : 0)
+    return Math.min(
+      Math.floor(width ? (width - gaps) / cols : 0),
+      merged.maxWidth
+    )
   })
   const [state, setState] = createStore<State<TItem>>({
     busy: false,
@@ -335,6 +346,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
         style={{
           'column-gap': `${merged.gap}px`,
           'grid-template-columns': `repeat(${state.numberOfColumns},1fr)`,
+          'justify-items': merged.align,
         }}
       >
         <Key each={[...state.columns.entries()]} by={([index]) => index}>
