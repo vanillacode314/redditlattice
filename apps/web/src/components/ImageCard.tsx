@@ -141,14 +141,8 @@ export const ImageCard: Component<Props> = (props) => {
           }}
           onHasHeight={props.onHasHeight}
           fallback={
-            <div class="grid h-full place-items-center">
-              <div
-                class="bg-white/15"
-                animate-pulse
-                h-10
-                w-10
-                rounded-full
-              ></div>
+            <div class="grid h-full place-items-center bg-neutral-900/10">
+              <div class="bg-white/15 animate-pulse h-10 w-10 rounded-full" />
             </div>
           }
           width={props.width}
