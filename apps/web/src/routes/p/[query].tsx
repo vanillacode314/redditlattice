@@ -1,3 +1,4 @@
+import { uniqBy } from 'lodash-es'
 import {
   batch,
   createEffect,
@@ -9,6 +10,7 @@ import {
 import { useParams } from 'solid-start'
 import { Button, InfiniteHandler, InfiniteLoading, Masonry, Spinner } from 'ui'
 import ImageCard from '~/components/ImageCard'
+import { PINTEREST_SERVER_BASE_PATH } from '~/consts'
 import { useRefresh } from '~/layouts/Base'
 import { useAppState, useUserState } from '~/stores'
 import { parseSchema } from '~/utils'
@@ -56,7 +58,7 @@ export default function Subreddit() {
 
   const onInfinite: InfiniteHandler = async (setState, _firstload) => {
     if (!ws) {
-      ws = new WebSocket('wss://pinterest-scraper-production.up.railway.app/')
+      ws = new WebSocket(PINTEREST_SERVER_BASE_PATH)
       ws.onopen = () => {
         ws!.send(query())
       }
@@ -67,10 +69,7 @@ export default function Subreddit() {
           data
         )
         setAppState('images', 'data', (data) => {
-          for (const image of newImages) {
-            data.add(image)
-          }
-          return new Set(data)
+          return new Set(uniqBy([...data, ...newImages], 'name'))
         })
         setState('idle')
       }
