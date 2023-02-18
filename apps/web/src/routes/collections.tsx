@@ -82,6 +82,7 @@ export default function Home() {
     if (!userState.redditCollections.has(id)) setCollection(id, id)
 
     navigate(getURL(subreddits, searchTerms || ''))
+    setQuery('')
   }
 
   return (

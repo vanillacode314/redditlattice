@@ -30,6 +30,7 @@ export default function Home() {
     if (query().startsWith('?')) return
 
     navigate(`/p/${query()}`)
+    setQuery('')
   }
 
   function removePinterestHistory(id: string) {

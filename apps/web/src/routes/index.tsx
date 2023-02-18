@@ -64,6 +64,7 @@ export default function Home() {
     } else {
       navigate(`/r/${query()}`)
     }
+    setQuery('')
   }
 
   function removeSubreddit(name: string) {
