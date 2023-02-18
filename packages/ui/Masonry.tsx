@@ -5,10 +5,8 @@ import {
   Accessor,
   batch,
   children,
-  createComputed,
   createEffect,
   createMemo,
-  createRenderEffect,
   createSignal,
   For,
   JSXElement,
@@ -103,16 +101,16 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     setState(
       'visible',
       produce((value) => {
-        state.columns.forEach((column, i) => {
-          column.forEach((item, j) => {
+        for (let i = 0; i < state.columns.length; i++) {
+          for (let j = 0; j < state.columns[i].length; j++) {
             const itemTop = state.topOffset[i][j] + merged.gap * j
             const itemHeight = state.heights[i][j]
             const itemBottom = itemTop + itemHeight
             value[i][j] =
               itemTop <= state.bottom + BOUNDS &&
               itemBottom >= state.top - BOUNDS
-          })
-        })
+          }
+        }
         return value
       })
     )
@@ -241,7 +239,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     }
   }
 
-  createRenderEffect(
+  createEffect(
     on(
       () => props.items,
       async (newItems, oldItems) => {
