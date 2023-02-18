@@ -4,6 +4,7 @@ import { spring } from 'motion'
 import {
   batch,
   Component,
+  createMemo,
   createRenderEffect,
   createSignal,
   For,
@@ -53,29 +54,32 @@ export const AutoResizingPicture: Component<Props> = (props) => {
   const { onHasHeight, onLoad, onError } = local
 
   const [height, setHeight] = createSignal<number>(props.fallbackHeight)
-  const [hasImage, setHasImage] = createSignal<boolean>(false)
+  const heightMemo = createMemo(() => height())
+  const [gotHeight, setGotHeight] = createSignal<boolean>(false)
   const [error, setError] = createSignal<boolean>(false)
   const [tries, setTries] = createSignal(0)
   const [animate, setAnimate] = createSignal<boolean>(false)
 
   const checkHeight = throttle(() => {
-    setTries((_) => _ + 1)
-    if (tries() > 1) setAnimate(true)
-    if (error()) return
-    if (!imgElement) return
-    if (!imgElement.naturalHeight) {
-      checkHeight()
-      return
-    }
+    batch(() => {
+      setTries(tries() + 1)
+      if (tries() > 1) setAnimate(true)
+      if (error()) return
+      if (!imgElement) return
+      if (!imgElement.naturalHeight) {
+        checkHeight()
+        return
+      }
 
-    const height =
-      (imgElement.naturalHeight / imgElement.naturalWidth) * local.width
-    onHasHeight?.({
-      ...imgElement.getBoundingClientRect().toJSON(),
-      height,
+      const height =
+        (imgElement.naturalHeight / imgElement.naturalWidth) * local.width
+      onHasHeight?.({
+        ...imgElement.getBoundingClientRect().toJSON(),
+        height,
+      })
+      setHeight(height)
+      setGotHeight(true)
     })
-    setHeight(height)
-    setHasImage(true)
   }, 100)
 
   createRenderEffect(
@@ -90,10 +94,9 @@ export const AutoResizingPicture: Component<Props> = (props) => {
 
   return (
     <Motion.div
-      style={{ 'will-change': 'height' }}
       class="relative overflow-hidden"
       ref={props.ref}
-      animate={{ height: `${height()}px`, ...local.style }}
+      animate={{ height: `${heightMemo()}px`, ...local.style }}
       initial={false}
       transition={
         animate()
@@ -107,7 +110,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
       }
       {...others}
     >
-      <Show when={!hasImage() && tries() > 1}>
+      <Show when={!gotHeight() && tries() > 1}>
         <div class="absolute inset-0">{props.fallback}</div>
       </Show>
       <picture>
@@ -124,13 +127,14 @@ export const AutoResizingPicture: Component<Props> = (props) => {
           onError={(e) => {
             batch(() => {
               setError(true)
-              setHasImage(false)
+              setGotHeight(false)
             })
             onError?.(e)
           }}
-          onLoad={(e) => onLoad?.(e)}
+          onLoad={onLoad}
           alt={merged.alt}
           referrerpolicy="no-referrer"
+          decoding="async"
         />
       </picture>
     </Motion.div>

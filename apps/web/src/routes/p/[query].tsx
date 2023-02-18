@@ -101,10 +101,9 @@ export default function Subreddit() {
             appState.scrollElement.removeEventListener('scroll', handler)
         }}
       >
-        {({ width, data: image, lastHeight, updateHeight, ref, style }) => (
+        {({ width, data: image, lastHeight, updateHeight, style }) => (
           <ImageCard
             style={style()}
-            ref={ref}
             width={width()}
             height={lastHeight()}
             image={image}

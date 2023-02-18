@@ -139,15 +139,15 @@ export const BaseLayout: Component<Props> = (props) => {
           Not Online
         </div>
       </Show>
-      <div class="grid grid-row-[auto_1fr] grid-cols-[auto_1fr] grow overflow-hidden">
-        <Suspense
-          fallback={
-            <div class="grid place-items-center p-5">
-              <Spinner></Spinner>
-            </div>
-          }
-        >
-          <ErrorBoundary>
+      <Suspense
+        fallback={
+          <div class="grid place-items-center p-5">
+            <Spinner></Spinner>
+          </div>
+        }
+      >
+        <ErrorBoundary>
+          <div class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] grow overflow-hidden">
             <div class="col-start-2 col-end-3 grid">
               <Navbar />
             </div>
@@ -155,9 +155,9 @@ export const BaseLayout: Component<Props> = (props) => {
               <Drawer />
             </div>
             {props.children}
-          </ErrorBoundary>
-        </Suspense>
-      </div>
+          </div>
+        </ErrorBoundary>
+      </Suspense>
     </div>
   )
 }

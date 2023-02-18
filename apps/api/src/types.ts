@@ -17,7 +17,7 @@ export const postSchema = z.object({
   media: z.unknown(),
   media_metadata: z
     .record(z.string(), z.object({ id: z.string(), m: z.string() }))
-    .optional(),
+    .nullish(),
   name: z.string(),
   url: z.string().transform((url) => {
     const newUrl = new URL(url)

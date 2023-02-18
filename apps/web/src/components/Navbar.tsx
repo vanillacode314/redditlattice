@@ -70,7 +70,10 @@ export const Navbar: Component = () => {
   createEffect(
     on(
       () => location.pathname,
-      () => setNavVisible(true)
+      () => {
+        setNavVisible(true)
+        setAppState('navOffset', 0)
+      }
     )
   )
 
@@ -110,7 +113,7 @@ export const Navbar: Component = () => {
 
   return (
     <>
-      <div class="relative z-20 shrink-0 overflow-hidden bg-black">
+      <div class="relative z-20 overflow-hidden bg-black">
         <div style={{ 'margin-bottom': -appState.navOffset + 'px' }} />
         <nav
           ref={(el) => {
