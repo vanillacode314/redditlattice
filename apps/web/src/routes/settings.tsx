@@ -103,7 +103,7 @@ export default function Settings() {
 
   return (
     <div
-      class="p-5 flex flex-col-reverse h-full gap-3 max-w-xl mx-auto"
+      class="p-5 flex flex-col-reverse h-full gap-3 max-w-xl mx-auto w-full"
       ref={(el) => setAppState('scrollElement', el)}
     >
       <Button
@@ -157,40 +157,40 @@ export default function Settings() {
         value={userState.gap}
         onChange={(e) => setUserState('gap', +e.currentTarget.value)}
       />
-      <Show when={userState.processImages}>
-        <Input
-          class="bg-black outline-none"
-          label="Image Size Multiplier (relative to width)"
-          min="1"
-          step="0.1"
-          type="number"
-          value={userState.imageSizeMultiplier}
-          onChange={(e) =>
-            setUserState('imageSizeMultiplier', +e.currentTarget.value)
-          }
-        />
-        <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
-          <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
-            Preffered Image Format
-          </span>
-          <select
-            value={userState.prefferedImageFormat}
-            onChange={(e) =>
-              setUserState(
-                'prefferedImageFormat',
-                userStateSchema.shape.prefferedImageFormat.parse(
-                  e.currentTarget.value
-                )
-              )
-            }
-            class="bg-black outline-none"
-          >
-            <For each={['webp', 'avif', 'jpeg', 'png']}>
-              {(val) => <option>{val}</option>}
-            </For>
-          </select>
-        </label>
-      </Show>
+      {/* <Show when={userState.processImages}> */}
+      {/*   <Input */}
+      {/*     class="bg-black outline-none" */}
+      {/*     label="Image Size Multiplier (relative to width)" */}
+      {/*     min="1" */}
+      {/*     step="0.1" */}
+      {/*     type="number" */}
+      {/*     value={userState.imageSizeMultiplier} */}
+      {/*     onChange={(e) => */}
+      {/*       setUserState('imageSizeMultiplier', +e.currentTarget.value) */}
+      {/*     } */}
+      {/*   /> */}
+      {/*   <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700"> */}
+      {/*     <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300"> */}
+      {/*       Preffered Image Format */}
+      {/*     </span> */}
+      {/*     <select */}
+      {/*       value={userState.prefferedImageFormat} */}
+      {/*       onChange={(e) => */}
+      {/*         setUserState( */}
+      {/*           'prefferedImageFormat', */}
+      {/*           userStateSchema.shape.prefferedImageFormat.parse( */}
+      {/*             e.currentTarget.value */}
+      {/*           ) */}
+      {/*         ) */}
+      {/*       } */}
+      {/*       class="bg-black outline-none" */}
+      {/*     > */}
+      {/*       <For each={['webp', 'avif', 'jpeg', 'png']}> */}
+      {/*         {(val) => <option>{val}</option>} */}
+      {/*       </For> */}
+      {/*     </select> */}
+      {/*   </label> */}
+      {/* </Show> */}
       <input
         class="hidden"
         type="file"
@@ -209,8 +209,8 @@ export default function Settings() {
       {/*   </span> */}
       {/*   <input */}
       {/*     type="checkbox" */}
-      {/*     checked={userState()!.hideNSFW} */}
-      {/*     onChange={(e) => setHideNSFW(e.currentTarget.checked)} */}
+      {/*     checked={userState.hideNSFW} */}
+      {/*     onChange={(e) => setUserState('hideNSFW', e.currentTarget.checked)} */}
       {/*   /> */}
       {/* </label> */}
       <Input

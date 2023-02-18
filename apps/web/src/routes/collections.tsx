@@ -86,7 +86,7 @@ export default function Home() {
   }
 
   return (
-    <main class="pb-5 h-full flex flex-col-reverse overflow-hidden gap-3 max-w-xl mx-auto">
+    <main class="pb-5 h-full flex flex-col-reverse overflow-hidden gap-3 max-w-xl w-full mx-auto">
       <SearchInput
         prefix="/r/"
         onSubmit={onSubmit}

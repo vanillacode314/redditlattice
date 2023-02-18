@@ -7,7 +7,7 @@ export default function About() {
 
   return (
     <div
-      class="flex flex-col-reverse gap-5 py-5 h-full max-w-xl mx-auto"
+      class="flex flex-col-reverse gap-5 py-5 h-full max-w-xl mx-auto w-full"
       ref={(el) => setAppState('scrollElement', el)}
     >
       <div flex flex-col-reverse gap-2>
