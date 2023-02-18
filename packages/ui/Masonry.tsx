@@ -1,6 +1,6 @@
 import { Key } from '@solid-primitives/keyed'
 import { createElementSize } from '@solid-primitives/resize-observer'
-import { cloneDeep, differenceBy } from 'lodash-es'
+import { differenceBy, throttle } from 'lodash-es'
 import {
   Accessor,
   batch,
@@ -71,7 +71,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   const [state, setState] = createStore<State<TItem>>({
     busy: false,
     top: 0,
-    bottom: 0,
+    bottom: Infinity,
     heights: Array(numberOfColumns())
       .fill(null)
       .map(() => []),
@@ -102,14 +102,41 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
       'visible',
       produce((value) => {
         for (let i = 0; i < state.columns.length; i++) {
-          for (let j = 0; j < state.columns[i].length; j++) {
-            const itemTop = state.topOffset[i][j] + merged.gap * j
-            const itemHeight = state.heights[i][j]
-            const itemBottom = itemTop + itemHeight
-            value[i][j] =
-              itemTop <= state.bottom + BOUNDS &&
-              itemBottom >= state.top - BOUNDS
+          function getTop() {
+            let low = 0
+            let high = state.columns[i].length - 1
+            let mid = Math.floor((low + high) / 2)
+            while (low <= high) {
+              mid = Math.floor((low + high) / 2)
+              const itemTop = state.topOffset[i][mid] + merged.gap * mid
+              const itemHeight = state.heights[i][mid]
+              const itemBottom = itemTop + itemHeight
+              if (itemBottom > state.top - BOUNDS) {
+                high = mid - 1
+              } else {
+                low = mid + 1
+              }
+            }
+            return mid
           }
+
+          function getBottom() {
+            let low = 0
+            let high = state.columns[i].length - 1
+            let mid = Math.floor((low + high) / 2)
+            while (low <= high) {
+              mid = Math.floor((low + high) / 2)
+              const itemTop = state.topOffset[i][mid] + merged.gap * mid
+              if (itemTop < state.bottom + BOUNDS) {
+                low = mid + 1
+              } else {
+                high = mid - 1
+              }
+            }
+            return mid
+          }
+          value[i].fill(false)
+          value[i].fill(true, getTop(), getBottom() + 1)
         }
         return value
       })
@@ -117,14 +144,17 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   })
 
   onMount(() => {
-    const detach = props.attachScrollHandler?.((e) => {
-      const el = e.target as HTMLElement
-      if (!el) return
-      setState({
-        top: el.scrollTop,
-        bottom: el.scrollTop + el.clientHeight,
-      })
-    })
+    const detach = props.attachScrollHandler?.(
+      throttle((e) => {
+        const el = e.target as HTMLElement
+        if (!el) return
+        const paddingTop = +el.style.paddingTop.replace('px', '')
+        setState({
+          top: el.scrollTop - paddingTop,
+          bottom: el.scrollTop + el.clientHeight - paddingTop,
+        })
+      }, 100)
+    )
     onCleanup(() => detach?.())
   })
 
