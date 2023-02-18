@@ -279,17 +279,10 @@ export default function Home() {
                       </button>
                     ),
                   ]}
-                  items={[
-                    ...setDifference(
-                      userState.subreddits,
-                      userState.favouriteSubreddits
-                    ),
-                  ]
-                    .sort()
-                    .map((sr) => ({
-                      id: sr,
-                      title: sr,
-                    }))}
+                  items={[...userState.subreddits].sort().map((sr) => ({
+                    id: sr,
+                    title: sr,
+                  }))}
                 ></List>
               </Show>
             </Tab>
