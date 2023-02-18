@@ -105,7 +105,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
       produce((value) => {
         state.columns.forEach((column, i) => {
           column.forEach((item, j) => {
-            const itemTop = state.topOffset[i][j]
+            const itemTop = state.topOffset[i][j] + merged.gap * j
             const itemHeight = state.heights[i][j]
             const itemBottom = itemTop + itemHeight
             value[i][j] =
