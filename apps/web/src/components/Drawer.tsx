@@ -160,16 +160,18 @@ export const Drawer: Component = () => {
         <ul flex="~ col">
           <For each={links}>
             {({ icon, href, title }) => (
-              <A
-                class="flex items-center gap-3 bg-black px-5 py-3 text-sm font-bold uppercase tracking-wider transition-colors hover:bg-neutral-900 tap-highlight-none text-gray-100"
-                activeClass="bg-neutral-800"
-                end={true}
-                href={href}
-                onClick={() => setOpen(false)}
-              >
-                {icon && <div text="xl" class={icon} />}
-                <span>{title}</span>
-              </A>
+              <li class="contents">
+                <A
+                  class="flex items-center gap-3 bg-black px-5 py-3 text-sm font-bold uppercase tracking-wider transition-colors hover:bg-neutral-900 tap-highlight-none text-gray-100"
+                  activeClass="bg-neutral-800"
+                  end={true}
+                  href={href}
+                  onClick={() => setOpen(false)}
+                >
+                  {icon && <div text="xl" class={icon} />}
+                  <span>{title}</span>
+                </A>
+              </li>
             )}
           </For>
         </ul>

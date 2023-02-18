@@ -63,6 +63,7 @@ export const SearchInput: Component<Props> = (props) => {
         <TransitionFade blur duration={100}>
           <Show when={props.value}>
             <button
+              aria-label="search"
               type="button"
               class="grid place-items-center"
               onClick={() => props.setValue('')}

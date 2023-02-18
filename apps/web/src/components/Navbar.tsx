@@ -147,6 +147,7 @@ export const Navbar: Component = () => {
                 }}
               >
                 <button
+                  aria-label="search"
                   type="button"
                   onClick={() => setAppState({ isSearching: false })}
                 >
@@ -169,6 +170,7 @@ export const Navbar: Component = () => {
                 <div grid class="[&_*]:grid-area-[1/-1]">
                   <Show when={query()}>
                     <button
+                      aria-label="clear"
                       type="button"
                       onClick={() => setQuery('')}
                       onFocus={(e) => e.relatedTarget?.focus()}
@@ -181,6 +183,7 @@ export const Navbar: Component = () => {
             }
           >
             <button
+              aria-label="menu"
               classList={{
                 hidden: appState.drawerDocked,
               }}
@@ -201,6 +204,7 @@ export const Navbar: Component = () => {
             <span class="grow" />
             <Show when={showBack()}>
               <button
+                aria-label="search"
                 type="button"
                 title="search"
                 onClick={() => setAppState({ isSearching: true })}
@@ -208,7 +212,12 @@ export const Navbar: Component = () => {
                 <span text="2xl" class="i-mdi-magnify"></span>
               </button>
               <AutoScrollModal onClose={(success) => setScrolling(success)} />
-              <button type="button" title="autoscroll" onClick={toggleScroll}>
+              <button
+                aria-label="autoscroll"
+                type="button"
+                title="autoscroll"
+                onClick={toggleScroll}
+              >
                 <span
                   text="2xl"
                   classList={{
@@ -218,6 +227,7 @@ export const Navbar: Component = () => {
                 ></span>
               </button>
               <button
+                aria-label="fullscreen"
                 title="fullscreen"
                 type="button"
                 onClick={() => setFullscreen((_) => !_)}
