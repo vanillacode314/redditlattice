@@ -13,7 +13,8 @@ import {
 export type State = 'idle' | 'error' | 'loading' | 'completed'
 export type InfiniteHandler = (
   setState: (state: State) => void,
-  firstload: boolean
+  firstload: boolean,
+  reload: () => void
 ) => void
 
 interface Props {
@@ -80,7 +81,7 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
 
   const load = (firstload: boolean = false) => {
     setState('loading')
-    onInfinite(updateState, firstload)
+    onInfinite(updateState, firstload, load)
   }
 
   const setup = () => merged.firstload && load(true)

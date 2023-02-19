@@ -1,4 +1,4 @@
-import { uniqBy } from 'lodash-es'
+import { differenceBy } from 'lodash-es'
 import {
   createEffect,
   createMemo,
@@ -77,12 +77,18 @@ export default function Subreddit() {
       schema,
       images
     )
+    const addedImages = differenceBy(
+      newImages,
+      [...appState.images.data.values()],
+      'name'
+    )
     setAppState('images', 'data', (data) => {
-      return new Set(uniqBy([...data, ...newImages], 'name'))
+      return new Set([...data, ...addedImages])
     })
+    return addedImages
   }
 
-  const onInfinite: InfiniteHandler = async (setState, firstload) => {
+  const onInfinite: InfiniteHandler = async (setState, firstload, reload) => {
     function attachEvents(socket: WebSocket) {
       function onError() {
         setState('error')
@@ -99,7 +105,11 @@ export default function Subreddit() {
             setState('idle')
             return
           case 'IMAGES':
-            parseResponse(schema, images)
+            const addedImages = parseResponse(schema, images)
+            if (addedImages.length === 0) {
+              reload()
+              return
+            }
             setState('idle')
             return
           case 'ERROR':
