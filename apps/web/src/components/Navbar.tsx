@@ -161,6 +161,7 @@ export const Navbar: Component = () => {
                   }}
                   value={query()}
                   onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
+                  onBlur={() => setAppState({ isSearching: false })}
                   required
                   text="xl"
                   grow
