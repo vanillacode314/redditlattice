@@ -72,20 +72,16 @@ export default function SubredditPage() {
   onMount(() => setSort(sort()))
 
   const resetState = () => {
-    batch(() => {
-      setAppState(
-        'title',
+    setAppState({
+      title:
         q().length > 0
           ? `${q().join('+')} - /r/${subreddits().join('+')}`
-          : `/r/${subreddits()}`
-      )
-      setAppState({
-        images: {
-          key: key(),
-          after: '',
-          data: new Set(),
-        },
-      })
+          : `/r/${subreddits()}`,
+      images: {
+        key: key(),
+        after: '',
+        data: new Set(),
+      },
     })
   }
 

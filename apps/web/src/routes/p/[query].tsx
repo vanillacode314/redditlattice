@@ -9,6 +9,7 @@ import {
 } from 'solid-js'
 import { useParams } from 'solid-start'
 import { Button, InfiniteHandler, InfiniteLoading, Masonry, Spinner } from 'ui'
+import z from 'zod'
 import ImageCard from '~/components/ImageCard'
 import { PINTEREST_SERVER_BASE_PATH } from '~/consts'
 import { useRefresh } from '~/layouts/Base'
@@ -17,7 +18,23 @@ import { parseSchema } from '~/utils'
 
 const [appState, setAppState] = useAppState()
 
+export function messageSchema<TSchema extends z.ZodTypeAny>(
+  dataSchema?: TSchema
+) {
+  const _dataSchema: TSchema = dataSchema || (z.any() as any)
+  return z.object({
+    code: z
+      .string()
+      .min(3)
+      .regex(/^[A-Z_]+$/, {
+        message: 'code can only contain uppercase letters and underscores',
+      }),
+    data: _dataSchema,
+  })
+}
+
 let ws: WebSocket | undefined
+let sessionId: string = ''
 export default function Subreddit() {
   const params = useParams()
 
@@ -31,15 +48,13 @@ export default function Subreddit() {
   const resetState = () => {
     ws?.close()
     ws = undefined
-    batch(() => {
-      setAppState('title', `/p/${query()}`)
-      setAppState({
-        images: {
-          key: key(),
-          after: '',
-          data: new Set(),
-        },
-      })
+    setAppState({
+      title: `/p/${query()}`,
+      images: {
+        key: key(),
+        after: '',
+        data: new Set(),
+      },
     })
   }
 
@@ -57,25 +72,56 @@ export default function Subreddit() {
   createEffect(() => appState.images.key !== key() && resetState())
 
   const onInfinite: InfiniteHandler = async (setState, _firstload) => {
-    if (!ws) {
-      ws = new WebSocket(PINTEREST_SERVER_BASE_PATH)
-      ws.onopen = () => {
-        ws!.send(query())
-      }
-      ws.onmessage = ({ data: message }) => {
-        const { schema, data } = JSON.parse(message)
-        const newImages = parseSchema<Record<'name' | 'url' | 'title', string>>(
-          schema,
-          data
-        )
-        setAppState('images', 'data', (data) => {
-          return new Set(uniqBy([...data, ...newImages], 'name'))
+    if (ws) {
+      ws.send(
+        JSON.stringify({
+          code: 'GET_IMAGES',
+          data: {
+            sessionId,
+            query: query(),
+          },
         })
-        setState('idle')
-      }
+      )
       return
     }
-    ws.send(query())
+    ws = new WebSocket(PINTEREST_SERVER_BASE_PATH)
+    ws.onopen = () => {
+      ws!.send(
+        JSON.stringify({
+          code: 'INSTANTIATE',
+          data: {
+            sessionId,
+          },
+        })
+      )
+    }
+    ws.onmessage = ({ data: message }) => {
+      const { code, data } = messageSchema().parse(JSON.parse(message))
+      switch (code) {
+        case 'SESSION_ID':
+          sessionId = data
+          ws.send(
+            JSON.stringify({
+              code: 'GET_IMAGES',
+              data: {
+                sessionId,
+                query: query(),
+              },
+            })
+          )
+          return
+        case 'IMAGES':
+          const { schema, images } = data
+          const newImages = parseSchema<
+            Record<'name' | 'url' | 'title', string>
+          >(schema, images)
+          setAppState('images', 'data', (data) => {
+            return new Set(uniqBy([...data, ...newImages], 'name'))
+          })
+          setState('idle')
+          return
+      }
+    }
   }
 
   return (
