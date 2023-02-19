@@ -1,10 +1,12 @@
 import { uniqBy } from 'lodash-es'
 import {
-  batch,
   createEffect,
   createMemo,
+  getOwner,
   Match,
+  onCleanup,
   onMount,
+  runWithOwner,
   Switch,
 } from 'solid-js'
 import { useParams } from 'solid-start'
@@ -33,9 +35,10 @@ export function messageSchema<TSchema extends z.ZodTypeAny>(
   })
 }
 
-let ws: WebSocket | undefined
+let socket: WebSocket | undefined
 let sessionId: string = ''
 export default function Subreddit() {
+  const componentOwner = getOwner()
   const params = useParams()
 
   const [userState, setUserState] = useUserState()
@@ -46,8 +49,6 @@ export default function Subreddit() {
   const key = createMemo(() => `pinterest-${query()}`)
 
   const resetState = () => {
-    ws?.close()
-    ws = undefined
     setAppState({
       title: `/p/${query()}`,
       images: {
@@ -81,11 +82,47 @@ export default function Subreddit() {
     })
   }
 
-  const onInfinite: InfiniteHandler = async (setState, _firstload) => {
-    if (ws) {
-      ws.send(
+  const onInfinite: InfiniteHandler = async (setState, firstload) => {
+    function attachEvents(socket: WebSocket) {
+      function onError() {
+        setState('error')
+      }
+      socket.addEventListener('error', onError)
+
+      function onMessage({ data: message }: MessageEvent) {
+        const { code, data } = messageSchema().parse(JSON.parse(message))
+        const { schema, images } = data
+        switch (code) {
+          case 'SESSION_ID':
+            sessionId = data.sessionId
+            parseResponse(schema, images)
+            setState('idle')
+            return
+          case 'IMAGES':
+            parseResponse(schema, images)
+            setState('idle')
+            return
+          case 'ERROR':
+            setState('error')
+            return
+        }
+      }
+      socket.addEventListener('message', onMessage)
+
+      runWithOwner(componentOwner, () =>
+        onCleanup(() => {
+          socket?.removeEventListener('message', onMessage)
+          socket?.removeEventListener('error', onError)
+        })
+      )
+    }
+    if (firstload && socket) {
+      attachEvents(socket)
+    }
+    if (socket?.readyState === 1) {
+      socket!.send(
         JSON.stringify({
-          code: 'GET_IMAGES',
+          code: !firstload ? 'GET_IMAGES' : 'INSTANTIATE',
           data: {
             sessionId,
             query: query(),
@@ -94,9 +131,10 @@ export default function Subreddit() {
       )
       return
     }
-    ws = new WebSocket(PINTEREST_SERVER_BASE_PATH)
-    ws.onopen = () => {
-      ws!.send(
+    if (socket?.readyState === 0) return
+    socket = new WebSocket(PINTEREST_SERVER_BASE_PATH)
+    socket.addEventListener('open', () => {
+      socket!.send(
         JSON.stringify({
           code: 'INSTANTIATE',
           data: {
@@ -105,22 +143,8 @@ export default function Subreddit() {
           },
         })
       )
-    }
-    ws.onmessage = ({ data: message }) => {
-      const { code, data } = messageSchema().parse(JSON.parse(message))
-      const { schema, images } = data
-      switch (code) {
-        case 'SESSION_ID':
-          sessionId = data.sessionId
-          parseResponse(schema, images)
-          setState('idle')
-          return
-        case 'IMAGES':
-          parseResponse(schema, images)
-          setState('idle')
-          return
-      }
-    }
+    })
+    attachEvents(socket)
   }
 
   return (
@@ -175,7 +199,7 @@ export default function Subreddit() {
                 </Button>
               </Match>
               <Match when={state === 'completed'}>
-                <span uppercase font-bold>
+                <span class="uppercase font-bold">
                   {appState.images.data.size > 0 ? 'END' : 'NO IMAGES FOUND'}
                 </span>
               </Match>
