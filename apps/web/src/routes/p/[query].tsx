@@ -71,6 +71,16 @@ export default function Subreddit() {
 
   createEffect(() => appState.images.key !== key() && resetState())
 
+  function parseResponse(schema, images) {
+    const newImages = parseSchema<Record<'name' | 'url' | 'title', string>>(
+      schema,
+      images
+    )
+    setAppState('images', 'data', (data) => {
+      return new Set(uniqBy([...data, ...newImages], 'name'))
+    })
+  }
+
   const onInfinite: InfiniteHandler = async (setState, _firstload) => {
     if (ws) {
       ws.send(
@@ -90,6 +100,7 @@ export default function Subreddit() {
         JSON.stringify({
           code: 'INSTANTIATE',
           data: {
+            query: query(),
             sessionId,
           },
         })
@@ -97,27 +108,15 @@ export default function Subreddit() {
     }
     ws.onmessage = ({ data: message }) => {
       const { code, data } = messageSchema().parse(JSON.parse(message))
+      const { schema, images } = data
       switch (code) {
         case 'SESSION_ID':
-          sessionId = data
-          ws.send(
-            JSON.stringify({
-              code: 'GET_IMAGES',
-              data: {
-                sessionId,
-                query: query(),
-              },
-            })
-          )
+          sessionId = data.sessionId
+          parseResponse(schema, images)
+          setState('idle')
           return
         case 'IMAGES':
-          const { schema, images } = data
-          const newImages = parseSchema<
-            Record<'name' | 'url' | 'title', string>
-          >(schema, images)
-          setAppState('images', 'data', (data) => {
-            return new Set(uniqBy([...data, ...newImages], 'name'))
-          })
+          parseResponse(schema, images)
           setState('idle')
           return
       }
