@@ -4,7 +4,6 @@ import { spring } from 'motion'
 import {
   batch,
   Component,
-  createMemo,
   createRenderEffect,
   createSignal,
   For,
@@ -54,7 +53,6 @@ export const AutoResizingPicture: Component<Props> = (props) => {
   const { onHasHeight, onLoad, onError } = local
 
   const [height, setHeight] = createSignal<number>(props.fallbackHeight)
-  const heightMemo = createMemo(() => height())
   const [gotHeight, setGotHeight] = createSignal<boolean>(false)
   const [error, setError] = createSignal<boolean>(false)
   const [tries, setTries] = createSignal(0)
@@ -96,7 +94,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
     <Motion.div
       class="relative overflow-hidden"
       ref={props.ref}
-      animate={{ height: `${heightMemo()}px`, ...local.style }}
+      animate={{ height: `${height()}px`, ...local.style }}
       initial={false}
       transition={
         animate()
