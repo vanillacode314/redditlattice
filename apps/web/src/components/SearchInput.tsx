@@ -1,17 +1,26 @@
-import { Component, createSignal, JSX, Show, splitProps } from 'solid-js'
+import {
+  Component,
+  createSignal,
+  For,
+  JSX,
+  JSXElement,
+  Show,
+  splitProps,
+} from 'solid-js'
 import { TransitionFade } from 'ui/transitions'
 
 interface Props
   extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'onSubmit' | 'type'> {
   onSubmit?: (value: string) => void
   ref?: HTMLInputElement | ((instance: HTMLInputElement) => void)
-  onFocus?: () => void
-  onBlur?: () => void
+  onFocus?: (e: FocusEvent) => void
+  onBlur?: (e: FocusEvent) => void
   value: string
   setValue: (value: string) => void
   flashing?: boolean
   setFlashing?: (flashing: boolean) => void
   prefix: string
+  buttons?: JSXElement[]
 }
 export const SearchInput: Component<Props> = (props) => {
   const [_, others] = splitProps(props, [
@@ -56,23 +65,36 @@ export const SearchInput: Component<Props> = (props) => {
             props.setValue(inp.value.toLowerCase())
             inp.setSelectionRange(start, start)
           }}
+          onFocus={props.onFocus}
+          onBlur={props.onBlur}
           type="text"
           class="outline-none bg-transparent min-w-0 placeholder:text-gray-500"
           {...others}
         />
-        <TransitionFade blur duration={100}>
-          <Show when={props.value}>
-            <button
-              aria-label="search"
-              type="button"
-              class="grid place-items-center"
-              onClick={() => props.setValue('')}
-              onFocus={(e) => (e.relatedTarget as HTMLInputElement)?.focus?.()}
-            >
-              <span class="i-mdi-close-circle text-xl"></span>
-            </button>
-          </Show>
-        </TransitionFade>
+        <div class="flex gap-3">
+          <For each={props.buttons}>
+            {(Button) => (
+              <TransitionFade blur duration={100}>
+                <Show when={props.value}>{Button}</Show>
+              </TransitionFade>
+            )}
+          </For>
+          <TransitionFade blur duration={100}>
+            <Show when={props.value}>
+              <button
+                aria-label="search"
+                type="button"
+                class="grid place-items-center"
+                onClick={() => props.setValue('')}
+                onFocus={(e) =>
+                  (e.relatedTarget as HTMLInputElement)?.focus?.()
+                }
+              >
+                <span class="i-mdi-close-circle text-xl"></span>
+              </button>
+            </Show>
+          </TransitionFade>
+        </div>
       </div>
       <button class="text-white text-xl rounded-xl w-12 h-12 outline-none grid place-items-center bg-pink-800 hover:bg-pink-700 focus:bg-pink-700 focus:ring focus:ring-blue transition-colors shrink-0 tap-highlight-none">
         <div class="i-mdi-magnify"></div>

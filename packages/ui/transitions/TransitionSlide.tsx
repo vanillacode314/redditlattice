@@ -54,10 +54,8 @@ export const TransitionSlide: Component<Props> = (props) => {
         el.animate(keyframes(), animationOptions).finished.then(done)
       }}
       onExit={(el, done) => {
-        requestAnimationFrame(() => {
-          const { width, height } = el.getBoundingClientRect()
-          setSize(merged.direction === 'x' ? width : height)
-        })
+        const { width, height } = el.getBoundingClientRect()
+        setSize(merged.direction === 'x' ? width : height)
         el.animate(keyframes(), {
           ...animationOptions,
           direction: 'reverse',

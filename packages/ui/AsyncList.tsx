@@ -1,55 +1,43 @@
-import { Component, createResource, JSXElement, Show } from 'solid-js'
+import { createResource, For, JSXElement, Show } from 'solid-js'
 import List from './List'
 
-interface Item {
-  id: string
-  title: string
-}
-
-interface Props {
-  key: () => string | string[]
-  fetcher: (key: string, ac: AbortController) => Promise<Item[]>
-  onClick: (id: Item['id']) => void
-  onRemove?: (id: Item['id']) => void
-  buttons?: ((id: Item['id']) => JSXElement)[]
+interface Props<T, U> {
+  key: () => U
+  fetcher: (key: U, ac: AbortController) => Promise<T[]>
   title?: string
   reverse?: boolean
-  focusable?: boolean
   fallback?: JSXElement
-  ref?: (el: HTMLUListElement) => void | HTMLUListElement
+  ref?: ((el: HTMLUListElement) => void) | HTMLUListElement
+  children: (data: T) => JSXElement
 }
 
-export const AsyncList: Component<Props> = (props) => {
+export const AsyncList: <T, U>(props: Props<T, U>) => JSXElement = (props) => {
   type Params = ReturnType<typeof props.key>
   type Item = Awaited<ReturnType<typeof props.fetcher>>[number]
 
-  const { key, fetcher, onClick, onRemove } = props
+  const { key, fetcher } = props
 
   let ac: AbortController
 
   const [items] = createResource<Item[], Params>(
     key,
-    async ([, query]) => {
+    async (key) => {
       ac?.abort()
       ac = new AbortController()
-      return await fetcher(query, ac)
+      return await fetcher(key, ac)
     },
     { initialValue: [] }
   )
 
   return (
-    <Show when={items().length > 0} fallback={props.fallback}>
-      <List
-        ref={props.ref}
-        buttons={props.buttons}
-        items={items()}
-        focusable={props.focusable}
-        title={props.title}
-        reverse={props.reverse}
-        onClick={onClick}
-        onRemove={onRemove}
-      />
-    </Show>
+    <List
+      ref={props.ref}
+      title={props.title}
+      reverse={props.reverse}
+      fallback={props.fallback}
+    >
+      <For each={items()}>{(item) => props.children(item)}</For>
+    </List>
   )
 }
 

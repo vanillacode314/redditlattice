@@ -1,8 +1,7 @@
-import { createEffect, createSignal, onMount, Show } from 'solid-js'
+import { createEffect, createSignal, For, onMount, Show } from 'solid-js'
 import { untrack } from 'solid-js/web'
 import { useNavigate } from 'solid-start'
-import { List } from 'ui'
-import { TransitionFade } from 'ui/transitions'
+import { List, ListItem } from 'ui'
 import SearchInput from '~/components/SearchInput'
 import { useAppState, useSessionState, useUserState } from '~/stores'
 
@@ -56,21 +55,25 @@ export default function Home() {
         class="flex flex-col-reverse gap-2 grow shrink-1"
       >
         {/* RECENTS LIST */}
-        <List
-          onClick={(id) => {
-            setQuery(id)
-            flashSearchInput()
-          }}
-          onRemove={(id) => {
-            removePinterestHistory(id)
-          }}
-          reverse
-          title="history"
-          items={[...userState.pinterestQueries].sort().map((q) => ({
-            id: q,
-            title: q,
-          }))}
-        ></List>
+        <List reverse title="history">
+          <For each={[...userState.pinterestQueries].sort()}>
+            {(searchTerm) => (
+              <ListItem
+                key={searchTerm}
+                focusable={false}
+                onClick={() => {
+                  setQuery(searchTerm)
+                  flashSearchInput()
+                }}
+                onRemove={() => {
+                  removePinterestHistory(searchTerm)
+                }}
+              >
+                {searchTerm}
+              </ListItem>
+            )}
+          </For>
+        </List>
       </div>
     </main>
   )

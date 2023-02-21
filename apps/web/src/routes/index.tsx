@@ -1,12 +1,19 @@
 import { TRPCClientError } from '@trpc/client'
-import { createEffect, createSignal, onMount, Show, Suspense } from 'solid-js'
+import {
+  createEffect,
+  createSignal,
+  For,
+  onMount,
+  Show,
+  Suspense,
+} from 'solid-js'
 import { untrack } from 'solid-js/web'
 import { useNavigate } from 'solid-start'
-import { AsyncList, List, Spinner, Tab, Tabs } from 'ui'
+import { AsyncList, List, ListItem, Spinner, Tab, Tabs } from 'ui'
 import { trpc } from '~/client'
 import SearchInput from '~/components/SearchInput'
 import { useAppState, useSessionState, useUserState } from '~/stores'
-import { parseSchema, setDifference } from '~/utils'
+import { parseSchema } from '~/utils'
 
 export default function Home() {
   let inputElement!: HTMLInputElement
@@ -21,7 +28,7 @@ export default function Home() {
   const [flashing, setFlashing] = createSignal<boolean>(false)
   const flashSearchInput = () => setFlashing(true)
 
-  let listRefs: HTMLElement[] = []
+  let listRefs: HTMLUListElement[] = []
 
   const [query, setQuery] = createSignal<string>(sessionState.redditQuery)
   createEffect(() => {
@@ -46,6 +53,26 @@ export default function Home() {
     }
 
     setQuery(subreddit + '?')
+  }
+
+  const autoCompleteFetcher = async (
+    [_, query]: [string, string],
+    ac: AbortController
+  ) => {
+    if (!query) return []
+    try {
+      const { schema, subreddits } =
+        // @ts-ignore
+        await trpc.subredditAutocomplete.query(query, {
+          signal: ac.signal,
+        })
+      return parseSchema<{ id: string; name: string }>(schema, subreddits)
+    } catch (err) {
+      if (err instanceof TRPCClientError) {
+        err.cause?.name !== 'ObservableAbortError' && console.error(err)
+      }
+    }
+    return []
   }
 
   const searchTerm = () => query().split('?')[1] ?? ''
@@ -93,6 +120,7 @@ export default function Home() {
   return (
     <main class="pb-5 h-full flex flex-col-reverse overflow-hidden gap-3 max-w-xl mx-auto w-full">
       <SearchInput
+        ref={inputElement}
         value={query()}
         setValue={setQuery}
         onFocus={() => setFocused(true)}
@@ -117,10 +145,6 @@ export default function Home() {
             >
               <AsyncList
                 ref={(el) => setAppState('scrollElement', el)}
-                onClick={(id) => {
-                  setQuery(id.toLowerCase())
-                  flashSearchInput()
-                }}
                 fallback={
                   <div class="grid place-content-center p-5">
                     <h3 class="uppercase font-bold text-xl tracking-wide">
@@ -128,30 +152,24 @@ export default function Home() {
                     </h3>
                   </div>
                 }
-                focusable={false}
                 reverse
                 title="subreddits"
-                fetcher={async (query, ac) => {
-                  if (!query) return []
-                  try {
-                    const { schema, subreddits } =
-                      await trpc.subredditAutocomplete.query(query, {
-                        signal: ac.signal,
-                      })
-                    return parseSchema<{ id: string; name: string }>(
-                      schema,
-                      subreddits
-                    ).map(({ name }) => ({ id: name, title: name }))
-                  } catch (err) {
-                    if (err instanceof TRPCClientError) {
-                      err.cause?.name !== 'ObservableAbortError' &&
-                        console.error(err)
-                    }
-                  }
-                  return []
-                }}
-                key={() => ['sr-autocomplete', query()]}
-              ></AsyncList>
+                fetcher={autoCompleteFetcher}
+                key={() => ['sr-autocomplete', query()] as const}
+              >
+                {({ id, name }) => (
+                  <ListItem
+                    key={id}
+                    focusable={false}
+                    onClick={() => {
+                      setQuery(name.toLowerCase())
+                      flashSearchInput()
+                    }}
+                  >
+                    {name}
+                  </ListItem>
+                )}
+              </AsyncList>
             </Suspense>
           }
         >
@@ -163,8 +181,9 @@ export default function Home() {
             }}
           >
             <Tab title="favourites">
-              <Show
-                when={userState.favouriteSubreddits.size > 0}
+              <List
+                ref={listRefs[0]}
+                reverse
                 fallback={
                   <div class="grid place-content-center p-5">
                     <h3 class="uppercase font-bold text-xl tracking-wide">
@@ -173,46 +192,45 @@ export default function Home() {
                   </div>
                 }
               >
-                <List
-                  ref={listRefs[0]}
-                  onClick={(id) => {
-                    setSubreddit(id)
-                    flashSearchInput()
-                  }}
-                  reverse
-                  buttons={[
-                    (id) => (
-                      <button
-                        class="group outline-none"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          toggleFavouriteSubreddit(id)
-                        }}
-                      >
-                        <div
-                          class="i-mdi-star text-xl transition-colors"
-                          classList={{
-                            'text-amber-500 group-hover:text-amber-400 group-focus:text-amber-400':
-                              userState.favouriteSubreddits.has(id),
-                            'text-gray-700 group-hover:text-white group-focus:text-white':
-                              !userState.favouriteSubreddits.has(id),
+                <For each={[...userState.favouriteSubreddits].sort()}>
+                  {(subreddit) => (
+                    <ListItem
+                      focusable={false}
+                      key={subreddit}
+                      onClick={() => {
+                        setSubreddit(subreddit)
+                        flashSearchInput()
+                      }}
+                      buttons={[
+                        <button
+                          class="group outline-none"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleFavouriteSubreddit(subreddit)
                           }}
-                        />
-                      </button>
-                    ),
-                  ]}
-                  items={[...userState.favouriteSubreddits]
-                    .sort()
-                    .map((sr) => ({
-                      id: sr,
-                      title: sr,
-                    }))}
-                ></List>
-              </Show>
+                        >
+                          <div
+                            class="i-mdi-star text-xl transition-colors"
+                            classList={{
+                              'text-amber-500 group-hover:text-amber-400 group-focus:text-amber-400':
+                                userState.favouriteSubreddits.has(subreddit),
+                              'text-gray-700 group-hover:text-white group-focus:text-white':
+                                !userState.favouriteSubreddits.has(subreddit),
+                            }}
+                          />
+                        </button>,
+                      ]}
+                    >
+                      {subreddit}
+                    </ListItem>
+                  )}
+                </For>
+              </List>
             </Tab>
             <Tab title="Recents">
-              <Show
-                when={userState.redditRecents.size > 0}
+              <List
+                ref={listRefs[1]}
+                reverse
                 fallback={
                   <div class="grid place-content-center p-5">
                     <h3 class="uppercase font-bold text-xl tracking-wide">
@@ -221,27 +239,32 @@ export default function Home() {
                   </div>
                 }
               >
-                <List
-                  ref={listRefs[1]}
-                  onClick={(id) => {
-                    const [subreddit, searchTerm] = id.split('?')
-                    setSubreddit(subreddit)
-                    setSearchTerm(searchTerm || '')
-                    flashSearchInput()
-                  }}
-                  reverse
-                  items={[...userState.redditRecents]
-                    .sort(([_q1, t1], [_q2, t2]) => t2 - t1)
-                    .map(([q, _]) => ({
-                      id: q,
-                      title: q,
-                    }))}
-                ></List>
-              </Show>
+                <For
+                  each={[...userState.redditRecents].sort(
+                    ([_q1, t1], [_q2, t2]) => t2 - t1
+                  )}
+                >
+                  {([query]) => (
+                    <ListItem
+                      focusable={false}
+                      key={query}
+                      onClick={() => {
+                        const [subreddit, searchTerm] = query.split('?')
+                        setSubreddit(subreddit)
+                        setSearchTerm(searchTerm || '')
+                        flashSearchInput()
+                      }}
+                    >
+                      {query}
+                    </ListItem>
+                  )}
+                </For>
+              </List>
             </Tab>
             <Tab title="subreddits">
-              <Show
-                when={userState.subreddits.size > 0}
+              <List
+                ref={listRefs[2]}
+                reverse
                 fallback={
                   <div class="grid place-content-center p-5">
                     <h3 class="uppercase font-bold text-xl tracking-wide">
@@ -250,45 +273,46 @@ export default function Home() {
                   </div>
                 }
               >
-                <List
-                  ref={listRefs[2]}
-                  onClick={(id) => {
-                    setSubreddit(id)
-                    flashSearchInput()
-                  }}
-                  onRemove={(id) => removeSubreddit(id)}
-                  reverse
-                  buttons={[
-                    (id) => (
-                      <button
-                        class="group outline-none"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          toggleFavouriteSubreddit(id)
-                        }}
-                      >
-                        <div
-                          class="i-mdi-star text-xl transition-colors"
-                          classList={{
-                            'text-amber-500 group-hover:text-amber-400 group-focus:text-amber-400':
-                              userState.favouriteSubreddits.has(id),
-                            'text-gray-700 group-hover:text-white group-focus:text-white':
-                              !userState.favouriteSubreddits.has(id),
+                <For each={[...userState.subreddits].sort()}>
+                  {(subreddit) => (
+                    <ListItem
+                      focusable={false}
+                      key={subreddit}
+                      onClick={() => {
+                        setSubreddit(subreddit)
+                        flashSearchInput()
+                      }}
+                      onRemove={() => removeSubreddit(subreddit)}
+                      buttons={[
+                        <button
+                          class="group outline-none"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleFavouriteSubreddit(subreddit)
                           }}
-                        />
-                      </button>
-                    ),
-                  ]}
-                  items={[...userState.subreddits].sort().map((sr) => ({
-                    id: sr,
-                    title: sr,
-                  }))}
-                ></List>
-              </Show>
+                        >
+                          <div
+                            class="i-mdi-star text-xl transition-colors"
+                            classList={{
+                              'text-amber-500 group-hover:text-amber-400 group-focus:text-amber-400':
+                                userState.favouriteSubreddits.has(subreddit),
+                              'text-gray-700 group-hover:text-white group-focus:text-white':
+                                !userState.favouriteSubreddits.has(subreddit),
+                            }}
+                          />
+                        </button>,
+                      ]}
+                    >
+                      {subreddit}
+                    </ListItem>
+                  )}
+                </For>
+              </List>
             </Tab>
             <Tab title="searches">
-              <Show
-                when={userState.redditQueries.size > 0}
+              <List
+                ref={listRefs[3]}
+                reverse
                 fallback={
                   <div class="grid place-content-center p-5">
                     <h3 class="uppercase font-bold text-xl tracking-wide">
@@ -297,25 +321,26 @@ export default function Home() {
                   </div>
                 }
               >
-                <List
-                  ref={listRefs[3]}
-                  onClick={(id) => {
-                    const sr = subreddit() || userState.redditQueries.get(id)
-                    if (!sr) return
-                    setSubreddit(sr)
-                    setSearchTerm(id)
-                    flashSearchInput()
-                  }}
-                  onRemove={(id) => removeSearchTerm(id)}
-                  reverse
-                  items={[...userState.redditQueries.keys()]
-                    .sort()
-                    .map((q) => ({
-                      id: q,
-                      title: q,
-                    }))}
-                ></List>
-              </Show>
+                <For each={[...userState.redditQueries.keys()].sort()}>
+                  {(searchTerm) => (
+                    <ListItem
+                      focusable={false}
+                      key={searchTerm}
+                      onClick={() => {
+                        const sr =
+                          subreddit() || userState.redditQueries.get(searchTerm)
+                        if (!sr) return
+                        setSubreddit(sr)
+                        setSearchTerm(searchTerm)
+                        flashSearchInput()
+                      }}
+                      onRemove={() => removeSearchTerm(searchTerm)}
+                    >
+                      {searchTerm}
+                    </ListItem>
+                  )}
+                </For>
+              </List>
             </Tab>
           </Tabs>
         </Show>
