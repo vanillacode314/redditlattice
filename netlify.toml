@@ -4,5 +4,5 @@
   publish = "netlify"
 
 [build.environment]
-  NODE_VERSION = "17"
+  NODE_VERSION = "18"
   NPM_FLAGS = "--version"
