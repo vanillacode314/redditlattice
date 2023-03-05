@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@motionone/solid": "^10.15.5",
+    "@solid-primitives/intersection-observer": "^2.0.8",
     "@solid-primitives/keyed": "^1.1.7",
     "@solid-primitives/map": "^0.3.2",
     "@solid-primitives/resize-observer": "^2.0.9",

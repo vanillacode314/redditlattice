@@ -1,15 +1,13 @@
-import { throttle } from 'lodash-es'
 import {
   Component,
   createEffect,
+  createMemo,
   createSignal,
   JSXElement,
   mergeProps,
   on,
-  onCleanup,
-  onMount,
 } from 'solid-js'
-
+import { createVisibilityObserver } from '@solid-primitives/intersection-observer'
 export type State = 'idle' | 'error' | 'loading' | 'completed'
 export type InfiniteHandler = (
   setState: (state: State) => void,
@@ -27,6 +25,8 @@ interface Props {
 }
 
 export const InfiniteLoading: Component<Props> = (props: Props) => {
+  let el!: HTMLDivElement
+
   const merged = mergeProps(
     { key: '', distance: 0, target: 'body', firstload: true },
     props
@@ -35,48 +35,29 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
   const { onInfinite } = props
 
   const [state, setState] = createSignal<State>('idle')
-
-  const onScroll = throttle((e: Event) => {
-    if (state() !== 'idle') return
-
-    let scrollTarget: HTMLElement
+  const target = createMemo<HTMLElement>(() => {
     if (merged.target instanceof HTMLElement) {
-      scrollTarget = merged.target
+      return merged.target
     } else {
-      scrollTarget = document.querySelector(merged.target) as HTMLElement
+      return document.querySelector(merged.target) as HTMLElement
     }
-    if (!scrollTarget)
-      throw new Error(
-        `scroll-target ${props.target} not found for infinite loading`
-      )
+  })
+  const useVisibilityObserver = createVisibilityObserver({ threshold: 0.8, root: target(), rootMargin: `0px 0px ${merged.distance}px 0px` });
 
-    const scrollBottom = Math.round(
-      scrollTarget.scrollHeight -
-        scrollTarget.scrollTop -
-        scrollTarget.clientHeight
-    )
-    if (scrollBottom - 1 <= merged.distance) load()
-  }, 16)
+  const visible = useVisibilityObserver(() => el)
+
+  createEffect(on(
+    visible,
+    (visible) => {
+      if (!visible) return
+      if (state() !== 'idle') return
+      load()
+    }
+  ))
 
   const updateState = (newState: State) => {
-    if (newState !== 'idle') {
-      setState(newState)
-      return
-    }
-
-    let scrollTarget: HTMLElement
-    if (merged.target instanceof HTMLElement) {
-      scrollTarget = merged.target
-    } else {
-      scrollTarget = document.querySelector(merged.target) as HTMLElement
-    }
-    if (!scrollTarget)
-      throw new Error(
-        `scroll-target ${props.target} not found for infinite loading`
-      )
-
-    const noScrollbar = scrollTarget.scrollHeight === scrollTarget.clientHeight
-    noScrollbar ? load() : setState('idle')
+    setState(newState)
+    if (visible()) load()
   }
 
   const load = (firstload: boolean = false) => {
@@ -84,7 +65,7 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
     onInfinite(updateState, firstload, load)
   }
 
-  const setup = () => merged.firstload && load(true)
+  const setup = () => load(merged.firstload)
 
   createEffect(
     on(
@@ -93,23 +74,7 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
     )
   )
 
-  onMount(() => {
-    let scrollTarget: HTMLElement
-    if (merged.target instanceof HTMLElement) {
-      scrollTarget = merged.target
-    } else {
-      scrollTarget = document.querySelector(merged.target) as HTMLElement
-    }
-    if (!scrollTarget)
-      throw new Error(
-        `scroll-target ${props.target} not found for infinite loading`
-      )
-
-    scrollTarget.addEventListener('scroll', onScroll, { passive: true })
-    onCleanup(() => scrollTarget.removeEventListener('scroll', onScroll))
-  })
-
-  return <div>{props.children(state(), load)}</div>
+  return <div ref={el}>{props.children(state(), load)}</div>
 }
 
 export default InfiniteLoading
