@@ -1,13 +1,18 @@
 import { Component, createSignal } from 'solid-js'
 import { Button } from 'ui'
-import { useAppState } from '~/stores'
+import { useAppState, useUserState } from '~/stores'
 import { autoScroll } from '~/utils/scroller'
 
-const [speed, setSpeed] = createSignal<number>(150) // in pixels per second
 let cancelScroll: () => void
 let el!: HTMLDialogElement
 
 const [appState, setAppState] = useAppState()
+const [userState, setUserState] = useUserState()
+
+const speed = () => userState.autoScrollSpeedPixelsPerSecond
+const setSpeed = (speed: number) =>
+  setUserState('autoScrollSpeedPixelsPerSecond', speed)
+
 export const startScroll = () => {
   if (!appState.scrollElement) return
   cancelScroll = autoScroll(appState.scrollElement, speed())

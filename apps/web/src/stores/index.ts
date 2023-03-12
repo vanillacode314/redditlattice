@@ -71,6 +71,7 @@ export const userStateSchema = z.object({
   recentsLimit: z.number().default(5),
   columnMaxWidth: z.number().default(600),
   maxColumns: z.number().default(4),
+  autoScrollSpeedPixelsPerSecond: z.number().default(150),
 })
 const [userState, setUserState] = createStorageStore(
   'user-state-v2',
