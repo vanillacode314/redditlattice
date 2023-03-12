@@ -152,6 +152,7 @@ export const Navbar: Component = () => {
                   <span text="2xl" class="i-mdi-arrow-left"></span>
                 </button>
                 <input
+                  id="search"
                   ref={(el) => {
                     requestAnimationFrame(() => {
                       el.focus()
