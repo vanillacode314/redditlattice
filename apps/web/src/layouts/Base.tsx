@@ -1,5 +1,6 @@
 import { Motion } from '@motionone/solid'
 import { createConnectivitySignal } from '@solid-primitives/connectivity'
+import { WindowEventListener } from '@solid-primitives/event-listener'
 import { createMediaQuery } from '@solid-primitives/media'
 import { Gesture } from '@use-gesture/vanilla'
 import { spring } from 'motion'
@@ -15,7 +16,7 @@ import {
   Show,
   Suspense,
 } from 'solid-js'
-import { ErrorBoundary, useLocation } from 'solid-start'
+import { ErrorBoundary, useLocation, useNavigate } from 'solid-start'
 import { Spinner } from 'ui'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
@@ -29,6 +30,8 @@ const [refresh, setRefresh] = createSignal<() => void>(() => {})
 export const useRefresh = () => [refresh, setRefresh] as const
 
 export const BaseLayout: Component<Props> = (props) => {
+  const navigate = useNavigate()
+
   const isOnline = createConnectivitySignal()
   const location = useLocation()
   createComputed(
@@ -116,52 +119,101 @@ export const BaseLayout: Component<Props> = (props) => {
   )
 
   return (
-    <div class="flex flex-col h-full max-h-full relative">
-      <div class="bg-tranparent pointer-events-none absolute inset-x-0 top-0 z-10 grid place-content-center p-6">
-        <Motion.div
-          class="bg-purple relative z-10 rounded-full p-2"
-          initial={false}
-          animate={{
-            transform: `translateY(${offset() - 200}%) rotate(${offset()}deg)`,
-          }}
-          transition={down() ? { duration: 0 } : { easing: spring() }}
-        >
-          <div text="3xl" class="i-mdi-refresh"></div>
-        </Motion.div>
-      </div>
-      <Show when={!isOnline()}>
-        <div
-          bg="gray-800"
-          px-5
-          py-2
-          text="sm"
-          font="bold"
-          tracking-wide
-          uppercase
-        >
-          Not Online
+    <>
+      <WindowEventListener
+        onKeydown={(e) => {
+          if (e.shiftKey) {
+            switch (e.key.toLowerCase()) {
+              case 'h':
+                e.preventDefault()
+                history.back()
+                break
+              case 'l':
+                e.preventDefault()
+                history.forward()
+                break
+            }
+          } else if (e.ctrlKey) {
+            switch (e.key.toLowerCase()) {
+              case 'f': 
+            }
+          } else {
+            switch (e.key.toLowerCase()) {
+              case '/':
+                if (
+                  location.pathname.startsWith('/r/') ||
+                  location.pathname.startsWith('/p/')
+                ) {
+                  e.preventDefault()
+                  setAppState({ isSearching: true })
+                } else {
+                  e.preventDefault()
+                  const input = document.getElementById(
+                    'search'
+                  ) as HTMLInputElement
+                  input?.focus()
+                }
+                break
+              case 'Escape':
+                setAppState({ isSearching: false })
+                const input = document.getElementById(
+                  'search'
+                ) as HTMLInputElement
+                input?.blur()
+                break
+            }
+          }
+        }}
+      ></WindowEventListener>
+      <div class="flex flex-col h-full max-h-full relative">
+        <div class="bg-tranparent pointer-events-none absolute inset-x-0 top-0 z-10 grid place-content-center p-6">
+          <Motion.div
+            class="bg-purple relative z-10 rounded-full p-2"
+            initial={false}
+            animate={{
+              transform: `translateY(${
+                offset() - 200
+              }%) rotate(${offset()}deg)`,
+            }}
+            transition={down() ? { duration: 0 } : { easing: spring() }}
+          >
+            <div text="3xl" class="i-mdi-refresh"></div>
+          </Motion.div>
         </div>
-      </Show>
-      <Suspense
-        fallback={
-          <div class="grid place-items-center p-5">
-            <Spinner></Spinner>
+        <Show when={!isOnline()}>
+          <div
+            bg="gray-800"
+            px-5
+            py-2
+            text="sm"
+            font="bold"
+            tracking-wide
+            uppercase
+          >
+            Not Online
           </div>
-        }
-      >
-        <ErrorBoundary>
-          <div class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] grow overflow-hidden">
-            <div class="col-start-2 col-end-3 grid">
-              <Navbar />
+        </Show>
+        <Suspense
+          fallback={
+            <div class="grid place-items-center p-5">
+              <Spinner></Spinner>
             </div>
-            <div class="row-start-1 row-end-3 col-span-1 grid">
-              <Drawer />
+          }
+        >
+          <ErrorBoundary>
+            <div class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] grow overflow-hidden">
+              <div class="col-start-2 col-end-3 grid">
+                <Navbar />
+              </div>
+              <div class="row-start-1 row-end-3 col-span-1 grid">
+                <Drawer />
+              </div>
+              {props.children}
             </div>
-            {props.children}
-          </div>
-        </ErrorBoundary>
-      </Suspense>
-    </div>
+          </ErrorBoundary>
+        </Suspense>
+      </div>
+    </>
   )
 }
 

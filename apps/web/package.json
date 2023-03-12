@@ -13,6 +13,7 @@
   "dependencies": {
     "@motionone/solid": "^10.15.5",
     "@solid-primitives/connectivity": "^0.3.7",
+    "@solid-primitives/event-listener": "^2.2.8",
     "@solid-primitives/keyed": "^1.1.7",
     "@solid-primitives/map": "^0.3.2",
     "@solid-primitives/media": "^2.1.1",

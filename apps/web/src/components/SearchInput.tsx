@@ -57,6 +57,7 @@ export const SearchInput: Component<Props> = (props) => {
           {props.prefix}
         </span>
         <input
+          id="search"
           ref={props.ref}
           value={props.value}
           onInput={(e) => {
