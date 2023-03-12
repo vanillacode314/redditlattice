@@ -12,7 +12,7 @@ import {
 import { useLocation, useNavigate, useSearchParams } from 'solid-start'
 import AutoScrollModal, { showAutoScrollModal } from '~/modals/AutoScrollModal'
 import { useAppState, useSessionState } from '~/stores'
-import { clamp, getScrollTop } from '~/utils'
+import { clamp } from '~/utils'
 
 export const Navbar: Component = () => {
   const [appState, setAppState] = useAppState()
@@ -96,7 +96,6 @@ export const Navbar: Component = () => {
               scroller.style.paddingTop = `${
                 appState.navOffset + originalPaddingTop
               }px`
-              // setNavVisible(offset() === 0)
             },
           },
           {
@@ -118,8 +117,7 @@ export const Navbar: Component = () => {
         <nav
           ref={(el) => {
             requestAnimationFrame(function handler() {
-              const style = getComputedStyle(el)
-              const h = parseFloat(style.height)
+              const h = parseFloat(getComputedStyle(el).height)
               if (!h) {
                 requestAnimationFrame(handler)
                 return
@@ -240,6 +238,19 @@ export const Navbar: Component = () => {
                     'i-mdi-fullscreen-exit': fullscreen(),
                   }}
                 ></span>
+              </button>
+              <button
+                aria-label="scroll to top"
+                type="button"
+                title="search"
+                onClick={() => {
+                  appState.scrollElement?.scrollTo({
+                    top: 0,
+                    behavior: 'smooth',
+                  })
+                }}
+              >
+                <span text="2xl" class="i-mdi-arrow-up"></span>
               </button>
             </Show>
           </Show>
