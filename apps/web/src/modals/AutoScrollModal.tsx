@@ -58,6 +58,22 @@ export const AutoScrollModal: Component<Props> = (props) => {
             startScroll()
             const scroller = appState.scrollElement
             if (!scroller) return
+            let lastScrollTop = scroller.scrollTop
+            scroller.addEventListener(
+              'scroll',
+              function handler() {
+                const currentScrollTop = scroller.scrollTop
+                const delta = currentScrollTop - lastScrollTop
+                if (delta < 0) {
+                  scroller.removeEventListener('scroll', handler)
+                  setAppState('autoScrolling', false)
+                  cancelScroll?.()
+                  return
+                }
+                lastScrollTop = currentScrollTop
+              },
+              { passive: true }
+            )
             for (const eventType of ['touchstart', 'mousedown']) {
               scroller.addEventListener(
                 eventType,
