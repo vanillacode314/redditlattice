@@ -1,7 +1,6 @@
 import path from 'path'
 import devtools from 'solid-devtools/vite'
 import netlify from 'solid-start-netlify'
-import node from 'solid-start-node'
 import solid from 'solid-start/vite'
 import {
   presetAttributify,
@@ -27,7 +26,7 @@ export default defineConfig({
   },
   plugins: [
     devtools({}),
-    solid({ ssr: false, adapter: process.env.NETLIFY ? netlify() : node() }),
+    solid({ ssr: false, adapter: netlify() }),
     Unocss({
       rules: [
         [
