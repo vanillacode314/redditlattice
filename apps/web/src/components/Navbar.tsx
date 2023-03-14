@@ -243,7 +243,7 @@ export const Navbar: Component = () => {
               <button
                 aria-label="scroll to top"
                 type="button"
-                title="search"
+                title="scroll to top"
                 onClick={() => {
                   appState.scrollElement?.scrollTo({
                     top: 0,
