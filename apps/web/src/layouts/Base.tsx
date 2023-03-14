@@ -47,6 +47,7 @@ export const BaseLayout: Component<Props> = (props) => {
   const [offset, setOffset] = createSignal<number>(0)
   const [down, setDown] = createSignal<boolean>(false)
   const isMobile = createMediaQuery('(max-width: 768px)')
+  const isTouch = createMediaQuery('(hover: none)')
 
   createComputed(() => {
     const route = location.pathname
@@ -78,6 +79,7 @@ export const BaseLayout: Component<Props> = (props) => {
               down,
               tap,
             }) => {
+              if (!isTouch()) return
               if (tap) return
               stopInertialScroll?.()
               stopInertialScroll = undefined
@@ -135,7 +137,7 @@ export const BaseLayout: Component<Props> = (props) => {
             }
           } else if (e.ctrlKey) {
             switch (e.key.toLowerCase()) {
-              case 'f': 
+              case 'f':
             }
           } else {
             switch (e.key.toLowerCase()) {
