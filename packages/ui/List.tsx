@@ -46,45 +46,41 @@ export const List: Component<ListProps> = (props) => {
             'flex-col-reverse': props.reverse,
           }}
         >
-          <TransitionSlide duration={120}>
-            <Key each={evaluatedListItems()} by="key">
-              {(item) => {
-                const { onClick, onRemove } = item()
+          {/* <TransitionSlide duration={120}> */}
+          <Key each={evaluatedListItems()} by="key">
+            {(item) => {
+              const { onClick, onRemove } = item()
 
-                return (
-                  <li class="w-full block">
-                    <button
-                      class="flex cursor-pointer items-center gap-5 px-5 py-2 transition-colors focus-within:bg-neutral-800 hover:bg-neutral-800 tap-highlight-none w-full text-left"
-                      onClick={onClick}
-                      tabindex="-1"
-                      onMouseDown={(e) =>
-                        item().focusable || e.preventDefault()
-                      }
-                      onTouchStart={(e) =>
-                        item().focusable || e.preventDefault()
-                      }
-                    >
-                      <div class="grow" tabindex="0">
-                        {item().children}
-                      </div>
-                      <For each={item().buttons}>{(Button) => Button}</For>
-                      <Show when={onRemove}>
-                        <button
-                          class="group outline-none tap-highlight-none"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onRemove?.(e)
-                          }}
-                        >
-                          <span class="i-mdi-close-circle text-xl text-gray-700 transition-colors group-hover:text-white group-focus:text-white"></span>
-                        </button>
-                      </Show>
-                    </button>
-                  </li>
-                )
-              }}
-            </Key>
-          </TransitionSlide>
+              return (
+                <li class="w-full block">
+                  <button
+                    class="flex cursor-pointer items-center gap-5 px-5 py-2 transition-colors focus-within:bg-neutral-800 hover:bg-neutral-800 tap-highlight-none w-full text-left"
+                    onClick={onClick}
+                    tabindex="-1"
+                    onMouseDown={(e) => item().focusable || e.preventDefault()}
+                    onTouchStart={(e) => item().focusable || e.preventDefault()}
+                  >
+                    <div class="grow" tabindex="0">
+                      {item().children}
+                    </div>
+                    <For each={item().buttons}>{(Button) => Button}</For>
+                    <Show when={onRemove}>
+                      <button
+                        class="group outline-none tap-highlight-none"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onRemove?.(e)
+                        }}
+                      >
+                        <span class="i-mdi-close-circle text-xl text-gray-700 transition-colors group-hover:text-white group-focus:text-white"></span>
+                      </button>
+                    </Show>
+                  </button>
+                </li>
+              )
+            }}
+          </Key>
+          {/* </TransitionSlide> */}
         </ul>
       </Show>
     </div>
