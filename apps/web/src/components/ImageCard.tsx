@@ -93,16 +93,10 @@ export const ImageCard: Component<Props> = (props) => {
 
   async function downloadImage() {
     const format = getExtension(props.image.url)
-    const url = userState.processImages
-      ? await fetch(
-          getProcessedImageURL(props.image.url, 0, { passthrough: true })
-        )
-          .then((res) => res.blob())
-          .then((blob) => blobToDataURL(blob))
-      : props.image.url
+    const url = props.image.url
     download(
-      url,
-      props.image.title.replaceAll(' ', '-').toLowerCase() + '.' + format
+      `/api/download?url=${url}`,
+      props.image.title.replace(/\s/g, '-').toLowerCase() + '.' + format
     )
   }
 

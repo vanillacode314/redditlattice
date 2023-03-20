@@ -71,13 +71,11 @@ export function updateKey<K = any, V = any>(
   return map
 }
 
-export function download(url: string, title = '') {
+export function download(url: string, title?: string) {
   const a = document.createElement('a')
   a.href = url
-  a.download = title
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
+  a.download = title ?? url.substring(url.lastIndexOf('/') + 1)
+  a.dispatchEvent(new MouseEvent('click'))
 }
 
 export function blobToDataURL(blob: Blob): Promise<string> {
@@ -114,7 +112,7 @@ export const nextFrame = (cb: FrameRequestCallback) =>
   requestAnimationFrame(() => requestAnimationFrame(cb))
 
 export const getExtension = (path: string) =>
-  new URL(path).pathname.split('.').at(-1)
+  path.slice(path.lastIndexOf('.') + 1)
 
 export function filterStringKeys<T extends Record<any, any>>(obj: T): T {
   return Object.fromEntries(
