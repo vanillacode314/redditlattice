@@ -95,7 +95,7 @@ export const ImageCard: Component<Props> = (props) => {
     const format = getExtension(props.image.url)
     const url = props.image.url
     download(
-      `/api/download?url=${url}`,
+      url,
       props.image.title.replace(/\s/g, '-').toLowerCase() + '.' + format
     )
   }

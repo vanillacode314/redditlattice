@@ -71,9 +71,16 @@ export function updateKey<K = any, V = any>(
   return map
 }
 
-export function download(url: string, title?: string) {
+export async function download(url: string, title?: string) {
+  const dataURL = await fetch(url)
+    .then((response) => {
+      return response.blob()
+    })
+    .then((blob) => {
+      return URL.createObjectURL(blob)
+    })
   const a = document.createElement('a')
-  a.href = url
+  a.href = dataURL
   a.download = title ?? url.substring(url.lastIndexOf('/') + 1)
   a.dispatchEvent(new MouseEvent('click'))
 }

@@ -10,14 +10,14 @@
   "devDependencies": {
     "@iconify-json/mdi": "^1.1.50",
     "@types/lodash-es": "^4.17.7",
-    "@types/web": "^0.0.97",
-    "@unocss/vite": "^0.50.4",
+    "@types/web": "^0.0.99",
+    "@unocss/vite": "^0.50.6",
     "eslint": "^8.36.0",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
-    "typescript": "^4.9.5",
-    "unocss": "^0.50.4",
-    "vite": "^4.1.4"
+    "typescript": "^5.0.2",
+    "unocss": "^0.50.6",
+    "vite": "^4.2.0"
   },
   "dependencies": {
     "@motionone/solid": "^10.15.5",
@@ -31,8 +31,8 @@
     "lethargy": "^1.0.9",
     "lodash-es": "^4.17.21",
     "motion": "^10.15.5",
-    "solid-js": "^1.6.14",
-    "solid-transition-group": "^0.0.13",
+    "solid-js": "^1.6.15",
+    "solid-transition-group": "^0.1.1",
     "zod": "^3.21.4"
   }
 }
