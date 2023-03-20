@@ -1,2 +1,3 @@
 /trpc/* /.netlify/functions/index 200
+/ireddit/*  https://i.redd.it/:splat  200
 /* /index.html 200

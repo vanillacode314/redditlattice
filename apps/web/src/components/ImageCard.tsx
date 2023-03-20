@@ -94,10 +94,18 @@ export const ImageCard: Component<Props> = (props) => {
   async function downloadImage() {
     const format = getExtension(props.image.url)
     const url = props.image.url
-    download(
-      url,
-      props.image.title.replace(/\s/g, '-').toLowerCase() + '.' + format
-    )
+    if (url.startsWith('https://i.redd.it')) {
+      const id = url.replace('https://i.redd.it/', '')
+      download(
+        `/ireddit/${id}`,
+        props.image.title.replace(/\s/g, '-').toLowerCase() + '.' + format
+      )
+    } else {
+      download(
+        url,
+        props.image.title.replace(/\s/g, '-').toLowerCase() + '.' + format
+      )
+    }
   }
 
   async function removeFromCache() {
