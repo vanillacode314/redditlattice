@@ -61,9 +61,9 @@ export const Root: Component = () => {
       <Html lang="en">
         <Head>
           <Title>
-            {appState.title
-              ? `${appState.title} - RedditLattice`
-              : `RedditLattice`}
+            <Show when={appState.title} fallback={`RedditLattice`}>
+              {appState.title} - RedditLattice
+            </Show>
           </Title>
           <Meta charset="utf-8" />
           <Meta
