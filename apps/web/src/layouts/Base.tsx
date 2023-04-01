@@ -30,14 +30,28 @@ const [refresh, setRefresh] = createSignal<() => void>(() => {})
 export const useRefresh = () => [refresh, setRefresh] as const
 
 export const BaseLayout: Component<Props> = (props) => {
-  const navigate = useNavigate()
-
   const isOnline = createConnectivitySignal()
   const location = useLocation()
+
   createComputed(
     on(
       () => location.pathname,
       () => setRefresh(() => () => {})
+    )
+  )
+  createComputed(
+    on(
+      () => `${location.pathname}${location.search}`,
+      (newPath, oldPath, lastPage) => {
+        if (oldPath && newPath !== lastPage) {
+          setAppState('lastPage', appState.lastPage.length, oldPath)
+          return oldPath
+        }
+        return appState.lastPage.at(-1)
+      },
+      {
+        defer: true,
+      }
     )
   )
 

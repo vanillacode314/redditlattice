@@ -6,6 +6,7 @@ import { imageSchema } from '~/types'
 import { createStorageStore } from '~/utils/store'
 
 export const appStateSchema = z.object({
+  lastPage: z.string().array().default([]),
   title: z.string().default(''),
   navVisible: z.boolean().default(true),
   isSearching: z.boolean().default(false),

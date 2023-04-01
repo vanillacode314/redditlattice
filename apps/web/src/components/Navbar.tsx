@@ -153,11 +153,7 @@ export const Navbar: Component = () => {
                 </button>
                 <input
                   id="search"
-                  ref={(el) => {
-                    requestAnimationFrame(() => {
-                      el.focus()
-                    })
-                  }}
+                  ref={(el) => requestAnimationFrame(() => el.focus())}
                   value={query()}
                   onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
                   onBlur={() => setAppState({ isSearching: false })}
@@ -183,12 +179,19 @@ export const Navbar: Component = () => {
             }
           >
             <button
-              aria-label="menu"
+              aria-label={showBack() ? 'back' : 'menu'}
               classList={{
                 hidden: appState.drawerDocked,
               }}
               type="button"
-              onClick={() => (showBack() ? navigate('/') : toggleDrawer())}
+              onClick={() => {
+                if (showBack()) {
+                  navigate(appState.lastPage.at(-1) ?? '/')
+                  setAppState('lastPage', appState.lastPage.slice(0, -1))
+                } else {
+                  toggleDrawer()
+                }
+              }}
             >
               <span
                 text="2xl"
