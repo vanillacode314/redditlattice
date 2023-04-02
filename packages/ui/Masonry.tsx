@@ -341,12 +341,12 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
         </For>
       </div>
       <div
-        class="grid place-items-start"
+        class="grid items-start"
         ref={setMasonryRef}
         style={{
           'column-gap': `${merged.gap}px`,
-          'grid-template-columns': `repeat(${state.numberOfColumns},1fr)`,
-          'justify-items': merged.align,
+          'grid-template-columns': `repeat(${state.numberOfColumns},auto)`,
+          'justify-content': merged.align,
         }}
       >
         <Key each={[...state.columns.entries()]} by={([index]) => index}>
