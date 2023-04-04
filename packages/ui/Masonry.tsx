@@ -225,8 +225,13 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
         if (row.id === item.id) {
           i = columnIndex
           j = rowIndex
+          break
         }
       }
+    }
+    if (!i || !j) {
+      console.error('item with id:', item.id, 'not found')
+      return
     }
     const height = state.heights[i][j]
     batch(() => {
