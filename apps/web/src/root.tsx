@@ -29,14 +29,16 @@ export const Root: Component = () => {
     if (localStorage.getItem('migration-v1-to-v2-done')) return
     let userStateV1: any = localStorage.getItem('user-state')
     if (!userStateV1) return
-    userStateV1 = devalue.parse(userStateV1)
-    if (!userStateV1) return
-    userStateV1.redditQueries = userStateV1.searchTerms
-    userStateV1.subredditSort = userStateV1.sort
-    userStateV1.redditCollections = userStateV1.collections
-    userStateV1.redditRecents = userStateV1.recents
-    setUserState(userStateV1)
-    localStorage.setItem('migration-v1-to-v2-done', 'true')
+    try {
+      userStateV1 = devalue.parse(userStateV1)
+      if (!userStateV1) return
+      userStateV1.redditQueries = userStateV1.searchTerms
+      userStateV1.subredditSort = userStateV1.sort
+      userStateV1.redditCollections = userStateV1.collections
+      userStateV1.redditRecents = userStateV1.recents
+      setUserState(userStateV1)
+      localStorage.setItem('migration-v1-to-v2-done', 'true')
+    } catch {}
   }
 
   const cleanCache = async () => {
