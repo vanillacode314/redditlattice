@@ -3,7 +3,6 @@ import { throttle } from 'lodash-es'
 import { spring } from 'motion'
 import {
   batch,
-  Component,
   createRenderEffect,
   createSignal,
   For,
@@ -11,6 +10,7 @@ import {
   JSXElement,
   mergeProps,
   on,
+  ParentComponent,
   Show,
   splitProps,
 } from 'solid-js'
@@ -28,7 +28,7 @@ interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   style: JSX.CSSProperties
 }
 
-export const AutoResizingPicture: Component<Props> = (props) => {
+export const AutoResizingPicture: ParentComponent<Props> = (props) => {
   let imgElement: HTMLImageElement
 
   const [local, others] = splitProps(props, [
@@ -90,7 +90,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
 
   return (
     <Motion.div
-      class="relative overflow-hidden"
+      class="overflow-hidden group"
       ref={props.ref}
       animate={{ height: `${height()}px`, ...local.style }}
       initial={false}
@@ -133,6 +133,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
           decoding="async"
         />
       </picture>
+      {props.children}
     </Motion.div>
   )
 }

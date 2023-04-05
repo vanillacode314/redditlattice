@@ -1,4 +1,5 @@
 import { Motion } from '@motionone/solid'
+import { createMediaQuery } from '@solid-primitives/media'
 import { del, get } from 'idb-keyval'
 import { uniq } from 'lodash-es'
 import { spring } from 'motion'
@@ -17,7 +18,7 @@ import { useLocation, useNavigate } from 'solid-start'
 import { AutoResizingPicture, Button } from 'ui'
 import { IMAGE_SERVER_BASE_PATH } from '~/consts'
 import { useUserState } from '~/stores'
-import { blobToDataURL, download, getExtension, nextFrame } from '~/utils'
+import { download, getExtension, nextFrame } from '~/utils'
 import { longpress } from '~/utils/use-longpress'
 import { outsideclick } from '~/utils/use-outsideclick'
 
@@ -32,6 +33,7 @@ interface Props {
 }
 
 export const ImageCard: Component<Props> = (props) => {
+  const isMobile = createMediaQuery('(hover: none)')
   const merged = mergeProps({ onLoad: () => {} }, props)
 
   const navigate = useNavigate()
@@ -174,7 +176,16 @@ export const ImageCard: Component<Props> = (props) => {
           onLoad={merged.onLoad}
           onError={onError}
           alt={props.image.title}
-        ></AutoResizingPicture>
+        >
+          <span
+            classList={{
+              'group-hover:opacity-100': !isMobile(),
+            }}
+            class="w-full bg-gradient-to-t absolute bottom-0 from-black/90 to-transparent px-5 py-3 z-10 opacity-0 transition-opacity font-bold tracking-wider uppercase text-sm"
+          >
+            {props.image.title}
+          </span>
+        </AutoResizingPicture>
       </Show>
       <Show when={popupVisible()}>
         <Portal mount={document.documentElement}>
