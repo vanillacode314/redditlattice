@@ -1,3 +1,4 @@
+import { createVisibilityObserver } from '@solid-primitives/intersection-observer'
 import {
   Component,
   createEffect,
@@ -5,9 +6,8 @@ import {
   createSignal,
   JSXElement,
   mergeProps,
-  on,
+  untrack,
 } from 'solid-js'
-import { createVisibilityObserver } from '@solid-primitives/intersection-observer'
 export type State = 'idle' | 'error' | 'loading' | 'completed'
 export type InfiniteHandler = (
   setState: (state: State) => void,
@@ -42,22 +42,25 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
       return document.querySelector(merged.target) as HTMLElement
     }
   })
-  const useVisibilityObserver = createVisibilityObserver({ threshold: 0.8, root: target(), rootMargin: `0px 0px ${merged.distance}px 0px` });
+  const useVisibilityObserver = createVisibilityObserver({
+    threshold: 0.8,
+    root: target(),
+    rootMargin: `0px 0px ${merged.distance}px 0px`,
+  })
 
   const visible = useVisibilityObserver(() => el)
 
-  createEffect(on(
-    visible,
-    (visible) => {
-      if (!visible) return
+  createEffect(() => {
+    if (!visible()) return
+    untrack(() => {
       if (state() !== 'idle') return
       load()
-    }
-  ))
+    })
+  })
 
   const updateState = (newState: State) => {
     setState(newState)
-    if (visible()) load()
+    if (visible() && state() == 'idle') load()
   }
 
   const load = (firstload: boolean = false) => {
@@ -67,12 +70,10 @@ export const InfiniteLoading: Component<Props> = (props: Props) => {
 
   const setup = () => load(merged.firstload)
 
-  createEffect(
-    on(
-      () => merged.key,
-      () => setup()
-    )
-  )
+  createEffect(() => {
+    merged.key
+    untrack(setup)
+  })
 
   return <div ref={el}>{props.children(state(), load)}</div>
 }
