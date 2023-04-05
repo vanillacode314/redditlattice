@@ -178,6 +178,7 @@ importers:
       '@solid-primitives/intersection-observer': ^2.0.11
       '@solid-primitives/keyed': ^1.1.10
       '@solid-primitives/map': ^0.4.3
+      '@solid-primitives/memo': ^1.2.4
       '@solid-primitives/resize-observer': ^2.0.15
       '@solid-primitives/set': ^0.4.3
       '@types/lodash-es': ^4.17.7
@@ -203,6 +204,7 @@ importers:
       '@solid-primitives/intersection-observer': 2.0.11_solid-js@1.7.1
       '@solid-primitives/keyed': 1.1.10_solid-js@1.7.1
       '@solid-primitives/map': 0.4.3_solid-js@1.7.1
+      '@solid-primitives/memo': 1.2.4_solid-js@1.7.1
       '@solid-primitives/resize-observer': 2.0.15_solid-js@1.7.1
       '@solid-primitives/set': 0.4.3_solid-js@1.7.1
       '@use-gesture/vanilla': 10.2.25
@@ -2309,6 +2311,16 @@ packages:
       '@solid-primitives/utils': 6.0.0_solid-js@1.7.1
       solid-js: 1.7.1
 
+  /@solid-primitives/memo/1.2.4_solid-js@1.7.1:
+    resolution: {integrity: sha512-kPV2hWoR01ylX1JCh6V+AoO4i2twAqMBA00c1IiUVxNCPnWXfo9pYGn2xSeW4xTleqfY/nJGWjxsyX9HFSMXrw==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      '@solid-primitives/scheduled': 1.3.2_solid-js@1.7.1
+      '@solid-primitives/utils': 6.0.0_solid-js@1.7.1
+      solid-js: 1.7.1
+    dev: false
+
   /@solid-primitives/pagination/0.2.4_solid-js@1.7.1:
     resolution: {integrity: sha512-jlOycA+GIhfUi6OEgBpomuNr7KspyL272xl94vP8i92wrqlTEJPWnHLz8Oqh5vlY3jKkVNZWPwmLVpL1e2Rl0g==}
     peerDependencies:
@@ -2393,7 +2405,6 @@ packages:
       solid-js: ^1.6.12
     dependencies:
       solid-js: 1.7.1
-    dev: true
 
   /@solid-primitives/set/0.4.3_solid-js@1.7.1:
     resolution: {integrity: sha512-n/owKQy/76IWPLZkvLSWZ+0Ji4fndvQ6vj4idXEm5vS8hj/xvGHP2Fw6uBf2XrijGr3BVuSuq9zvnaGjIAB12w==}
@@ -3002,7 +3013,7 @@ packages:
       chokidar: 3.5.3
       fast-glob: 3.2.12
       magic-string: 0.30.0
-      vite: 4.2.1
+      vite: 4.2.1_@types+node@18.15.11
     transitivePeerDependencies:
       - rollup
     dev: true

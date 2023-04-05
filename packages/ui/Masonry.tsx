@@ -1,4 +1,5 @@
 import { Key } from '@solid-primitives/keyed'
+import { createLazyMemo } from '@solid-primitives/memo'
 import { createElementSize } from '@solid-primitives/resize-observer'
 import { differenceBy, throttle } from 'lodash-es'
 import {
@@ -11,10 +12,10 @@ import {
   For,
   JSXElement,
   mergeProps,
-  on,
   onCleanup,
   onMount,
   Show,
+  untrack,
 } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 
@@ -43,17 +44,22 @@ export interface Props<T> {
 }
 
 interface State<T> {
-  busy: boolean
   numberOfColumns: number
   columnWidth: number
-  columns: T[][]
   top: number
   bottom: number
   heights: number[][]
   topOffset: number[][]
+  columns: T[][]
   visible: boolean[][]
   masonrySize: { readonly height: number | null; readonly width: number | null }
   renderingOffscreen: (T & { setHeight: (height: number) => void })[]
+}
+
+function get2DArray<T>(x: number, y: number) {
+  return Array<T[]>(x)
+    .fill(null as unknown as any)
+    .map(() => [] as T[])
 }
 
 export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
@@ -64,12 +70,14 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
   )
   const [masonryRef, setMasonryRef] = createSignal<HTMLDivElement>()
   const masonrySize = createElementSize(masonryRef)
+
   const numberOfColumns = createMemo(() =>
     Math.min(
       masonrySize.width ? Math.ceil(masonrySize.width / props.maxWidth) : 1,
       merged.maxColumns
     )
   )
+
   const columnWidth = createMemo(() => {
     const cols = numberOfColumns()
     const gaps = merged.gap * (cols - 1)
@@ -79,80 +87,97 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
       merged.maxWidth
     )
   })
-  const [state, setState] = createStore<State<TItem>>({
-    busy: false,
-    top: 0,
-    bottom: Infinity,
-    heights: Array(numberOfColumns())
-      .fill(null)
-      .map(() => []),
-    topOffset: Array(numberOfColumns())
-      .fill(null)
-      .map(() => []),
-    visible: Array(numberOfColumns())
-      .fill(null)
-      .map(() => []),
-    columns: [],
-    renderingOffscreen: [],
-    get numberOfColumns(): number {
-      return numberOfColumns()
-    },
-    get columnWidth(): number {
-      return columnWidth()
-    },
-    get masonrySize(): {
-      readonly height: number | null
-      readonly width: number | null
-    } {
-      return masonrySize
-    },
-  })
 
-  createEffect(() => {
-    setState(
-      'visible',
-      produce((value) => {
-        for (let i = 0; i < state.columns.length; i++) {
-          function getTop() {
-            let low = 0
-            let high = state.columns[i].length - 1
-            let mid = Math.floor((low + high) / 2)
-            while (low <= high) {
-              mid = Math.floor((low + high) / 2)
-              const itemTop = state.topOffset[i][mid] + merged.gap * mid
-              const itemHeight = state.heights[i][mid]
-              const itemBottom = itemTop + itemHeight
-              if (itemBottom > state.top - BOUNDS) {
-                high = mid - 1
-              } else {
-                low = mid + 1
-              }
-            }
-            return mid
-          }
+  const [state, setState] = createStore<State<TItem>>(
+    {
+      top: 0,
+      bottom: Infinity,
+      heights: get2DArray(numberOfColumns(), 1),
+      topOffset: get2DArray(numberOfColumns(), 1),
+      columns: get2DArray(numberOfColumns(), 1),
+      get visible() {
+        return visible()
+      },
+      renderingOffscreen: [],
+      get numberOfColumns(): number {
+        return numberOfColumns()
+      },
+      get columnWidth(): number {
+        return columnWidth()
+      },
+      get masonrySize(): {
+        readonly height: number | null
+        readonly width: number | null
+      } {
+        return masonrySize
+      },
+    },
+    {
+      name: 'masonry-state',
+    }
+  )
 
-          function getBottom() {
-            let low = 0
-            let high = state.columns[i].length - 1
-            let mid = Math.floor((low + high) / 2)
-            while (low <= high) {
-              mid = Math.floor((low + high) / 2)
-              const itemTop = state.topOffset[i][mid] + merged.gap * mid
-              if (itemTop < state.bottom + BOUNDS) {
-                low = mid + 1
-              } else {
-                high = mid - 1
-              }
-            }
-            return mid
-          }
-          value[i].fill(false)
-          value[i].fill(true, getTop(), getBottom() + 1)
-        }
-        return value
+  function getShortestColumnIndex() {
+    if (state.numberOfColumns === 1) return 0
+    let shortestColumnIndex = 0
+    let shortestColumnHeight = Infinity
+    for (
+      let columnIndex = 0;
+      columnIndex < state.numberOfColumns;
+      columnIndex++
+    ) {
+      const columnHeight = state.topOffset[columnIndex].at(-1)
+      if (columnHeight === undefined) return columnIndex
+      if (columnHeight >= shortestColumnHeight) continue
+      shortestColumnIndex = columnIndex
+      shortestColumnHeight = columnHeight
+    }
+    return shortestColumnIndex
+  }
+
+  function renderOffscreen(item: TItem): Promise<number> {
+    return new Promise((resolve) => {
+      setState('renderingOffscreen', state.renderingOffscreen.length, {
+        ...item,
+        setHeight: resolve,
       })
-    )
-  })
+    })
+  }
+
+  const visible = createLazyMemo(
+    () => {
+      const visible = [] as boolean[][]
+      for (let i = 0; i < state.columns.length; i++) {
+        function getBounds(
+          condition: (data: { itemBottom: number; itemTop: number }) => boolean
+        ) {
+          let low = 0
+          let high = state.columns[i].length - 1
+          let mid = Math.floor((low + high) / 2)
+          while (low <= high) {
+            mid = Math.floor((low + high) / 2)
+            const itemTop = state.topOffset[i][mid] + merged.gap * mid
+            const itemBottom = itemTop + state.heights[i][mid]
+            condition({ itemBottom, itemTop })
+              ? (high = mid - 1)
+              : (low = mid + 1)
+          }
+          return mid
+        }
+
+        const getTop = () =>
+          getBounds(({ itemBottom }) => itemBottom > state.top - BOUNDS)
+        const getBottom = () =>
+          getBounds(({ itemTop }) => !(itemTop < state.bottom + BOUNDS))
+
+        visible[i] = Array(state.columns[i].length).fill(false)
+        visible[i].fill(true, getTop(), getBottom() + 1)
+      }
+      return visible
+    },
+    [],
+    { name: 'visible' }
+  )
 
   onMount(() => {
     const detach = props.attachScrollHandler?.(
@@ -169,152 +194,95 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     onCleanup(() => detach?.())
   })
 
-  function getShortestColumnIndex() {
-    let shortestColumnIndex = 0
-    let shortestColumnHeight = Infinity
-    for (let i = 0; i < state.numberOfColumns; i++) {
-      const height = state.topOffset[i]?.at(-1) ?? 0
-      if (height >= shortestColumnHeight) continue
-      shortestColumnIndex = i
-      shortestColumnHeight = height
-    }
-    return shortestColumnIndex
-  }
+  const gridMap = new Map<TItem['id'], [number, number]>()
 
-  function addItem(item: TItem): Promise<void> {
-    return new Promise((resolve) => {
-      const index = state.renderingOffscreen.length
-      setState('renderingOffscreen', index, {
-        ...item,
-        setHeight(height: number) {
-          setState('renderingOffscreen', (value) =>
-            value.filter((i) => i.id !== item.id)
-          )
-          const columnIndex = getShortestColumnIndex()
-          batch(() => {
-            setState('heights', columnIndex, (value) =>
-              value ? [...value, height] : [height]
-            )
-            setState('topOffset', columnIndex, (value) =>
-              value && value.length > 0
-                ? [
-                    ...value,
-                    value[value.length - 1] +
-                      state.heights[columnIndex][value.length - 1],
-                  ]
-                : [0]
-            )
-            setState('visible', columnIndex, (value) =>
-              value ? [...value, true] : [true]
-            )
-            setState('columns', columnIndex, (value) =>
-              value ? [...value, item] : [item]
-            )
-          })
-          resolve()
-        },
-      })
-    })
-  }
+  function addItem(item: TItem, height: number) {
+    const columnIndex = getShortestColumnIndex()
+    const rowIndex = state.columns[columnIndex].length
+    const lastTopOffset = state.topOffset[columnIndex][rowIndex - 1]
+    const newTopOffset =
+      typeof lastTopOffset === 'number' ? lastTopOffset + height : 0
 
-  function deleteItem(item: TItem) {
-    let i!: number
-    let j!: number
-    for (const [columnIndex, column] of state.columns.entries()) {
-      for (const [rowIndex, row] of column.entries()) {
-        if (row.id === item.id) {
-          i = columnIndex
-          j = rowIndex
-          break
-        }
-      }
-    }
-    if (!i || !j) {
-      console.error('item with id:', item.id, 'not found')
-      return
-    }
-    const height = state.heights[i][j]
     batch(() => {
-      setState(
-        'columns',
-        produce((value) => {
-          value[i].splice(j, 1)
-          if (value[i].length === 0) value.splice(i, 1)
-          return value
-        })
-      )
-      setState(
-        'heights',
-        produce((value) => {
-          value[i].splice(j, 1)
-          if (value[i].length === 0) value.splice(i, 1)
-          return value
-        })
-      )
-      setState(
-        'visible',
-        produce((value) => {
-          value[i].splice(j, 1)
-          if (value[i].length === 0) value.splice(i, 1)
-          return value
-        })
-      )
+      setState('heights', columnIndex, rowIndex, height)
+      setState('topOffset', columnIndex, rowIndex, newTopOffset)
+      setState('columns', columnIndex, rowIndex, item)
+    })
+    gridMap.set(item.id, [columnIndex, rowIndex])
+  }
+
+  function removeItem(item: TItem) {
+    const [columnIndex, rowIndex] = gridMap.get(item.id)!
+    const height = state.heights[columnIndex][rowIndex]
+    batch(() => {
+      setState('heights', columnIndex, rowIndex, -1)
+      setState('topOffset', columnIndex, rowIndex, -1)
       setState(
         'topOffset',
-        produce((value) => {
-          for (let k = j + 1; k < value.length; k++) {
-            if (value[i][k]) value[i][k] -= height
-          }
-          value[i].splice(j, 1)
-          if (value[i].length === 0) value.splice(i, 1)
-          return value
-        })
+        columnIndex,
+        { from: rowIndex + 1, to: state.topOffset.length - 1 },
+        (value) => (value === -1 ? value : value - height)
+      )
+      setState('columns', columnIndex, (row) =>
+        row.filter(($item) => item.id !== $item.id)
       )
     })
   }
 
-  async function addItems(...items: TItem[]): Promise<void> {
-    for (const item of items) {
-      await addItem(item)
+  createEffect<Promise<[TItem[], number]>>(async (lastPromise) => {
+    const newItems = props.items
+    const currentNumberOfColumns = numberOfColumns()
+    const [oldItems, lastNumberOfColumns] = await lastPromise
+    let addedItems: TItem[], removedItems: TItem[]
+    if (currentNumberOfColumns !== lastNumberOfColumns) {
+      gridMap.clear()
+      batch(() => {
+        setState('heights', get2DArray(currentNumberOfColumns, 1))
+        setState('topOffset', get2DArray(currentNumberOfColumns, 1))
+        setState('columns', get2DArray(currentNumberOfColumns, 1))
+      })
+      removedItems = []
+      addedItems = newItems
+    } else {
+      addedItems = differenceBy(newItems, oldItems, (item) => item.id)
+      removedItems = differenceBy(oldItems, newItems, (item) => item.id)
     }
-  }
 
-  function deleteItems(...items: TItem[]): void {
-    for (const item of items) {
-      deleteItem(item)
+    for (
+      let columnIndex = 0;
+      columnIndex < currentNumberOfColumns;
+      columnIndex++
+    ) {
+      batch(() => {
+        setState('heights', columnIndex, (value) => value ?? [])
+        setState('topOffset', columnIndex, (value) => value ?? [])
+        setState('columns', columnIndex, (value) => value ?? [])
+      })
     }
-  }
 
-  createEffect(
-    on(
-      () => props.items,
-      async (newItems, oldItems) => {
-        oldItems = oldItems || []
-        const deletedItems = differenceBy(oldItems, newItems, (v) => v.id)
-        const addedItems = differenceBy(newItems, oldItems, (v) => v.id)
-        setState('busy', true)
-        deleteItems(...deletedItems)
-        await addItems(...addedItems)
-        setState('busy', false)
-      }
-    )
-  )
+    return await untrack(async () => {
+      batch(() => {
+        removedItems.forEach(removeItem)
+        setState(
+          'heights',
+          { from: 0, to: currentNumberOfColumns - 1 },
+          (row) => (row ?? []).filter((value) => value >= 0)
+        )
+        setState(
+          'topOffset',
+          { from: 0, to: currentNumberOfColumns - 1 },
+          (row) => (row ?? []).filter((value) => value >= 0)
+        )
+      })
 
-  const resetGrid = async () => {
-    if (state.busy) return
-    setState('busy', true)
-    deleteItems(...props.items)
-    await addItems(...props.items)
-    setState('busy', false)
-  }
-
-  createEffect(
-    on(
-      () => state.numberOfColumns,
-      () => resetGrid(),
-      { defer: true }
-    )
-  )
+      const heights = await Promise.all(addedItems.map(renderOffscreen))
+      setState('renderingOffscreen', [])
+      batch(() => {
+        heights.forEach((height, index) => addItem(addedItems[index], height))
+      })
+      return [newItems, currentNumberOfColumns]
+    })
+  }, Promise.resolve([[], numberOfColumns()]))
 
   return (
     <>
@@ -328,17 +296,16 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
                 style: () => ({}),
                 lastHeight: () => undefined,
                 updateHeight: () => {},
-                width: () => state.columnWidth,
+                width: columnWidth,
               })
             )
+            const list = resolved.toArray() as HTMLElement[]
             requestAnimationFrame(() => {
-              const list = resolved.toArray() as HTMLElement[]
               for (const child of list) {
-                if (child) {
-                  const { height } = child.getBoundingClientRect()
-                  item.setHeight(height)
-                  break
-                }
+                if (!child) continue
+                const { height } = child.getBoundingClientRect()
+                item.setHeight(height)
+                break
               }
             })
             return resolved()
