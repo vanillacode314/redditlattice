@@ -98,6 +98,7 @@ export const SearchInput: Component<Props> = (props) => {
         </div>
       </div>
       <button class="text-white text-xl rounded-xl w-12 h-12 outline-none grid place-items-center bg-pink-800 hover:bg-pink-700 focus:bg-pink-700 focus:ring focus:ring-blue transition-colors shrink-0 tap-highlight-none">
+        <span class="sr-only">Search</span>
         <div class="i-mdi-magnify"></div>
       </button>
     </form>
