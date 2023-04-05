@@ -200,8 +200,9 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     const columnIndex = getShortestColumnIndex()
     const rowIndex = state.columns[columnIndex].length
     const lastTopOffset = state.topOffset[columnIndex][rowIndex - 1]
+    const lastHeight = state.heights[columnIndex][rowIndex - 1]
     const newTopOffset =
-      typeof lastTopOffset === 'number' ? lastTopOffset + height : 0
+      typeof lastTopOffset === 'number' ? lastTopOffset + lastHeight : 0
 
     batch(() => {
       setState('heights', columnIndex, rowIndex, height)
@@ -365,16 +366,11 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
                           setState(
                             'topOffset',
                             columnIndex(),
-                            produce((value) => {
-                              for (
-                                let i = rowIndex() + 1;
-                                i < value.length;
-                                i++
-                              ) {
-                                value[i] += diff
-                              }
-                              return value
-                            })
+                            {
+                              from: rowIndex() + 1,
+                              to: state.topOffset[columnIndex()].length - 1,
+                            },
+                            (value) => value + diff
                           )
                         })
                       },

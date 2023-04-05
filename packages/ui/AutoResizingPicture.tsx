@@ -56,12 +56,10 @@ export const AutoResizingPicture: Component<Props> = (props) => {
   const [gotHeight, setGotHeight] = createSignal<boolean>(false)
   const [error, setError] = createSignal<boolean>(false)
   const [tries, setTries] = createSignal(0)
-  const [animate, setAnimate] = createSignal<boolean>(false)
 
   const checkHeight = throttle(() => {
     batch(() => {
       setTries(tries() + 1)
-      if (tries() > 1) setAnimate(true)
       if (error()) return
       if (!imgElement) return
       if (!imgElement.naturalHeight) {
@@ -97,7 +95,7 @@ export const AutoResizingPicture: Component<Props> = (props) => {
       animate={{ height: `${height()}px`, ...local.style }}
       initial={false}
       transition={
-        animate()
+        tries() > 1
           ? {
               easing: spring({
                 damping: 12,
