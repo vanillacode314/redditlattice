@@ -1,4 +1,5 @@
 import { TRPCClientError } from '@trpc/client'
+import clsx from 'clsx'
 import {
   createEffect,
   createSignal,
@@ -163,8 +164,9 @@ export default function Home() {
                   ['sr-autocomplete', query().split('+').at(-1)!] as const
                 }
               >
-                {({ id, name }) => (
+                {({ id, name }, stale) => (
                   <ListItem
+                    class={clsx(stale() && 'opacity-50')}
                     key={id}
                     focusable={false}
                     onClick={() => {

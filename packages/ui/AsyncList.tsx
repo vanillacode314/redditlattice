@@ -1,4 +1,4 @@
-import { createResource, For, JSXElement, Show } from 'solid-js'
+import { Accessor, createResource, For, JSXElement } from 'solid-js'
 import List from './List'
 
 interface Props<T, U> {
@@ -8,7 +8,7 @@ interface Props<T, U> {
   reverse?: boolean
   fallback?: JSXElement
   ref?: ((el: HTMLUListElement) => void) | HTMLUListElement
-  children: (data: T) => JSXElement
+  children: (data: T, stale: Accessor<boolean>) => JSXElement
 }
 
 export const AsyncList: <T, U>(props: Props<T, U>) => JSXElement = (props) => {
@@ -19,15 +19,11 @@ export const AsyncList: <T, U>(props: Props<T, U>) => JSXElement = (props) => {
 
   let ac: AbortController
 
-  const [items] = createResource<Item[], Params>(
-    key,
-    async (key) => {
-      ac?.abort()
-      ac = new AbortController()
-      return await fetcher(key, ac)
-    },
-    { initialValue: [] }
-  )
+  const [items] = createResource<Item[], Params>(key, async (key) => {
+    ac?.abort()
+    ac = new AbortController()
+    return await fetcher(key, ac)
+  })
 
   return (
     <List
@@ -36,7 +32,9 @@ export const AsyncList: <T, U>(props: Props<T, U>) => JSXElement = (props) => {
       reverse={props.reverse}
       fallback={props.fallback}
     >
-      <For each={items()}>{(item) => props.children(item)}</For>
+      <For each={items.latest}>
+        {(item) => props.children(item, () => items.loading)}
+      </For>
     </List>
   )
 }

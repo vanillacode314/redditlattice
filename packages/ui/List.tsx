@@ -1,4 +1,5 @@
 import { Key } from '@solid-primitives/keyed'
+import clsx from 'clsx'
 import {
   children,
   Component,
@@ -54,7 +55,10 @@ export const List: Component<ListProps> = (props) => {
               return (
                 <li class="w-full block">
                   <button
-                    class="flex cursor-pointer items-center gap-5 px-5 py-2 transition-colors focus-within:bg-neutral-800 hover:bg-neutral-800 tap-highlight-none w-full text-left"
+                    class={clsx(
+                      'flex cursor-pointer items-center gap-5 px-5 py-2 transition focus-within:bg-neutral-800 hover:bg-neutral-800 tap-highlight-none w-full text-left',
+                      item().class
+                    )}
                     onClick={onClick}
                     tabindex="-1"
                     onMouseDown={(e) => item().focusable || e.preventDefault()}
@@ -89,6 +93,7 @@ export const List: Component<ListProps> = (props) => {
 
 interface ListItemProps {
   key?: string
+  class?: string
   onClick: (e: MouseEvent) => void
   onRemove?: (e: MouseEvent) => void
   buttons?: JSXElement[]
