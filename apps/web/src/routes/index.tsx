@@ -6,8 +6,8 @@ import {
   onMount,
   Show,
   Suspense,
+  untrack,
 } from 'solid-js'
-import { untrack } from 'solid-js/web'
 import { useNavigate } from 'solid-start'
 import { AsyncList, List, ListItem, Spinner, Tab, Tabs } from 'ui'
 import { trpc } from '~/client'

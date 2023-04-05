@@ -1,11 +1,10 @@
 import { Motion } from '@motionone/solid'
 import { Gesture } from '@use-gesture/vanilla'
-import { Lethargy } from 'lethargy'
+import { Lethargy } from 'lethargy-ts'
 import {
   batch,
   children,
   Component,
-  createEffect,
   For,
   JSXElement,
   onCleanup,
