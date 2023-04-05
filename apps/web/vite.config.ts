@@ -26,7 +26,7 @@ export default defineConfig({
   },
   plugins: [
     devtools({}),
-    solid({ ssr: true, adapter: netlify() }),
+    solid({ ssr: false, adapter: netlify() }),
     Unocss({
       rules: [
         [
