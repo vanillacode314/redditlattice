@@ -17,7 +17,14 @@ export default function About() {
         <div px-5 flex flex-col gap-5>
           <p>
             A FOSS reddit viewer for image based subreddits. Lays out the images
-            in a tight lattice.
+            in a tight lattice. Written in{' '}
+            <a
+              href="https://start.solidjs.com/getting-started/what-is-solidstart"
+              class="text-pink-300 visited:text-pink-800 hover:text-pink-500 hover:underline focus:text-pink-500 focus:underline"
+            >
+              SolidStart
+            </a>
+            .
           </p>
           <p>
             Uses a custom server to resize images on the fly for faster loading.

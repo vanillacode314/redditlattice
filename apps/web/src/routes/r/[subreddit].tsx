@@ -103,22 +103,25 @@ export default function SubredditPage() {
     )
 
     /* Update Recents */
-    setUserState('redditRecents', (current) => {
-      current.set(
+    setUserState('redditRecents', ($redditRecents) => {
+      $redditRecents.set(
         q().length > 0 ? `${subreddits()[0]}?${q()[0]}` : subreddits()[0],
         Math.floor(Date.now() / 1000)
       )
-      while (current.size > userState.recentsLimit) {
-        const [q, _] = minBy([...current], ([_, timestamp]) => timestamp)!
-        current.delete(q)
+      while ($redditRecents.size > userState.recentsLimit) {
+        const [q, _] = minBy(
+          [...$redditRecents],
+          ([_, timestamp]) => timestamp
+        )!
+        $redditRecents.delete(q)
       }
-      return new Map([...current])
+      return new Map($redditRecents)
     })
 
     /* Update Search Terms */
-    setUserState('redditQueries', (current) => {
-      if (q().length > 0) current.set(q()[0], subreddits()[0])
-      return new Map([...current])
+    setUserState('redditQueries', ($redditQueries) => {
+      if (q().length > 0) $redditQueries.set(q()[0], subreddits()[0])
+      return new Map($redditQueries)
     })
   })
 
@@ -157,10 +160,7 @@ export default function SubredditPage() {
           after,
         }))
 
-      setAppState('images', (images) => ({
-        ...images,
-        data: new Set([...images.data, ...newImages]),
-      }))
+      setAppState('images', 'data', (data) => new Set([...data, ...newImages]))
 
       CACHE.set(key(), {
         after,

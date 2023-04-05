@@ -50,11 +50,11 @@ export default function Home() {
     })
   })
   createEffect(() => {
-    const _focused = focused()
+    const $focused = focused()
     untrack(() => {
-      if (_focused) inputElement.focus()
+      if ($focused) inputElement.focus()
 
-      setSessionState('focused', _focused)
+      setSessionState('focused', $focused)
     })
   })
 
@@ -77,6 +77,8 @@ export default function Home() {
     } catch (err) {
       if (err instanceof TRPCClientError) {
         err.cause?.name !== 'ObservableAbortError' && console.error(err)
+      } else {
+        throw err
       }
     }
     return []
@@ -84,15 +86,15 @@ export default function Home() {
   const navigate = useNavigate()
 
   const removeCollection = (id: string) =>
-    setUserState('redditCollections', (collections) => {
-      collections.delete(id)
-      return new Map([...collections])
+    setUserState('redditCollections', ($redditCollections) => {
+      $redditCollections.delete(id)
+      return new Map($redditCollections)
     })
 
   const setCollection = (id: string, value: string) =>
-    setUserState((state) => {
-      state!.redditCollections.set(id, value)
-      return { ...state! }
+    setUserState('redditCollections', ($redditCollections) => {
+      $redditCollections.set(id, value)
+      return new Map($redditCollections)
     })
 
   function onSubmit() {

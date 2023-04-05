@@ -70,6 +70,8 @@ export default function Home() {
     } catch (err) {
       if (err instanceof TRPCClientError) {
         err.cause?.name !== 'ObservableAbortError' && console.error(err)
+      } else {
+        throw err
       }
     }
     return []
@@ -97,14 +99,14 @@ export default function Home() {
   function removeSubreddit(name: string) {
     setUserState('subreddits', (subreddits) => {
       subreddits.delete(name)
-      return new Set([...subreddits])
+      return new Set(subreddits)
     })
   }
 
   function removeSearchTerm(term: string) {
     setUserState('redditQueries', (searchTerms) => {
       searchTerms.delete(term)
-      return new Map([...searchTerms])
+      return new Map(searchTerms)
     })
   }
 
@@ -113,7 +115,7 @@ export default function Home() {
       favouriteSubreddits.has(subreddit)
         ? favouriteSubreddits.delete(subreddit)
         : favouriteSubreddits.add(subreddit)
-      return new Set([...favouriteSubreddits])
+      return new Set(favouriteSubreddits)
     })
   }
 

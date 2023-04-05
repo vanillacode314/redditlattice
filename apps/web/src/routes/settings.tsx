@@ -78,25 +78,25 @@ export default function Settings() {
   onMount(() => setAppState('title', 'Settings'))
 
   const resetState = () =>
-    setAppState({
-      images: {
-        key: '',
-        after: '',
-        data: new Set(),
-      },
+    setAppState('images', {
+      key: '',
+      after: '',
+      data: new Set<any>(),
     })
 
   onCleanup(() => {
     /* Update Recents */
-    setUserState((state) => {
-      while (state.redditRecents.size > state.recentsLimit) {
-        const [q, _] = minBy(
-          [...state.redditRecents],
+    const currentRecentsSize = userState.redditRecents.size
+    const recentsLimit = userState.recentsLimit
+    setUserState('redditRecents', ($redditRecents) => {
+      while (currentRecentsSize > recentsLimit) {
+        const [redditQuery, _] = minBy(
+          [...$redditRecents],
           ([_, timestamp]) => timestamp
         )!
-        state.redditRecents.delete(q)
+        $redditRecents.delete(redditQuery)
       }
-      return { ...state }
+      return new Map($redditRecents)
     })
     resetState()
   })

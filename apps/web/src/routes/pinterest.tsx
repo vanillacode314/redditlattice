@@ -15,9 +15,9 @@ export default function Home() {
 
   const [query, setQuery] = createSignal<string>(sessionState.pinterestQuery)
   createEffect(() => {
-    const q = query()
+    const $query = query()
     untrack(() => {
-      setSessionState('pinterestQuery', q)
+      setSessionState('pinterestQuery', $query)
     })
   })
 

@@ -59,20 +59,18 @@ export default function Subreddit() {
     })
   }
 
-  setRefresh(() => () => {
-    resetState()
-  })
+  setRefresh(() => resetState)
 
   onMount(() => {
-    setUserState('pinterestQueries', (queries) => {
-      queries.add(query())
-      return new Set(queries)
+    setUserState('pinterestQueries', ($pinterestQueries) => {
+      $pinterestQueries.add(query())
+      return new Set($pinterestQueries)
     })
   })
 
   createEffect(() => appState.images.key !== key() && resetState())
 
-  function parseResponse(schema, images) {
+  function parseResponse(schema: any, images: any) {
     const newImages = parseSchema<Record<'name' | 'url' | 'title', string>>(
       schema,
       images
@@ -82,9 +80,7 @@ export default function Subreddit() {
       [...appState.images.data.values()],
       'name'
     )
-    setAppState('images', 'data', (data) => {
-      return new Set([...data, ...addedImages])
-    })
+    setAppState('images', 'data', (data) => new Set([...data, ...addedImages]))
     return addedImages
   }
 
@@ -129,31 +125,24 @@ export default function Subreddit() {
     if (firstload && socket) {
       attachEvents(socket)
     }
-    if (socket?.readyState === 1) {
+    function sendMessage(code: string): void {
       socket!.send(
         JSON.stringify({
-          code: !firstload ? 'GET_IMAGES' : 'INSTANTIATE',
+          code,
           data: {
+            quer: query(),
             sessionId,
-            query: query(),
           },
         })
       )
+    }
+    if (socket?.readyState === 1) {
+      sendMessage(!firstload ? 'GET_IMAGES' : 'INSTANTIATE')
       return
     }
     if (socket?.readyState === 0) return
     socket = new WebSocket(PINTEREST_SERVER_BASE_PATH)
-    socket.addEventListener('open', () => {
-      socket!.send(
-        JSON.stringify({
-          code: 'INSTANTIATE',
-          data: {
-            query: query(),
-            sessionId,
-          },
-        })
-      )
-    })
+    socket.addEventListener('open', () => sendMessage('INSTANTIATE'))
     attachEvents(socket)
   }
 
