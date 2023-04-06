@@ -175,11 +175,14 @@ importers:
     specifiers:
       '@iconify-json/mdi': ^1.1.50
       '@motionone/solid': ^10.16.0
+      '@solid-primitives/deep': ^0.0.102
       '@solid-primitives/intersection-observer': ^2.0.11
       '@solid-primitives/keyed': ^1.1.10
       '@solid-primitives/map': ^0.4.3
       '@solid-primitives/memo': ^1.2.4
       '@solid-primitives/resize-observer': ^2.0.15
+      '@solid-primitives/scheduled': ^1.3.2
+      '@solid-primitives/scroll': ^2.0.13
       '@solid-primitives/set': ^0.4.3
       '@types/lodash-es': ^4.17.7
       '@types/web': ^0.0.99
@@ -201,11 +204,14 @@ importers:
       zod: ^3.21.4
     dependencies:
       '@motionone/solid': 10.16.0_solid-js@1.7.1
+      '@solid-primitives/deep': 0.0.102_solid-js@1.7.1
       '@solid-primitives/intersection-observer': 2.0.11_solid-js@1.7.1
       '@solid-primitives/keyed': 1.1.10_solid-js@1.7.1
       '@solid-primitives/map': 0.4.3_solid-js@1.7.1
       '@solid-primitives/memo': 1.2.4_solid-js@1.7.1
       '@solid-primitives/resize-observer': 2.0.15_solid-js@1.7.1
+      '@solid-primitives/scheduled': 1.3.2_solid-js@1.7.1
+      '@solid-primitives/scroll': 2.0.13_solid-js@1.7.1
       '@solid-primitives/set': 0.4.3_solid-js@1.7.1
       '@use-gesture/vanilla': 10.2.25
       clsx: 1.2.1
@@ -2237,6 +2243,14 @@ packages:
       solid-js: 1.7.1
     dev: true
 
+  /@solid-primitives/deep/0.0.102_solid-js@1.7.1:
+    resolution: {integrity: sha512-qD4J69VUDnnjwe4zlU3yEyZoa04wF8atytU88i80+CZ4pi7qNKEjTiU1DQg6lMTtx9znZrhChz349sRfHViVPQ==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      solid-js: 1.7.1
+    dev: false
+
   /@solid-primitives/event-bus/1.0.4_solid-js@1.7.1:
     resolution: {integrity: sha512-WXc+VE6JZ3MdljqlFe79bv1q90Zo5YDqsUjANredy8g6kLGCYKx/H6MezUdyLZlcHZFU4IGcAH2CDeeOUyVDsg==}
     peerDependencies:
@@ -2405,6 +2419,17 @@ packages:
       solid-js: ^1.6.12
     dependencies:
       solid-js: 1.7.1
+
+  /@solid-primitives/scroll/2.0.13_solid-js@1.7.1:
+    resolution: {integrity: sha512-nS1m9ZVMygqlNXEeSgNZJO3zF/Rdn6eMa3OImDFogQyGIy1YTJgT3ylExsF7JS7A/8KRDhsy1rVUH2GuGZ7u/Q==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      '@solid-primitives/event-listener': 2.2.10_solid-js@1.7.1
+      '@solid-primitives/rootless': 1.3.2_solid-js@1.7.1
+      '@solid-primitives/static-store': 0.0.2_solid-js@1.7.1
+      solid-js: 1.7.1
+    dev: false
 
   /@solid-primitives/set/0.4.3_solid-js@1.7.1:
     resolution: {integrity: sha512-n/owKQy/76IWPLZkvLSWZ+0Ji4fndvQ6vj4idXEm5vS8hj/xvGHP2Fw6uBf2XrijGr3BVuSuq9zvnaGjIAB12w==}
@@ -3013,7 +3038,7 @@ packages:
       chokidar: 3.5.3
       fast-glob: 3.2.12
       magic-string: 0.30.0
-      vite: 4.2.1_@types+node@18.15.11
+      vite: 4.2.1
     transitivePeerDependencies:
       - rollup
     dev: true

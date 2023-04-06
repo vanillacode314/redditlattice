@@ -1,71 +1,64 @@
-import { Key } from '@solid-primitives/keyed'
-import { createLazyMemo } from '@solid-primitives/memo'
 import { createElementSize } from '@solid-primitives/resize-observer'
-import { differenceBy, throttle } from 'lodash-es'
+import { differenceBy } from 'lodash-es'
 import {
   Accessor,
   batch,
   children,
+  Component,
   createEffect,
   createMemo,
   createSignal,
   For,
+  Index,
   JSXElement,
   mergeProps,
-  onCleanup,
-  onMount,
-  Show,
   untrack,
 } from 'solid-js'
-import { createStore, produce } from 'solid-js/store'
-
-const BOUNDS: number = 1000
+import { createStore } from 'solid-js/store'
+import VirtualColumn from './VirtualColumn'
 
 interface Item<T = any> {
   id: string
   data: T
 }
 
-export interface Props<T> {
+export interface MasonryProps<T> {
   align?: 'start' | 'center' | 'end'
   items: Array<Item<T>>
   maxWidth: number
   maxColumns?: number
   gap?: number
+  scrollingElement?: string | HTMLElement
   children: (data: {
-    id: Item<T>['id']
-    data: Props<T>['items'][number]['data']
+    id: Accessor<Item<T>['id']>
+    data: Accessor<Item<T>['data']>
     width: Accessor<number>
     lastHeight: Accessor<number | undefined>
-    updateHeight: (rect: DOMRect) => void
+    updateHeight: (height: number) => void
     style: Accessor<Record<string, string>>
   }) => JSXElement
-  attachScrollHandler?: (handler: (e: Event) => void) => () => void
 }
 
 interface State<T> {
   numberOfColumns: number
+  renderingOffscreen: (Item<T> & { setHeight: (height: number) => void })[]
   columnWidth: number
-  top: number
-  bottom: number
+  columnHeights: number[]
   heights: number[][]
-  topOffset: number[][]
-  columns: T[][]
-  visible: boolean[][]
+  topOffsets: number[][]
+  columns: Item<T>[][]
   masonrySize: { readonly height: number | null; readonly width: number | null }
-  renderingOffscreen: (T & { setHeight: (height: number) => void })[]
 }
 
-function get2DArray<T>(x: number, y: number) {
+function get2DArray<T>(x: number, _: number) {
   return Array<T[]>(x)
     .fill(null as unknown as any)
     .map(() => [] as T[])
 }
 
-export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
-  type TItem = (typeof props.items)[number]
+export function Masonry<T>(props: MasonryProps<T>): JSXElement {
   const merged = mergeProps(
-    { align: 'center', gap: 0, maxColumns: Infinity },
+    { align: 'center', gap: 0, maxColumns: Infinity, scrollingElement: 'body' },
     props
   )
   const [masonryRef, setMasonryRef] = createSignal<HTMLDivElement>()
@@ -88,16 +81,20 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     )
   })
 
-  const [state, setState] = createStore<State<TItem>>(
+  function renderOffscreen(item: Item<T>): Promise<number> {
+    return new Promise((resolve) => {
+      setState('renderingOffscreen', state.renderingOffscreen.length, {
+        ...item,
+        setHeight: resolve,
+      })
+    })
+  }
+  const [state, setState] = createStore<State<T>>(
     {
-      top: 0,
-      bottom: Infinity,
-      heights: get2DArray(numberOfColumns(), 1),
-      topOffset: get2DArray(numberOfColumns(), 1),
       columns: get2DArray(numberOfColumns(), 1),
-      get visible() {
-        return visible()
-      },
+      topOffsets: get2DArray(numberOfColumns(), 1),
+      heights: get2DArray(numberOfColumns(), 1),
+      columnHeights: Array(numberOfColumns()),
       renderingOffscreen: [],
       get numberOfColumns(): number {
         return numberOfColumns()
@@ -126,7 +123,7 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
       columnIndex < state.numberOfColumns;
       columnIndex++
     ) {
-      const columnHeight = state.topOffset[columnIndex].at(-1)
+      const columnHeight = state.columnHeights[columnIndex] ?? 0
       if (columnHeight === undefined) return columnIndex
       if (columnHeight >= shortestColumnHeight) continue
       shortestColumnIndex = columnIndex
@@ -135,94 +132,33 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     return shortestColumnIndex
   }
 
-  function renderOffscreen(item: TItem): Promise<number> {
-    return new Promise((resolve) => {
-      setState('renderingOffscreen', state.renderingOffscreen.length, {
-        ...item,
-        setHeight: resolve,
-      })
-    })
-  }
-
-  const visible = createLazyMemo(
-    () => {
-      const visible = [] as boolean[][]
-      for (let i = 0; i < state.columns.length; i++) {
-        function getBounds(
-          condition: (data: { itemBottom: number; itemTop: number }) => boolean
-        ) {
-          let low = 0
-          let high = state.columns[i].length - 1
-          let mid = Math.floor((low + high) / 2)
-          while (low <= high) {
-            mid = Math.floor((low + high) / 2)
-            const itemTop = state.topOffset[i][mid] + merged.gap * mid
-            const itemBottom = itemTop + state.heights[i][mid]
-            condition({ itemBottom, itemTop })
-              ? (high = mid - 1)
-              : (low = mid + 1)
-          }
-          return mid
-        }
-
-        const getTop = () =>
-          getBounds(({ itemBottom }) => itemBottom > state.top - BOUNDS)
-        const getBottom = () =>
-          getBounds(({ itemTop }) => !(itemTop < state.bottom + BOUNDS))
-
-        visible[i] = Array(state.columns[i].length).fill(false)
-        visible[i].fill(true, getTop(), getBottom() + 1)
-      }
-      return visible
-    },
-    [],
-    { name: 'visible' }
-  )
-
-  onMount(() => {
-    const detach = props.attachScrollHandler?.(
-      throttle((e) => {
-        const el = e.target as HTMLElement
-        if (!el) return
-        const paddingTop = +el.style.paddingTop.replace('px', '')
-        setState({
-          top: el.scrollTop - paddingTop,
-          bottom: el.scrollTop + el.clientHeight - paddingTop,
-        })
-      }, 100)
-    )
-    onCleanup(() => detach?.())
-  })
-
-  const gridMap = new Map<TItem['id'], [number, number]>()
-
-  function addItem(item: TItem, height: number) {
+  const gridMap = new Map<Item<T>['id'], [number, number]>()
+  function addItem(item: Item<T>, height: number) {
     const columnIndex = getShortestColumnIndex()
     const rowIndex = state.columns[columnIndex].length
-    const lastTopOffset = state.topOffset[columnIndex][rowIndex - 1]
+    const lastTopOffset = state.topOffsets[columnIndex][rowIndex - 1]
     const lastHeight = state.heights[columnIndex][rowIndex - 1]
     const newTopOffset =
       typeof lastTopOffset === 'number' ? lastTopOffset + lastHeight : 0
 
     batch(() => {
       setState('heights', columnIndex, rowIndex, height)
-      setState('topOffset', columnIndex, rowIndex, newTopOffset)
+      setState('topOffsets', columnIndex, rowIndex, newTopOffset)
       setState('columns', columnIndex, rowIndex, item)
     })
     gridMap.set(item.id, [columnIndex, rowIndex])
   }
 
-  function removeItem(item: TItem) {
+  function removeItem(item: Item<T>) {
     const [columnIndex, rowIndex] = gridMap.get(item.id)!
     const height = state.heights[columnIndex][rowIndex]
     batch(() => {
-      setState('heights', columnIndex, rowIndex, -1)
-      setState('topOffset', columnIndex, rowIndex, -1)
-      setState(
-        'topOffset',
-        columnIndex,
-        { from: rowIndex + 1, to: state.topOffset.length - 1 },
-        (value) => (value === -1 ? value : value - height)
+      setState('heights', columnIndex, (rows) =>
+        rows.slice(0, rowIndex).concat(rows.slice(rowIndex + 1)))
+      setState('topOffsets', columnIndex, (rows) =>
+        rows
+          .slice(0, rowIndex)
+          .concat(rows.slice(rowIndex + 1).map((row) => row - height))
       )
       setState('columns', columnIndex, (row) =>
         row.filter(($item) => item.id !== $item.id)
@@ -230,16 +166,16 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     })
   }
 
-  createEffect<Promise<[TItem[], number]>>(async (lastPromise) => {
+  createEffect<Promise<[Item<T>[], number]>>(async (lastPromise) => {
     const newItems = props.items
     const currentNumberOfColumns = numberOfColumns()
     const [oldItems, lastNumberOfColumns] = await lastPromise
-    let addedItems: TItem[], removedItems: TItem[]
+    let addedItems: Item<T>[], removedItems: Item<T>[]
     if (currentNumberOfColumns !== lastNumberOfColumns) {
       gridMap.clear()
       batch(() => {
         setState('heights', get2DArray(currentNumberOfColumns, 1))
-        setState('topOffset', get2DArray(currentNumberOfColumns, 1))
+        setState('topOffsets', get2DArray(currentNumberOfColumns, 1))
         setState('columns', get2DArray(currentNumberOfColumns, 1))
       })
       removedItems = []
@@ -256,62 +192,48 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
     ) {
       batch(() => {
         setState('heights', columnIndex, (value) => value ?? [])
-        setState('topOffset', columnIndex, (value) => value ?? [])
+        setState('topOffsets', columnIndex, (value) => value ?? [])
         setState('columns', columnIndex, (value) => value ?? [])
       })
     }
 
-    return await untrack(async () => {
-      batch(() => {
+    return await untrack(() =>
+      batch(async () => {
         removedItems.forEach(removeItem)
-        setState(
-          'heights',
-          { from: 0, to: currentNumberOfColumns - 1 },
-          (row) => (row ?? []).filter((value) => value >= 0)
-        )
-        setState(
-          'topOffset',
-          { from: 0, to: currentNumberOfColumns - 1 },
-          (row) => (row ?? []).filter((value) => value >= 0)
-        )
-      })
-
-      const heights = await Promise.all(addedItems.map(renderOffscreen))
-      setState('renderingOffscreen', [])
-      batch(() => {
+        const heights = await Promise.all(addedItems.map(renderOffscreen))
+        setState('renderingOffscreen', [])
         heights.forEach((height, index) => addItem(addedItems[index], height))
+        return [newItems, currentNumberOfColumns]
       })
-      return [newItems, currentNumberOfColumns]
-    })
+    )
   }, Promise.resolve([[], numberOfColumns()]))
+
+  function updateHeight(height: number, columnIndex: number, rowIndex: number) {
+    if (!state.columns[columnIndex]?.[rowIndex]) return
+    const diff = height - state.heights[columnIndex][rowIndex]
+    batch(() => {
+      setState('heights', columnIndex, rowIndex, height)
+      setState(
+        'topOffsets',
+        columnIndex,
+        {
+          from: rowIndex + 1,
+          to: state.topOffsets[columnIndex].length - 1,
+        },
+        (value) => value + diff
+      )
+    })
+  }
 
   return (
     <>
       <div class="opacity-0 absolute">
-        <For each={state.renderingOffscreen}>
-          {(item) => {
-            const resolved = children(() =>
-              props.children({
-                id: item.id,
-                data: item.data,
-                style: () => ({}),
-                lastHeight: () => undefined,
-                updateHeight: () => {},
-                width: columnWidth,
-              })
-            )
-            const list = resolved.toArray() as HTMLElement[]
-            requestAnimationFrame(() => {
-              for (const child of list) {
-                if (!child) continue
-                const { height } = child.getBoundingClientRect()
-                item.setHeight(height)
-                break
-              }
-            })
-            return resolved()
-          }}
-        </For>
+        <OffScreenRenderer
+          items={state.renderingOffscreen}
+          width={state.columnWidth}
+        >
+          {props.children}
+        </OffScreenRenderer>
       </div>
       <div
         class="grid items-start"
@@ -322,68 +244,62 @@ export const Masonry: <T>(props: Props<T>) => JSXElement = (props) => {
           'justify-content': merged.align,
         }}
       >
-        <Key each={[...state.columns.entries()]} by={([index]) => index}>
-          {(entries, columnIndex) => (
-            <div
-              class="relative"
-              style={{
-                width: state.columnWidth + 'px',
-                height: `${
-                  (state.topOffset[columnIndex()].at(-1) ?? 0) +
-                  (state.heights[columnIndex()].at(-1) ?? 0) +
-                  state.columns[columnIndex()].length * merged.gap
-                }px`,
-              }}
+        <Index each={state.columns}>
+          {(rows, columnIndex) => (
+            <VirtualColumn
+              heights={state.heights[columnIndex]}
+              topOffsets={state.topOffsets[columnIndex]}
+              onHeightUpdate={(height) =>
+                setState('columnHeights', columnIndex, height)
+              }
+              items={rows()}
+              scrollingElement={props.scrollingElement}
+              gap={props.gap}
+              width={state.columnWidth}
+              updateHeight={(height, rowIndex) =>
+                updateHeight(height, columnIndex, rowIndex)
+              }
             >
-              <Key each={entries()[1]} by="id">
-                {(item, rowIndex) => (
-                  <Show when={state.visible[columnIndex()][rowIndex()]}>
-                    {props.children({
-                      id: item().id,
-                      data: item().data,
-                      style: () => ({
-                        position: 'absolute',
-                        width: `${state.columnWidth}px`,
-                        left: '0px',
-                        top: `${Math.floor(
-                          state.topOffset[columnIndex()][rowIndex()] +
-                            merged.gap * rowIndex()
-                        )}px`,
-                      }),
-                      lastHeight: () =>
-                        state.heights[columnIndex()][rowIndex()],
-                      updateHeight: (rect) => {
-                        if (!state.columns[columnIndex()]?.[rowIndex()]) return
-                        const diff =
-                          rect.height - state.heights[columnIndex()][rowIndex()]
-                        batch(() => {
-                          setState(
-                            'heights',
-                            columnIndex(),
-                            rowIndex(),
-                            rect.height
-                          )
-                          setState(
-                            'topOffset',
-                            columnIndex(),
-                            {
-                              from: rowIndex() + 1,
-                              to: state.topOffset[columnIndex()].length - 1,
-                            },
-                            (value) => value + diff
-                          )
-                        })
-                      },
-                      width: () => state.columnWidth,
-                    })}
-                  </Show>
-                )}
-              </Key>
-            </div>
+              {/* @ts-ignore: the types are correct */}
+              {props.children}
+            </VirtualColumn>
           )}
-        </Key>
+        </Index>
       </div>
     </>
+  )
+}
+
+const OffScreenRenderer: Component<{
+  items: (Item<unknown> & { setHeight: (height: number) => void })[]
+  children: MasonryProps<any>['children']
+  width: number
+}> = (props) => {
+  return (
+    <For each={props.items}>
+      {(item) => {
+        const resolved = children(() =>
+          props.children({
+            id: () => item.id,
+            data: () => item.data,
+            style: () => ({}),
+            lastHeight: () => undefined,
+            updateHeight: () => {},
+            width: () => props.width,
+          })
+        )
+        const list = resolved.toArray() as HTMLElement[]
+        requestAnimationFrame(() => {
+          for (const child of list) {
+            if (!child) continue
+            const { height } = child.getBoundingClientRect()
+            item.setHeight(height)
+            break
+          }
+        })
+        return resolved()
+      }}
+    </For>
   )
 }
 

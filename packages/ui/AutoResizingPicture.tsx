@@ -21,7 +21,7 @@ interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   alt?: string
   src?: string
   srcSets?: Map<string, string>
-  onHasHeight?: (rect: DOMRect) => void
+  onHasHeight?: (height: number) => void
   onLoad?: (e: Event) => void
   onError?: (e: Event) => void
   fallback?: JSXElement
@@ -29,7 +29,7 @@ interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
 }
 
 export const AutoResizingPicture: ParentComponent<Props> = (props) => {
-  let imgElement: HTMLImageElement
+  let imgRef!: HTMLImageElement
 
   const [local, others] = splitProps(props, [
     'width',
@@ -53,49 +53,45 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
   const { onHasHeight, onLoad, onError } = local
 
   const [height, setHeight] = createSignal<number>(props.fallbackHeight)
-  const [gotHeight, setGotHeight] = createSignal<boolean>(false)
+  const [hasHeight, setHasHeight] = createSignal<boolean>(false)
   const [error, setError] = createSignal<boolean>(false)
   const [tries, setTries] = createSignal(0)
 
-  const checkHeight = throttle(() => {
-    batch(() => {
-      setTries(tries() + 1)
-      if (error()) return
-      if (!imgElement) return
-      if (!imgElement.naturalHeight) {
-        checkHeight()
-        return
-      }
+  const checkHeight = throttle(
+    () =>
+      batch(() => {
+        setTries(tries() + 1)
+        if (error()) return
+        if (!imgRef.naturalHeight) {
+          queueMicrotask(checkHeight)
+          return
+        }
 
-      const height =
-        (imgElement.naturalHeight / imgElement.naturalWidth) * local.width
-      onHasHeight?.({
-        ...imgElement.getBoundingClientRect().toJSON(),
-        height,
-      })
-      setHeight(height)
-      setGotHeight(true)
-    })
-  }, 100)
+        const height =
+          (imgRef.naturalHeight / imgRef.naturalWidth) * props.width
+        onHasHeight?.(height)
+        setHeight(height)
+        setHasHeight(true)
+      }),
+    100
+  )
 
   createRenderEffect(
     on(
       () => props.width,
-      () => {
-        setTries(0)
-        queueMicrotask(() => checkHeight())
-      }
+      () => queueMicrotask(checkHeight),
+      { defer: true }
     )
   )
 
   return (
     <Motion.div
-      class="overflow-hidden group"
+      class="overflow-hidden group relative"
       ref={props.ref}
       animate={{ height: `${height()}px`, ...local.style }}
       initial={false}
       transition={
-        tries() > 1
+        !hasHeight()
           ? {
               easing: spring({
                 damping: 12,
@@ -106,7 +102,7 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
       }
       {...others}
     >
-      <Show when={!gotHeight() && tries() > 1}>
+      <Show when={!hasHeight() && tries() > 1}>
         <div class="absolute inset-0">{props.fallback}</div>
       </Show>
       <picture>
@@ -116,14 +112,14 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
         <img
           src={props.src}
           ref={(el) => {
-            if (imgElement) return
-            imgElement = el
-            queueMicrotask(() => checkHeight())
+            if (imgRef) return
+            imgRef = el
+            queueMicrotask(checkHeight)
           }}
           onError={(e) => {
             batch(() => {
               setError(true)
-              setGotHeight(false)
+              setHasHeight(false)
             })
             onError?.(e)
           }}

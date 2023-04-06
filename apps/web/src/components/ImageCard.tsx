@@ -27,7 +27,7 @@ interface Props {
   height?: number
   image: TImage
   onLoad?: () => void
-  onHasHeight?: (rect: DOMRect) => void
+  onHasHeight?: (height: number) => void
   style: Record<string, string>
   ref?: HTMLDivElement | ((instance: HTMLDivElement) => void)
 }
@@ -69,7 +69,7 @@ export const ImageCard: Component<Props> = (props) => {
       ? `${IMAGE_SERVER_BASE_PATH}/?passthrough=true&url=${url}&width=0`
       : `${IMAGE_SERVER_BASE_PATH}/?url=${url}&width=${width}&format=${format}`
 
-  function getSources() {
+  const sources = () => {
     const formats = uniq([userState.prefferedImageFormat, 'webp'])
     return new Map(
       formats.map((format) => [
@@ -154,8 +154,7 @@ export const ImageCard: Component<Props> = (props) => {
           width={props.width}
           fallbackHeight={props.height || props.width}
           ref={(el) => {
-            const dispose = longpress(el, { callback: showPopup })
-            onCleanup(dispose)
+            onCleanup(longpress(el, { callback: showPopup }))
             typeof props.ref === 'function' ? props.ref(el) : (props.ref = el)
           }}
           onContextMenu={(e: MouseEvent) => {
@@ -167,7 +166,7 @@ export const ImageCard: Component<Props> = (props) => {
               setMenu(true)
             })
           }}
-          srcSets={getSources()}
+          srcSets={sources()}
           src={
             userState.processImages
               ? getProcessedImageURL(props.image.url, width())

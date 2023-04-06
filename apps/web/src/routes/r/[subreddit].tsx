@@ -1,7 +1,6 @@
 import { TRPCClientError } from '@trpc/client'
 import { minBy } from 'lodash-es'
 import {
-  batch,
   createEffect,
   createMemo,
   getOwner,
@@ -203,20 +202,14 @@ export default function SubredditPage() {
         maxColumns={userState.maxColumns}
         align="center"
         gap={userState.gap}
-        attachScrollHandler={(handler) => {
-          appState.scrollElement.addEventListener('scroll', handler, {
-            passive: true,
-          })
-          return () =>
-            appState.scrollElement.removeEventListener('scroll', handler)
-        }}
+        scrollingElement={appState.scrollElement}
       >
         {({ width, data: image, lastHeight, updateHeight, style }) => (
           <ImageCard
             style={style()}
             width={width()}
             height={lastHeight()}
-            image={image}
+            image={image()}
             onHasHeight={updateHeight}
           />
         )}
