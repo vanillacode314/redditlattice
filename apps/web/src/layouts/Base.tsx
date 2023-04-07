@@ -79,6 +79,7 @@ export const BaseLayout: Component<Props> = (props) => {
     on(
       () => appState.scrollElement,
       (scroller) => {
+        return
         let stopInertialScroll: (() => void) | undefined
         if (!scroller) return
         const gesture = new Gesture(
