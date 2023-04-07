@@ -28,7 +28,6 @@ interface Props {
   image: TImage
   onLoad?: () => void
   onHasHeight?: (height: number) => void
-  style: Record<string, string>
   ref?: HTMLDivElement | ((instance: HTMLDivElement) => void)
 }
 
@@ -142,7 +141,6 @@ export const ImageCard: Component<Props> = (props) => {
       >
         <AutoResizingPicture
           style={{
-            ...props.style,
             'border-radius': `${userState.borderRadius}px`,
           }}
           onHasHeight={props.onHasHeight}

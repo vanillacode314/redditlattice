@@ -1,6 +1,6 @@
 import { createElementSize } from '@solid-primitives/resize-observer'
 import { createScrollPosition } from '@solid-primitives/scroll'
-import { differenceBy, sum } from 'lodash-es'
+import { differenceBy, merge, sum } from 'lodash-es'
 import {
   Accessor,
   batch,
@@ -39,7 +39,6 @@ export interface VirtualColumnProps<T> {
     data: Accessor<Item<T>['data']>
     width: Accessor<number>
     lastHeight: Accessor<number | undefined>
-    style: Accessor<Record<string, string>>
     updateHeight: (height: number) => void
   }) => JSXElement
 }
@@ -131,9 +130,9 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
     return untrack(() => s)
   })
 
-  // const firstVisibleIndex = createMemo(() =>
-  //   Math.max(0, visible().indexOf(true))
-  // )
+  const firstVisibleIndex = createMemo(() =>
+    Math.max(0, visible().indexOf(true))
+  )
 
   const columnMap = new Map<Item<T>['id'], number>()
   function addItem(item: Item<T>, height: number, rowIndex: number) {
@@ -190,12 +189,22 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
         {props.children}
       </OffScreenRenderer>
       <main
-        class="relative"
+        class="flex flex-col"
         style={{
           width: props.width + 'px',
           height: totalHeight() + merged.gap * props.items.length + 'px',
+          'row-gap': merged.gap + 'px',
         }}
       >
+        <div
+          style={{
+            width: props.width + 'px',
+            height:
+              topOffsets()[firstVisibleIndex()] +
+              merged.gap * firstVisibleIndex() +
+              'px',
+          }}
+        ></div>
         <For each={props.items}>
           {(_, index) => {
             const data = createMemo(() => props.items[index()], undefined, {
@@ -224,11 +233,6 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
                             (value) => value + diff
                           )
                         }),
-                  style: () => ({
-                    position: 'absolute',
-                    top: topOffset() + 'px',
-                    height: height() + 'px',
-                  }),
                 })}
               </Show>
             )
@@ -239,7 +243,7 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
   )
 }
 
-const OffScreenRenderer: Component<{
+export const OffScreenRenderer: Component<{
   items: (Item<unknown> & { setHeight: (height: number) => void })[]
   children: VirtualColumnProps<any>['children']
   width: number
@@ -251,7 +255,6 @@ const OffScreenRenderer: Component<{
           props.children({
             id: () => item.id,
             data: () => item.data,
-            style: () => ({}),
             lastHeight: () => undefined,
             updateHeight: () => {},
             width: () => props.width,

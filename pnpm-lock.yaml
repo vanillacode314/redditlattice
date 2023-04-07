@@ -197,6 +197,7 @@ importers:
       motion: ^10.15.5
       solid-js: ^1.7.1
       solid-transition-group: ^0.2.2
+      svelte: ^3.58.0
       tsconfig: workspace:*
       typescript: ^5.0.3
       unocss: ^0.50.6
@@ -229,6 +230,7 @@ importers:
       '@unocss/vite': 0.50.6_vite@4.2.1
       eslint: 8.37.0
       eslint-config-custom: link:../eslint-config-custom
+      svelte: 3.58.0
       tsconfig: link:../tsconfig
       typescript: 5.0.3
       unocss: 0.50.6_vite@4.2.1
@@ -6835,6 +6837,11 @@ packages:
   /supports-preserve-symlinks-flag/1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+
+  /svelte/3.58.0:
+    resolution: {integrity: sha512-brIBNNB76mXFmU/Kerm4wFnkskBbluBDCjx/8TcpYRb298Yh2dztS2kQ6bhtjMcvUhd5ynClfwpz5h2gnzdQ1A==}
+    engines: {node: '>= 8'}
+    dev: true
 
   /table/6.8.0:
     resolution: {integrity: sha512-s/fitrbVeEyHKFa7mFdkuQMWlH1Wgw/yEXMt5xACT4ZpzWFluehAxRtUUQKPuWhaLAWhFcVx6w3oC8VKaUfPGA==}

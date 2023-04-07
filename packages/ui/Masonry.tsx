@@ -3,19 +3,16 @@ import { differenceBy } from 'lodash-es'
 import {
   Accessor,
   batch,
-  children,
-  Component,
   createEffect,
   createMemo,
   createSignal,
-  For,
   Index,
   JSXElement,
   mergeProps,
   untrack,
 } from 'solid-js'
 import { createStore } from 'solid-js/store'
-import VirtualColumn from './VirtualColumn'
+import VirtualColumn, { OffScreenRenderer } from './VirtualColumn'
 
 interface Item<T = any> {
   id: string
@@ -35,7 +32,6 @@ export interface MasonryProps<T> {
     width: Accessor<number>
     lastHeight: Accessor<number | undefined>
     updateHeight: (height: number) => void
-    style: Accessor<Record<string, string>>
   }) => JSXElement
 }
 
@@ -154,7 +150,8 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
     const height = state.heights[columnIndex][rowIndex]
     batch(() => {
       setState('heights', columnIndex, (rows) =>
-        rows.slice(0, rowIndex).concat(rows.slice(rowIndex + 1)))
+        rows.slice(0, rowIndex).concat(rows.slice(rowIndex + 1))
+      )
       setState('topOffsets', columnIndex, (rows) =>
         rows
           .slice(0, rowIndex)
@@ -260,46 +257,12 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
                 updateHeight(height, columnIndex, rowIndex)
               }
             >
-              {/* @ts-ignore: the types are correct */}
               {props.children}
             </VirtualColumn>
           )}
         </Index>
       </div>
     </>
-  )
-}
-
-const OffScreenRenderer: Component<{
-  items: (Item<unknown> & { setHeight: (height: number) => void })[]
-  children: MasonryProps<any>['children']
-  width: number
-}> = (props) => {
-  return (
-    <For each={props.items}>
-      {(item) => {
-        const resolved = children(() =>
-          props.children({
-            id: () => item.id,
-            data: () => item.data,
-            style: () => ({}),
-            lastHeight: () => undefined,
-            updateHeight: () => {},
-            width: () => props.width,
-          })
-        )
-        const list = resolved.toArray() as HTMLElement[]
-        requestAnimationFrame(() => {
-          for (const child of list) {
-            if (!child) continue
-            const { height } = child.getBoundingClientRect()
-            item.setHeight(height)
-            break
-          }
-        })
-        return resolved()
-      }}
-    </For>
   )
 }
 

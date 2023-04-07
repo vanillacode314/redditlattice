@@ -14,6 +14,7 @@ import {
   Show,
   splitProps,
 } from 'solid-js'
+import { createSpring } from './utils/spring'
 
 interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   width: number
@@ -25,7 +26,7 @@ interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   onLoad?: (e: Event) => void
   onError?: (e: Event) => void
   fallback?: JSXElement
-  style: JSX.CSSProperties
+  style?: JSX.CSSProperties
 }
 
 export const AutoResizingPicture: ParentComponent<Props> = (props) => {
@@ -52,8 +53,11 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
   )
   const { onHasHeight, onLoad, onError } = local
 
-  const [height, setHeight] = createSignal<number>(props.fallbackHeight)
   const [hasHeight, setHasHeight] = createSignal<boolean>(false)
+  const [height, setHeight] = createSpring(props.fallbackHeight, hasHeight, {
+    stiffness: 0.2,
+    damping: 0.3,
+  })
   const [error, setError] = createSignal<boolean>(false)
   const [tries, setTries] = createSignal(0)
 
@@ -85,21 +89,10 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
   )
 
   return (
-    <Motion.div
+    <div
       class="overflow-hidden group relative"
       ref={props.ref}
-      animate={{ height: `${height()}px`, ...local.style }}
-      initial={false}
-      transition={
-        !hasHeight()
-          ? {
-              easing: spring({
-                damping: 12,
-                stiffness: 210,
-              }),
-            }
-          : { duration: 0 }
-      }
+      style={{ ...props.style, height: height() + 'px' }}
       {...others}
     >
       <Show when={!hasHeight() && tries() > 1}>
@@ -130,7 +123,7 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
         />
       </picture>
       {props.children}
-    </Motion.div>
+    </div>
   )
 }
 

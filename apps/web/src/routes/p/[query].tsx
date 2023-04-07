@@ -162,20 +162,13 @@ export default function Subreddit() {
         maxColumns={userState.maxColumns}
         align="center"
         gap={userState.gap}
-        attachScrollHandler={(handler) => {
-          appState.scrollElement.addEventListener('scroll', handler, {
-            passive: true,
-          })
-          return () =>
-            appState.scrollElement.removeEventListener('scroll', handler)
-        }}
+        scrollingElement={appState.scrollElement}
       >
-        {({ width, data: image, lastHeight, updateHeight, style }) => (
+        {({ width, data: image, lastHeight, updateHeight }) => (
           <ImageCard
-            style={style()}
             width={width()}
             height={lastHeight()}
-            image={image}
+            image={image()}
             onHasHeight={updateHeight}
           />
         )}

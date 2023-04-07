@@ -204,9 +204,8 @@ export default function SubredditPage() {
         gap={userState.gap}
         scrollingElement={appState.scrollElement}
       >
-        {({ width, data: image, lastHeight, updateHeight, style }) => (
+        {({ width, data: image, lastHeight, updateHeight }) => (
           <ImageCard
-            style={style()}
             width={width()}
             height={lastHeight()}
             image={image()}
