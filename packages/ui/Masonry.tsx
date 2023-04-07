@@ -7,12 +7,14 @@ import {
   createMemo,
   createSignal,
   Index,
+  JSX,
   JSXElement,
   mergeProps,
   untrack,
 } from 'solid-js'
 import { createStore } from 'solid-js/store'
-import VirtualColumn, { OffScreenRenderer } from './VirtualColumn'
+import { sum } from './utils'
+import VirtualColumn from './VirtualColumn'
 
 interface Item<T = any> {
   id: string
@@ -34,12 +36,11 @@ export interface MasonryProps<T> {
     y: Accessor<number>
     lastHeight: Accessor<number | undefined>
     updateHeight: (height: number) => void
-  }) => JSXElement
+  }) => Exclude<JSXElement, JSX.ArrayElement>
 }
 
 interface State<T> {
   numberOfColumns: number
-  renderingOffscreen: (Item<T> & { setHeight: (height: number) => void })[]
   columnWidth: number
   heights: number[][]
   topOffsets: number[][]
@@ -78,21 +79,11 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
     )
   })
 
-  // function renderOffscreen(item: Item<T>): Promise<number> {
-  //   return new Promise((resolve) => {
-  //     setState('renderingOffscreen', state.renderingOffscreen.length, {
-  //       ...item,
-  //       setHeight: resolve,
-  //     })
-  //   })
-  // }
-
   const [state, setState] = createStore<State<T>>(
     {
       columns: get2DArray(numberOfColumns(), 1),
       topOffsets: get2DArray(numberOfColumns(), 1),
       heights: get2DArray(numberOfColumns(), 1),
-      renderingOffscreen: [],
       get numberOfColumns(): number {
         return numberOfColumns()
       },
@@ -222,43 +213,44 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
     })
   }
 
+  const getColumnHeight = (index: number) => {
+    const heights = state.heights[index]
+    const gaps = (heights.length - 1) * merged.gap
+    return sum(state.heights[index]) + gaps
+  }
+
   return (
-    <>
-      <OffScreenRenderer
-        items={state.renderingOffscreen}
-        width={state.columnWidth}
-      >
-        {props.children}
-      </OffScreenRenderer>
-      <div
-        class="grid items-start"
-        ref={setMasonryRef}
-        style={{
-          'column-gap': `${merged.gap}px`,
-          'grid-template-columns': `repeat(${state.numberOfColumns},auto)`,
-          'justify-content': merged.align,
-        }}
-      >
-        <Index each={state.columns}>
-          {(rows, columnIndex) => (
-            <VirtualColumn
-              heights={state.heights[columnIndex]}
-              topOffsets={state.topOffsets[columnIndex]}
-              items={rows()}
-              scrollingElement={props.scrollingElement}
-              gap={props.gap}
-              width={state.columnWidth}
-              getInitialHeight={props.getInitialHeight}
-              updateHeight={(height, rowIndex) =>
-                updateHeight(height, columnIndex, rowIndex)
-              }
-            >
-              {props.children}
-            </VirtualColumn>
-          )}
-        </Index>
-      </div>
-    </>
+    <div
+      class="grid items-start contain-strict"
+      ref={setMasonryRef}
+      style={{
+        height: `${Math.max(
+          ...state.columns.map((_, index) => getColumnHeight(index))
+        )}px`,
+        'column-gap': `${merged.gap}px`,
+        'grid-template-columns': `repeat(${state.numberOfColumns},auto)`,
+        'justify-content': merged.align,
+      }}
+    >
+      <Index each={state.columns}>
+        {(rows, columnIndex) => (
+          <VirtualColumn
+            heights={state.heights[columnIndex]}
+            topOffsets={state.topOffsets[columnIndex]}
+            items={rows()}
+            scrollingElement={props.scrollingElement}
+            gap={props.gap}
+            width={state.columnWidth}
+            getInitialHeight={props.getInitialHeight}
+            updateHeight={(height, rowIndex) =>
+              updateHeight(height, columnIndex, rowIndex)
+            }
+          >
+            {props.children}
+          </VirtualColumn>
+        )}
+      </Index>
+    </div>
   )
 }
 
