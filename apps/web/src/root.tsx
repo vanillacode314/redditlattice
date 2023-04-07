@@ -72,6 +72,7 @@ export const Root: Component = () => {
             name="viewport"
             content="width=device-width, initial-scale=1, viewport-fit=cover"
           />
+          <Meta name="color-scheme" content="dark" />
           <script
             async
             src="https://www.googletagmanager.com/gtag/js?id=G-XDR9E19TGZ"
