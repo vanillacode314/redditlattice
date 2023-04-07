@@ -73,7 +73,7 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
         setHeight(height)
         setHasHeight(true)
       }),
-    100
+    500
   )
 
   createRenderEffect(
