@@ -11,7 +11,14 @@ import {
   Switch,
 } from 'solid-js'
 import { useLocation, useParams } from 'solid-start'
-import { Button, InfiniteHandler, InfiniteLoading, Masonry, Spinner } from 'ui'
+import {
+  Animate,
+  Button,
+  InfiniteHandler,
+  InfiniteLoading,
+  Masonry,
+  Spinner,
+} from 'ui'
 import { trpc } from '~/client'
 import Fab from '~/components/Fab'
 import ImageCard from '~/components/ImageCard'
@@ -206,14 +213,14 @@ export default function SubredditPage() {
         getInitialHeight={(_, width) => width}
       >
         {({ width, data: image, lastHeight, updateHeight, y }) => (
-          <ImageCard
-            class="absolute"
-            y={y()}
-            width={width()}
-            height={lastHeight()}
-            image={image()}
-            onHasHeight={updateHeight}
-          />
+          <Animate class="absolute" y={y()}>
+            <ImageCard
+              width={width()}
+              height={lastHeight()}
+              image={image()}
+              onHasHeight={updateHeight}
+            />
+          </Animate>
         )}
       </Masonry>
       <InfiniteLoading

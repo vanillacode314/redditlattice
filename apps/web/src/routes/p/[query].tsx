@@ -10,7 +10,14 @@ import {
   Switch,
 } from 'solid-js'
 import { useParams } from 'solid-start'
-import { Button, InfiniteHandler, InfiniteLoading, Masonry, Spinner } from 'ui'
+import {
+  Animate,
+  Button,
+  InfiniteHandler,
+  InfiniteLoading,
+  Masonry,
+  Spinner,
+} from 'ui'
 import z from 'zod'
 import ImageCard from '~/components/ImageCard'
 import { PINTEREST_SERVER_BASE_PATH } from '~/consts'
@@ -166,13 +173,14 @@ export default function Subreddit() {
         getInitialHeight={(_, width) => width}
       >
         {({ width, data: image, lastHeight, updateHeight, y }) => (
-          <ImageCard
-            width={width()}
-            y={y()}
-            height={lastHeight()}
-            image={image()}
-            onHasHeight={updateHeight}
-          />
+          <Animate class="absolute" y={y()}>
+            <ImageCard
+              width={width()}
+              height={lastHeight()}
+              image={image()}
+              onHasHeight={updateHeight}
+            />
+          </Animate>
         )}
       </Masonry>
       <InfiniteLoading

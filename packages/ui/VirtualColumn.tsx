@@ -1,7 +1,6 @@
-import { createEventListener } from '@solid-primitives/event-listener'
+import { createIntersectionObserver } from '@solid-primitives/intersection-observer'
 import { Key } from '@solid-primitives/keyed'
-import { createElementSize } from '@solid-primitives/resize-observer'
-import { createStaticStore } from '@solid-primitives/static-store'
+import { ReactiveWeakMap } from '@solid-primitives/map'
 import { differenceBy } from 'lodash-es'
 import {
   Accessor,
@@ -13,8 +12,10 @@ import {
   createMemo,
   For,
   Index,
+  JSX,
   JSXElement,
   mergeProps,
+  onCleanup,
   Show,
   untrack,
 } from 'solid-js'
@@ -46,7 +47,7 @@ export interface VirtualColumnProps<T> {
     y: Accessor<number>
     lastHeight: Accessor<number | undefined>
     updateHeight: (height: number) => void
-  }) => JSXElement
+  }) => Exclude<JSXElement, JSX.ArrayElement>
 }
 
 export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
@@ -72,25 +73,6 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
         : merged.scrollingElement) as HTMLElement
   )
 
-  const [scrollPos, setScrollPos] = createStaticStore({
-    x: 0,
-    y: 0,
-  })
-  createEventListener(
-    scrollElement,
-    'scroll',
-    () => {
-      setScrollPos({
-        x: scrollElement().scrollLeft,
-        y: scrollElement().scrollTop,
-      })
-    },
-    {
-      passive: true,
-    }
-  )
-  const scrollSize = createElementSize(scrollElement)
-
   const totalHeight = createMemo(() => sum(heights()))
   createComputed(() => onHeightUpdate?.(totalHeight()))
 
@@ -103,30 +85,6 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
   //   })
   // }
 
-  const pos = createMemo<{
-    top: number
-    bottom: number
-  }>(
-    () => {
-      const paddingTop = +scrollElement().style.paddingTop.replace('px', '')
-      const top = scrollPos.y - paddingTop - VIRTUAL_MARGIN
-      const bottom = scrollSize.height
-        ? top + scrollSize.height + 2 * VIRTUAL_MARGIN
-        : Infinity
-      return {
-        top,
-        bottom,
-      }
-    },
-    {
-      top: 0,
-      bottom: Infinity,
-    },
-    {
-      equals: (a, b) => a.top === b.top && a.bottom === b.bottom,
-    }
-  )
-
   const [internalTopOffsets, setInternalTopOffsets] = createStore(
     [] as number[]
   )
@@ -138,24 +96,22 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
     }
   )
 
-  const [visible, setVisible] = createStore([] as boolean[])
-  createEffect(() => {
-    const gap = merged.gap
-    const $heights = heights()
-    const $topOffsets = topOffsets()
-    for (let i = 0; i < props.items.length; i++) {
-      const height = $heights[i] ?? 0
-      if (height === 0) {
-        setVisible(i, true)
-        continue
-      }
-      const topOffset = ($topOffsets[i] ?? 0) + gap * i
-      const newState =
-        topOffset + height > pos().top && topOffset < pos().bottom
-      if (visible[i] === newState) continue
-      setVisible(i, newState)
+  const [els, setEls] = createStore([] as HTMLElement[])
+  createIntersectionObserver(
+    () => els,
+    (entries) =>
+      entries.forEach((entry) =>
+        visible.set(entry.target, entry.isIntersecting)
+      ),
+    {
+      // rootMargin: `${VIRTUAL_MARGIN}px`,
+      threshold: 0,
+      root: scrollElement(),
+      rootMargin: `${VIRTUAL_MARGIN}px 0px ${VIRTUAL_MARGIN}px 0px`,
     }
-  })
+  )
+  const visible = new ReactiveWeakMap<Element, boolean>()
+  // const [visible, setVisible] = createStore([] as boolean[])
 
   // const firstVisibleIndex = createMemo(() => Math.max(0, visible.indexOf(true)))
   // const numberOfVisibleItems = createMemo(() => visible.filter(Boolean).length)
@@ -234,28 +190,44 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
             const topOffset = createMemo(
               () => topOffsets()[index()] + merged.gap * index()
             )
+            const resolved = props.children({
+              id: () => data().id,
+              data: () => data().data,
+              width: () => props.width,
+              lastHeight: height,
+              y: topOffset,
+              updateHeight: updateHeight
+                ? (height) => updateHeight(height, index())
+                : (newHeight: number) =>
+                    batch(() => {
+                      const diff = newHeight - height()
+                      setInternalHeights(index(), newHeight)
+                      setInternalTopOffsets(
+                        {
+                          from: index() + 1,
+                          to: topOffsets().length - 1,
+                        },
+                        (value) => value + diff
+                      )
+                    }),
+            })
+            const el = children(() => resolved)
 
+            queueMicrotask(() => {
+              setEls(index(), el() as HTMLElement)
+            })
+            onCleanup(() => setEls((els) => els.filter(($el) => $el !== el())))
             return (
-              <Show when={visible[index()]}>
-                {props.children({
-                  id: () => data().id,
-                  data: () => data().data,
-                  width: () => props.width,
-                  lastHeight: height,
-                  y: topOffset,
-                  updateHeight: updateHeight
-                    ? (height) => updateHeight(height, index())
-                    : (newHeight: number) =>
-                        batch(() => {
-                          const diff = newHeight - height()
-                          setInternalHeights(index(), newHeight)
-                          setInternalTopOffsets(
-                            { from: index() + 1, to: topOffsets().length - 1 },
-                            (value) => value + diff
-                          )
-                        }),
-                })}
-              </Show>
+              <div
+                style={{
+                  visibility:
+                    visible.get(el() as HTMLElement) === false
+                      ? 'hidden'
+                      : 'visible',
+                }}
+              >
+                {el()}
+              </div>
             )
           }}
         </Key>

@@ -26,7 +26,7 @@ import { outsideclick } from '~/utils/use-outsideclick'
 interface Props {
   width: number
   height?: number
-  y: number
+  y?: number
   image: TImage
   onLoad?: () => void
   onHasHeight?: (height: number) => void
