@@ -1,5 +1,7 @@
+import { createEventListener } from '@solid-primitives/event-listener'
 import { createElementSize } from '@solid-primitives/resize-observer'
 import { createScrollPosition } from '@solid-primitives/scroll'
+import { createStaticStore } from '@solid-primitives/static-store'
 import { differenceBy } from 'lodash-es'
 import {
   Accessor,
@@ -67,7 +69,24 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
         ? document.querySelector(merged.scrollingElement)!
         : merged.scrollingElement) as HTMLElement
   )
-  const scrollPos = createScrollPosition(scrollElement)
+
+  const [scrollPos, setScrollPos] = createStaticStore({
+    x: 0,
+    y: 0,
+  })
+  createEventListener(
+    scrollElement,
+    'scroll',
+    (e) => {
+      setScrollPos({
+        x: scrollElement().scrollLeft,
+        y: scrollElement().scrollTop,
+      })
+    },
+    {
+      passive: true,
+    }
+  )
   const scrollSize = createElementSize(scrollElement)
 
   const totalHeight = createMemo(() => sum(heights()))
@@ -117,24 +136,21 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
     }
   )
 
-  const [s, set] = createStore([] as boolean[])
-  const visible = createMemo(() => {
+  const [visible, setVisible] = createStore([] as boolean[])
+  createEffect(() => {
     const gap = merged.gap
     for (let i = 0; i < props.items.length; i++) {
       const height = heights()[i] ?? 0
       if (height === 0) {
-        set(i, true)
+        setVisible(i, true)
         continue
       }
       const topOffset = (topOffsets()[i] ?? 0) + gap * i
-      set(i, topOffset + height > pos().top && topOffset < pos().bottom)
+      setVisible(i, topOffset + height > pos().top && topOffset < pos().bottom)
     }
-    return untrack(() => s)
   })
 
-  const firstVisibleIndex = createMemo(() =>
-    Math.max(0, visible().indexOf(true))
-  )
+  const firstVisibleIndex = createMemo(() => Math.max(0, visible.indexOf(true)))
 
   const columnMap = new Map<Item<T>['id'], number>()
   function addItem(item: Item<T>, height: number, rowIndex: number) {
@@ -225,7 +241,7 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
             const height = createMemo(() => heights()[index()])
 
             return (
-              <Show when={visible()[index()]}>
+              <Show when={visible[index()]}>
                 {props.children({
                   id: () => data().id,
                   data: () => data().data,
