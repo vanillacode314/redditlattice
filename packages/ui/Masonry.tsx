@@ -26,6 +26,7 @@ export interface MasonryProps<T> {
   maxColumns?: number
   gap?: number
   scrollingElement?: string | HTMLElement
+  getInitialHeight: (id: Item['id'], width: number) => number
   children: (data: {
     id: Accessor<Item<T>['id']>
     data: Accessor<Item<T>['data']>
@@ -40,7 +41,6 @@ interface State<T> {
   numberOfColumns: number
   renderingOffscreen: (Item<T> & { setHeight: (height: number) => void })[]
   columnWidth: number
-  columnHeights: number[]
   heights: number[][]
   topOffsets: number[][]
   columns: Item<T>[][]
@@ -78,20 +78,20 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
     )
   })
 
-  function renderOffscreen(item: Item<T>): Promise<number> {
-    return new Promise((resolve) => {
-      setState('renderingOffscreen', state.renderingOffscreen.length, {
-        ...item,
-        setHeight: resolve,
-      })
-    })
-  }
+  // function renderOffscreen(item: Item<T>): Promise<number> {
+  //   return new Promise((resolve) => {
+  //     setState('renderingOffscreen', state.renderingOffscreen.length, {
+  //       ...item,
+  //       setHeight: resolve,
+  //     })
+  //   })
+  // }
+
   const [state, setState] = createStore<State<T>>(
     {
       columns: get2DArray(numberOfColumns(), 1),
       topOffsets: get2DArray(numberOfColumns(), 1),
       heights: get2DArray(numberOfColumns(), 1),
-      columnHeights: Array(numberOfColumns()),
       renderingOffscreen: [],
       get numberOfColumns(): number {
         return numberOfColumns()
@@ -120,7 +120,7 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
       columnIndex < state.numberOfColumns;
       columnIndex++
     ) {
-      const columnHeight = state.columnHeights[columnIndex] ?? 0
+      const columnHeight = state.topOffsets[columnIndex].at(-1) ?? 0
       if (columnHeight === undefined) return columnIndex
       if (columnHeight >= shortestColumnHeight) continue
       shortestColumnIndex = columnIndex
@@ -130,13 +130,14 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
   }
 
   const gridMap = new Map<Item<T>['id'], [number, number]>()
-  function addItem(item: Item<T>, height: number) {
+  function addItem(item: Item<T>) {
     const columnIndex = getShortestColumnIndex()
     const rowIndex = state.columns[columnIndex].length
     const lastTopOffset = state.topOffsets[columnIndex][rowIndex - 1]
     const lastHeight = state.heights[columnIndex][rowIndex - 1]
     const newTopOffset =
       typeof lastTopOffset === 'number' ? lastTopOffset + lastHeight : 0
+    const height = props.getInitialHeight(item.id, state.columnWidth)
 
     batch(() => {
       setState('heights', columnIndex, rowIndex, height)
@@ -198,16 +199,7 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
     return await untrack(() =>
       batch(async () => {
         removedItems.forEach(removeItem)
-        requestAnimationFrame(async function handler() {
-          const item = addedItems.shift()!
-          if (!item) return
-
-          const height = await renderOffscreen(item)
-          setState('renderingOffscreen', [])
-          addItem(item, height)
-
-          requestAnimationFrame(handler)
-        })
+        addedItems.forEach(addItem)
         return [newItems, currentNumberOfColumns]
       })
     )
@@ -252,13 +244,11 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
             <VirtualColumn
               heights={state.heights[columnIndex]}
               topOffsets={state.topOffsets[columnIndex]}
-              onHeightUpdate={(height) =>
-                setState('columnHeights', columnIndex, height)
-              }
               items={rows()}
               scrollingElement={props.scrollingElement}
               gap={props.gap}
               width={state.columnWidth}
+              getInitialHeight={props.getInitialHeight}
               updateHeight={(height, rowIndex) =>
                 updateHeight(height, columnIndex, rowIndex)
               }

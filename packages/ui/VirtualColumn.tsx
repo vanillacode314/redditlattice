@@ -38,6 +38,7 @@ export interface VirtualColumnProps<T> {
   updateHeight?: (height: number, index: number) => void
   heights?: number[]
   topOffsets?: number[]
+  getInitialHeight: (id: Item['id'], width: number) => number
   children: (data: {
     id: Accessor<Item<T>['id']>
     data: Accessor<Item<T>['data']>
@@ -60,9 +61,9 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
     undefined,
     { equals: (a, b) => a.length === b.length && a.every((v, i) => v === b[i]) }
   )
-  const [renderingOffscreen, setRenderingOffscreen] = createStore(
-    [] as (Item<T> & { setHeight: (height: number) => void })[]
-  )
+  // const [renderingOffscreen, setRenderingOffscreen] = createStore(
+  //   [] as (Item<T> & { setHeight: (height: number) => void })[]
+  // )
 
   const scrollElement = createMemo(
     () =>
@@ -93,14 +94,14 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
   const totalHeight = createMemo(() => sum(heights()))
   createComputed(() => onHeightUpdate?.(totalHeight()))
 
-  function renderOffscreen(item: Item<T>): Promise<number> {
-    return new Promise((resolve) => {
-      setRenderingOffscreen(renderingOffscreen.length, {
-        ...item,
-        setHeight: resolve,
-      })
-    })
-  }
+  // function renderOffscreen(item: Item<T>): Promise<number> {
+  //   return new Promise((resolve) => {
+  //     setRenderingOffscreen(renderingOffscreen.length, {
+  //       ...item,
+  //       setHeight: resolve,
+  //     })
+  //   })
+  // }
 
   const pos = createMemo<{
     top: number
@@ -149,16 +150,21 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
         continue
       }
       const topOffset = ($topOffsets[i] ?? 0) + gap * i
-      setVisible(i, topOffset + height > pos().top && topOffset < pos().bottom)
+      const newState =
+        topOffset + height > pos().top && topOffset < pos().bottom
+      if (visible[i] === newState) continue
+      setVisible(i, newState)
     }
   })
 
-  const firstVisibleIndex = createMemo(() => Math.max(0, visible.indexOf(true)))
+  // const firstVisibleIndex = createMemo(() => Math.max(0, visible.indexOf(true)))
+  // const numberOfVisibleItems = createMemo(() => visible.filter(Boolean).length)
 
   const columnMap = new Map<Item<T>['id'], number>()
-  function addItem(item: Item<T>, height: number, rowIndex: number) {
+  function addItem(item: Item<T>, rowIndex: number) {
     const lastTopOffset = topOffsets().at(-1)
     const lastHeight = heights().at(-1)
+    const height = props.getInitialHeight(item.id, props.width)
     batch(() => {
       setInternalHeights(rowIndex, height)
       setInternalTopOffsets(
@@ -194,17 +200,7 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
     return await untrack(() =>
       batch(async () => {
         removedItems.forEach(removeItem)
-        let i = 0
-        requestAnimationFrame(async function handler() {
-          const item = addedItems.shift()!
-          if (!item) return
-
-          const height = await renderOffscreen(item)
-          setRenderingOffscreen([])
-          addItem(item, height, oldItems.length + i++)
-
-          requestAnimationFrame(handler)
-        })
+        addedItems.forEach((item, i) => addItem(item, oldItems.length + i))
         return newItems
       })
     )
@@ -212,9 +208,9 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
 
   return (
     <>
-      <OffScreenRenderer items={renderingOffscreen} width={props.width}>
-        {props.children}
-      </OffScreenRenderer>
+      {/* <OffScreenRenderen items={renderingOffscreen} width={props.width}> */}
+      {/*   {props.children} */}
+      {/* </OffScreenRenderer> */}
       <main
         class="relative"
         style={{
@@ -222,7 +218,12 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
           height: totalHeight() + merged.gap * props.items.length + 'px',
         }}
       >
-        {/* <Index each={[...props.items.entries()].filter(([i]) => visible()[i])}> */}
+        {/* <Index */}
+        {/*   each={[...props.items.entries()].slice( */}
+        {/*     firstVisibleIndex(), */}
+        {/*     numberOfVisibleItems() */}
+        {/*   )} */}
+        {/* > */}
         <Key each={props.items} by="id">
           {(_, index) => {
             // const index = () => firstVisibleIndex() + i

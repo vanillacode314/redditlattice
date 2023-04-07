@@ -203,6 +203,7 @@ export default function SubredditPage() {
         align="center"
         gap={userState.gap}
         scrollingElement={appState.scrollElement}
+        getInitialHeight={(_, width) => width}
       >
         {({ width, data: image, lastHeight, updateHeight, y }) => (
           <ImageCard
