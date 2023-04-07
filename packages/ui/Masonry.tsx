@@ -12,7 +12,7 @@ import {
   mergeProps,
   untrack,
 } from 'solid-js'
-import { createStore } from 'solid-js/store'
+import { createStore, produce } from 'solid-js/store'
 import { sum } from './utils'
 import VirtualColumn from './VirtualColumn'
 
@@ -142,17 +142,20 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
     const [columnIndex, rowIndex] = gridMap.get(item.id)!
     const height = state.heights[columnIndex][rowIndex]
     batch(() => {
-      setState('heights', columnIndex, (row) =>
-        row.slice(0, rowIndex).concat(row.slice(rowIndex + 1))
+      setState(
+        'heights',
+        columnIndex,
+        produce((row) => row.splice(0, rowIndex))
       )
-      setState('topOffsets', columnIndex, (row) =>
-        row
-          .slice(0, rowIndex)
-          .concat(row.slice(rowIndex + 1).map((row) => row - height))
+      setState(
+        'topOffsets',
+        columnIndex,
+        produce((rows) => {
+          rows.splice(rowIndex, 1)
+          for (let i = rowIndex; i < rows.length; i++) rows[i] -= height
+        })
       )
-      setState('columns', columnIndex, (row) =>
-        row.slice(0, rowIndex).concat(row.slice(rowIndex + 1))
-      )
+      setState('columns', columnIndex, (row) => row.splice(rowIndex, 1))
     })
   }
 

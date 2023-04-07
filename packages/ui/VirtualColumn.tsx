@@ -15,7 +15,7 @@ import {
   onCleanup,
   untrack,
 } from 'solid-js'
-import { createStore } from 'solid-js/store'
+import { createStore, produce } from 'solid-js/store'
 import { isServer } from 'solid-js/web'
 import { sum } from './utils'
 
@@ -118,13 +118,12 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
     const rowIndex = columnMap.get(item.id)!
     const height = heights()[rowIndex]
     batch(() => {
-      setInternalHeights((rows) =>
-        rows.slice(0, rowIndex).concat(rows.slice(rowIndex + 1))
-      )
-      setInternalTopOffsets((rows) =>
-        rows
-          .slice(0, rowIndex)
-          .concat(rows.slice(rowIndex + 1).map((row) => row - height))
+      setInternalHeights(produce((rows) => rows.splice(rowIndex, 1)))
+      setInternalTopOffsets(
+        produce((rows) => {
+          rows.splice(rowIndex, 1)
+          for (let i = rowIndex; i < rows.length; i++) rows[i] -= height
+        })
       )
     })
   }
@@ -193,7 +192,7 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
           const el = children(() => resolved)
 
           setEls(index(), el() as HTMLElement)
-          onCleanup(() => setEls((els) => els.filter(($el) => $el !== el())))
+          onCleanup(() => setEls(produce((els) => els.splice(index(), 1))))
           return (
             <div
               style={{
