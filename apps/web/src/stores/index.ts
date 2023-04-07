@@ -71,7 +71,7 @@ export const userStateSchema = z.object({
   redditRecents: z.map(z.string(), z.number()).default(() => new Map()),
   recentsLimit: z.number().default(5),
   columnMaxWidth: z.number().default(600),
-  maxColumns: z.number().default(4),
+  maxColumns: z.number().default(12),
   autoScrollSpeedPixelsPerSecond: z.number().default(150),
 })
 const [userState, setUserState] = createStorageStore(
