@@ -30,6 +30,7 @@ export interface MasonryProps<T> {
     id: Accessor<Item<T>['id']>
     data: Accessor<Item<T>['data']>
     width: Accessor<number>
+    y: Accessor<number>
     lastHeight: Accessor<number | undefined>
     updateHeight: (height: number) => void
   }) => JSXElement
@@ -231,14 +232,12 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
 
   return (
     <>
-      <div class="opacity-0 absolute">
-        <OffScreenRenderer
-          items={state.renderingOffscreen}
-          width={state.columnWidth}
-        >
-          {props.children}
-        </OffScreenRenderer>
-      </div>
+      <OffScreenRenderer
+        items={state.renderingOffscreen}
+        width={state.columnWidth}
+      >
+        {props.children}
+      </OffScreenRenderer>
       <div
         class="grid items-start"
         ref={setMasonryRef}

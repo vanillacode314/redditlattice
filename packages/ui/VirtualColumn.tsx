@@ -1,6 +1,6 @@
 import { createEventListener } from '@solid-primitives/event-listener'
+import { Key } from '@solid-primitives/keyed'
 import { createElementSize } from '@solid-primitives/resize-observer'
-import { createScrollPosition } from '@solid-primitives/scroll'
 import { createStaticStore } from '@solid-primitives/static-store'
 import { differenceBy } from 'lodash-es'
 import {
@@ -42,6 +42,7 @@ export interface VirtualColumnProps<T> {
     id: Accessor<Item<T>['id']>
     data: Accessor<Item<T>['data']>
     width: Accessor<number>
+    y: Accessor<number>
     lastHeight: Accessor<number | undefined>
     updateHeight: (height: number) => void
   }) => JSXElement
@@ -77,7 +78,7 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
   createEventListener(
     scrollElement,
     'scroll',
-    (e) => {
+    () => {
       setScrollPos({
         x: scrollElement().scrollLeft,
         y: scrollElement().scrollTop,
@@ -139,13 +140,15 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
   const [visible, setVisible] = createStore([] as boolean[])
   createEffect(() => {
     const gap = merged.gap
+    const $heights = heights()
+    const $topOffsets = topOffsets()
     for (let i = 0; i < props.items.length; i++) {
-      const height = heights()[i] ?? 0
+      const height = $heights[i] ?? 0
       if (height === 0) {
         setVisible(i, true)
         continue
       }
-      const topOffset = (topOffsets()[i] ?? 0) + gap * i
+      const topOffset = ($topOffsets[i] ?? 0) + gap * i
       setVisible(i, topOffset + height > pos().top && topOffset < pos().bottom)
     }
   })
@@ -209,36 +212,27 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
 
   return (
     <>
-      <div class="opacity-0 absolute">
-        <OffScreenRenderer items={renderingOffscreen} width={props.width}>
-          {props.children}
-        </OffScreenRenderer>
-      </div>
+      <OffScreenRenderer items={renderingOffscreen} width={props.width}>
+        {props.children}
+      </OffScreenRenderer>
       <main
-        class="flex flex-col"
+        class="relative"
         style={{
           width: props.width + 'px',
           height: totalHeight() + merged.gap * props.items.length + 'px',
-          'row-gap': merged.gap + 'px',
         }}
       >
-        <div
-          style={{
-            width: props.width + 'px',
-            height:
-              topOffsets()[firstVisibleIndex()] +
-              merged.gap * firstVisibleIndex() +
-              'px',
-          }}
-        ></div>
         {/* <Index each={[...props.items.entries()].filter(([i]) => visible()[i])}> */}
-        <For each={props.items}>
+        <Key each={props.items} by="id">
           {(_, index) => {
             // const index = () => firstVisibleIndex() + i
             const data = createMemo(() => props.items[index()], undefined, {
               equals: (a, b) => a.id === b.id,
             })
             const height = createMemo(() => heights()[index()])
+            const topOffset = createMemo(
+              () => topOffsets()[index()] + merged.gap * index()
+            )
 
             return (
               <Show when={visible[index()]}>
@@ -247,6 +241,7 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
                   data: () => data().data,
                   width: () => props.width,
                   lastHeight: height,
+                  y: topOffset,
                   updateHeight: updateHeight
                     ? (height) => updateHeight(height, index())
                     : (newHeight: number) =>
@@ -262,7 +257,7 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
               </Show>
             )
           }}
-        </For>
+        </Key>
         {/* </Index> */}
       </main>
     </>
@@ -275,29 +270,32 @@ export const OffScreenRenderer: Component<{
   width: number
 }> = (props) => {
   return (
-    <For each={props.items}>
-      {(item) => {
-        const resolved = children(() =>
-          props.children({
-            id: () => item.id,
-            data: () => item.data,
-            lastHeight: () => undefined,
-            updateHeight: () => {},
-            width: () => props.width,
+    <div class="opacity-0 absolute">
+      <For each={props.items}>
+        {(item) => {
+          const resolved = children(() =>
+            props.children({
+              id: () => item.id,
+              data: () => item.data,
+              lastHeight: () => undefined,
+              updateHeight: () => {},
+              width: () => props.width,
+              y: () => 0,
+            })
+          )
+          const list = resolved.toArray() as HTMLElement[]
+          requestAnimationFrame(() => {
+            for (const child of list) {
+              if (!child) continue
+              const { height } = child.getBoundingClientRect()
+              item.setHeight(height)
+              break
+            }
           })
-        )
-        const list = resolved.toArray() as HTMLElement[]
-        requestAnimationFrame(() => {
-          for (const child of list) {
-            if (!child) continue
-            const { height } = child.getBoundingClientRect()
-            item.setHeight(height)
-            break
-          }
-        })
-        return resolved()
-      }}
-    </For>
+          return resolved()
+        }}
+      </For>
+    </div>
   )
 }
 

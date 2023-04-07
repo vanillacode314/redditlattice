@@ -1,6 +1,5 @@
-import { Motion } from '@motionone/solid'
+import clsx from 'clsx'
 import { throttle } from 'lodash-es'
-import { spring } from 'motion'
 import {
   batch,
   createRenderEffect,
@@ -14,11 +13,12 @@ import {
   Show,
   splitProps,
 } from 'solid-js'
-import { createSpring } from './utils/spring'
+import Animate from './Animate'
 
 interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   width: number
   fallbackHeight: number
+  y?: number
   alt?: string
   src?: string
   srcSets?: Map<string, string>
@@ -41,9 +41,8 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
     'onHasHeight',
     'onLoad',
     'onError',
-    'ref',
     'fallback',
-    'style',
+    'class',
   ])
   const merged = mergeProps(
     {
@@ -54,10 +53,7 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
   const { onHasHeight, onLoad, onError } = local
 
   const [hasHeight, setHasHeight] = createSignal<boolean>(false)
-  const [height, setHeight] = createSpring(props.fallbackHeight, hasHeight, {
-    stiffness: 0.2,
-    damping: 0.3,
-  })
+  const [height, setHeight] = createSignal(props.fallbackHeight)
   const [error, setError] = createSignal<boolean>(false)
   const [tries, setTries] = createSignal(0)
 
@@ -83,16 +79,23 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
   createRenderEffect(
     on(
       () => props.width,
-      () => queueMicrotask(checkHeight),
+      () => {
+        setHasHeight(false)
+        queueMicrotask(checkHeight)
+      },
       { defer: true }
     )
   )
 
   return (
-    <div
-      class="overflow-hidden group relative"
-      ref={props.ref}
-      style={{ ...props.style, height: height() + 'px' }}
+    <Animate
+      class={clsx('overflow-hidden group', props.class)}
+      immediate={hasHeight()}
+      options={{
+        stiffness: 0.2,
+        damping: 0.3,
+      }}
+      height={height()}
       {...others}
     >
       <Show when={!hasHeight() && tries() > 1}>
@@ -105,7 +108,6 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
         <img
           src={props.src}
           ref={(el) => {
-            if (imgRef) return
             imgRef = el
             queueMicrotask(checkHeight)
           }}
@@ -123,7 +125,7 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
         />
       </picture>
       {props.children}
-    </div>
+    </Animate>
   )
 }
 

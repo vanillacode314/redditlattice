@@ -1,4 +1,4 @@
-import { Accessor, from } from 'solid-js'
+import { Accessor, createComputed, createEffect, from, untrack } from 'solid-js'
 import { spring } from 'svelte/motion'
 
 interface SpringOpts {
@@ -20,4 +20,19 @@ export function createSpring(
         hard: immediate(),
       }),
   ]
+}
+
+export function createDerivedSpring(
+  value: Accessor<number | undefined | false | null>,
+  immediate: Accessor<boolean> = () => false,
+  options: SpringOpts = {}
+): Accessor<number | undefined> {
+  const store = spring(value(), options)
+  const signal = from<number>(store.subscribe)
+  createComputed(() => {
+    const v = value()
+    if (!v) return
+    untrack(() => store.set(v, { hard: immediate() }))
+  })
+  return () => signal() ?? (value() || undefined)
 }

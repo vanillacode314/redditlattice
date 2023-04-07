@@ -1,5 +1,6 @@
 import { Motion } from '@motionone/solid'
 import { createMediaQuery } from '@solid-primitives/media'
+import clsx from 'clsx'
 import { del, get } from 'idb-keyval'
 import { uniq } from 'lodash-es'
 import { spring } from 'motion'
@@ -25,10 +26,12 @@ import { outsideclick } from '~/utils/use-outsideclick'
 interface Props {
   width: number
   height?: number
+  y: number
   image: TImage
   onLoad?: () => void
   onHasHeight?: (height: number) => void
   ref?: HTMLDivElement | ((instance: HTMLDivElement) => void)
+  class?: string
 }
 
 export const ImageCard: Component<Props> = (props) => {
@@ -127,7 +130,7 @@ export const ImageCard: Component<Props> = (props) => {
         fallback={
           <div
             style={{ height: `${props.width}px` }}
-            class="grid place-content-center gap-5"
+            class={clsx('grid place-content-center gap-5', props.class)}
           >
             <Button
               class="bg-purple-800 hover:bg-purple-700"
@@ -140,9 +143,11 @@ export const ImageCard: Component<Props> = (props) => {
         }
       >
         <AutoResizingPicture
+          y={props.y}
           style={{
             'border-radius': `${userState.borderRadius}px`,
           }}
+          class={props.class}
           onHasHeight={props.onHasHeight}
           fallback={
             <div class="grid h-full place-items-center bg-neutral-900/10">
