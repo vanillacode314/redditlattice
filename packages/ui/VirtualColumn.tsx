@@ -1,6 +1,6 @@
 import { createElementSize } from '@solid-primitives/resize-observer'
 import { createScrollPosition } from '@solid-primitives/scroll'
-import { differenceBy, merge, sum } from 'lodash-es'
+import { differenceBy } from 'lodash-es'
 import {
   Accessor,
   batch,
@@ -10,6 +10,7 @@ import {
   createEffect,
   createMemo,
   For,
+  Index,
   JSXElement,
   mergeProps,
   Show,
@@ -17,6 +18,7 @@ import {
 } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { isServer } from 'solid-js/web'
+import { sum } from './utils'
 
 interface Item<T = unknown> {
   id: string
@@ -173,11 +175,17 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
     return await untrack(() =>
       batch(async () => {
         removedItems.forEach(removeItem)
-        const heights = await Promise.all(addedItems.map(renderOffscreen))
-        setRenderingOffscreen([])
-        heights.forEach((height, i) =>
-          addItem(addedItems[i], height, oldItems.length + i)
-        )
+        let i = 0
+        requestAnimationFrame(async function handler() {
+          const item = addedItems.shift()!
+          if (!item) return
+
+          const height = await renderOffscreen(item)
+          setRenderingOffscreen([])
+          addItem(item, height, oldItems.length + i++)
+
+          requestAnimationFrame(handler)
+        })
         return newItems
       })
     )
@@ -185,9 +193,11 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
 
   return (
     <>
-      <OffScreenRenderer items={renderingOffscreen} width={props.width}>
-        {props.children}
-      </OffScreenRenderer>
+      <div class="opacity-0 absolute">
+        <OffScreenRenderer items={renderingOffscreen} width={props.width}>
+          {props.children}
+        </OffScreenRenderer>
+      </div>
       <main
         class="flex flex-col"
         style={{
@@ -205,15 +215,14 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
               'px',
           }}
         ></div>
+        {/* <Index each={[...props.items.entries()].filter(([i]) => visible()[i])}> */}
         <For each={props.items}>
           {(_, index) => {
+            // const index = () => firstVisibleIndex() + i
             const data = createMemo(() => props.items[index()], undefined, {
               equals: (a, b) => a.id === b.id,
             })
             const height = createMemo(() => heights()[index()])
-            const topOffset = createMemo(
-              () => topOffsets()[index()] + merged.gap * index()
-            )
 
             return (
               <Show when={visible()[index()]}>
@@ -238,6 +247,7 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
             )
           }}
         </For>
+        {/* </Index> */}
       </main>
     </>
   )

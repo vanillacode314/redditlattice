@@ -197,9 +197,16 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
     return await untrack(() =>
       batch(async () => {
         removedItems.forEach(removeItem)
-        const heights = await Promise.all(addedItems.map(renderOffscreen))
-        setState('renderingOffscreen', [])
-        heights.forEach((height, index) => addItem(addedItems[index], height))
+        requestAnimationFrame(async function handler() {
+          const item = addedItems.shift()!
+          if (!item) return
+
+          const height = await renderOffscreen(item)
+          setState('renderingOffscreen', [])
+          addItem(item, height)
+
+          requestAnimationFrame(handler)
+        })
         return [newItems, currentNumberOfColumns]
       })
     )
