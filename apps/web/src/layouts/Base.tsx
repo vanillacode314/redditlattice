@@ -1,6 +1,7 @@
 import { Motion } from '@motionone/solid'
 import { createConnectivitySignal } from '@solid-primitives/connectivity'
 import { WindowEventListener } from '@solid-primitives/event-listener'
+import { createEventListener } from '@solid-primitives/event-listener'
 import { createMediaQuery } from '@solid-primitives/media'
 import { Gesture } from '@use-gesture/vanilla'
 import { spring } from 'motion'
@@ -18,10 +19,10 @@ import {
 } from 'solid-js'
 import { ErrorBoundary, useLocation, useNavigate } from 'solid-start'
 import { Spinner } from 'ui'
+import { createSpring } from 'ui/utils/spring'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
 import { useAppState, useSessionState } from '~/stores'
-import { getScrollTop, inertialScroll } from '~/utils'
 interface Props {
   children: JSXElement
 }
@@ -58,8 +59,8 @@ export const BaseLayout: Component<Props> = (props) => {
   const [appState, setAppState] = useAppState()
   const [sessionState, setSessionState] = useSessionState()
 
-  const [offset, setOffset] = createSignal<number>(0)
   const [down, setDown] = createSignal<boolean>(false)
+  const [offset, setOffset] = createSpring(0, down)
   const isMobile = createMediaQuery('(max-width: 768px)')
   const isTouch = createMediaQuery('(hover: none)')
 
@@ -75,57 +76,68 @@ export const BaseLayout: Component<Props> = (props) => {
     })
   })
 
-  createEffect(
-    on(
-      () => appState.scrollElement,
-      (scroller) => {
-        if (!scroller) return
-        const gesture = new Gesture(
-          scroller,
-          {
-            onDrag: ({
-              velocity,
-              offset,
-              direction,
-              memo = 0,
-              movement,
-              down,
-              tap,
-            }) => {
-              if (!isTouch()) return
-              if (tap) return
-              setDown(down)
-              const _offset = Math.min(movement[1] - memo, 300)
-              if (!down) {
-                if (_offset === 300) {
-                  refresh()()
-                }
-                setOffset(0)
-                return movement[1]
-              }
-              const scrollPos = getScrollTop(scroller)
-              if (scrollPos === 0 && _offset > 0) {
-                setOffset(_offset)
-                return memo
-              } else {
-                setOffset(0)
-                scroller.scrollTop = -offset[1]
-                return movement[1]
-              }
-            },
-          },
-          {
-            drag: {
-              axis: 'y',
-              from: () => [0, -scroller.scrollTop],
-              filterTaps: true,
-              preventDefault: false,
-            },
-          }
-        )
-        onCleanup(() => gesture.destroy())
+  let touchId: number | null
+  let touchStartY: number
+  createEventListener(
+    () => appState.scrollElement as HTMLElement,
+    'touchstart',
+    (e) => {
+      if (down()) return
+      const scrollTop = getScrollTop(appState.scrollElement)
+      if (scrollTop > 5) return
+      setDown(true)
+      touchId = e.changedTouches[0].identifier
+      touchStartY = e.changedTouches[0].clientY
+    },
+    { passive: true }
+  )
+
+  let lastTouchY: number | null
+  let stoppedAtY: number = Infinity
+  let doRefresh = false
+  let lastOffset: number | null
+  createEventListener(
+    () => appState.scrollElement as HTMLElement,
+    'touchmove',
+    (e) => {
+      if (touchId === null) return
+      const touch = [...e.changedTouches].find(
+        (touch) => touch.identifier === touchId
+      )
+      if (!touch) return
+      if (touch.clientY > stoppedAtY) return
+      const dy = touch.clientY - (lastTouchY ?? touchStartY)
+      lastTouchY = touch.clientY
+      doRefresh = offset() + dy >= 350
+      stoppedAtY = doRefresh ? lastTouchY : Infinity
+      setOffset(Math.min((lastOffset ?? offset()) + dy, 350))
+      lastOffset = offset()
+    },
+    { passive: true }
+  )
+
+  createEventListener(
+    () => appState.scrollElement as HTMLElement,
+    'touchend',
+    (e) => {
+      if (touchId === null) return
+      const touch = [...e.changedTouches].find(
+        (touch) => touch.identifier === touchId
+      )
+      if (!touch) return
+      touchId = null
+      lastTouchY = null
+      lastOffset = null
+      batch(() => {
+        setDown(false)
+        setOffset(0)
+      })
+      if (doRefresh) {
+        doRefresh = false
+        refresh()()
       }
-    )
+    },
+    { passive: true }
   )
 
   return (

@@ -1,4 +1,11 @@
-import { Accessor, createComputed, createEffect, from, untrack } from 'solid-js'
+import {
+  Accessor,
+  createComputed,
+  createEffect,
+  from,
+  Setter,
+  untrack,
+} from 'solid-js'
 import { spring } from 'svelte/motion'
 
 interface SpringOpts {
@@ -6,33 +13,50 @@ interface SpringOpts {
   damping?: number
   precision?: number
 }
+
+/**
+ * @param initialValue - intialValue of the signal
+ * @param immediate - a signal indicating whether the change should be immediate or not
+ * @param options - options object containing values for stiffness, precision and damping
+ * @returns a tuple of an accessor and a setter
+ */
 export function createSpring(
   initialValue: number,
   immediate: Accessor<boolean> = () => false,
   options: SpringOpts = {}
-): [Accessor<number>, (value: number) => void] {
+): [Accessor<number>, Setter<number>] {
   const store = spring(initialValue, options)
   const signal = from<number>(store.subscribe)
   return [
     () => signal() ?? initialValue,
-    (value) =>
-      store.set(value, {
-        hard: immediate(),
-      }),
+    (value) => {
+      typeof value === 'number'
+        ? store.set(value, {
+            hard: immediate(),
+          })
+        : store.update(value)
+      return typeof value === 'number' ? value : value(signal()!)
+    },
   ]
 }
 
+/**
+ * @param deps - value of the signal
+ * @param immediate - a signal indicating whether the change should be immediate or not
+ * @param options - options object containing values for stiffness, precision and damping
+ * @returns an accessor containing the derived value
+ */
 export function createDerivedSpring(
-  value: Accessor<number | undefined | false | null>,
+  deps: Accessor<number | undefined | false | null>,
   immediate: Accessor<boolean> = () => false,
   options: SpringOpts = {}
 ): Accessor<number | undefined> {
-  const store = spring(value(), options)
+  const store = spring(deps(), options)
   const signal = from<number>(store.subscribe)
   createComputed(() => {
-    const v = value()
+    const v = deps()
     if (!v) return
     untrack(() => store.set(v, { hard: immediate() }))
   })
-  return () => signal() ?? (value() || undefined)
+  return () => signal() ?? (deps() || undefined)
 }
