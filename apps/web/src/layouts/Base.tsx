@@ -1,36 +1,30 @@
-import { Motion } from '@motionone/solid'
 import { createConnectivitySignal } from '@solid-primitives/connectivity'
-import { WindowEventListener } from '@solid-primitives/event-listener'
-import { createEventListener } from '@solid-primitives/event-listener'
+import {
+  createEventListener,
+  WindowEventListener,
+} from '@solid-primitives/event-listener'
 import { createMediaQuery } from '@solid-primitives/media'
-import { Gesture } from '@use-gesture/vanilla'
-import { spring } from 'motion'
 import {
   batch,
-  Component,
   createComputed,
-  createEffect,
   createSignal,
-  JSXElement,
   on,
-  onCleanup,
+  ParentComponent,
   Show,
   Suspense,
 } from 'solid-js'
-import { ErrorBoundary, useLocation, useNavigate } from 'solid-start'
+import { ErrorBoundary, useLocation } from 'solid-start'
 import { Spinner } from 'ui'
 import { createSpring } from 'ui/utils/spring'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
 import { useAppState, useSessionState } from '~/stores'
-interface Props {
-  children: JSXElement
-}
+import { getScrollTop } from '~/utils'
 
 const [refresh, setRefresh] = createSignal<() => void>(() => {})
 export const useRefresh = () => [refresh, setRefresh] as const
 
-export const BaseLayout: Component<Props> = (props) => {
+export const BaseLayout: ParentComponent = (props) => {
   const isOnline = createConnectivitySignal()
   const location = useLocation()
 
@@ -62,7 +56,6 @@ export const BaseLayout: Component<Props> = (props) => {
   const [down, setDown] = createSignal<boolean>(false)
   const [offset, setOffset] = createSpring(0, down)
   const isMobile = createMediaQuery('(max-width: 768px)')
-  const isTouch = createMediaQuery('(hover: none)')
 
   createComputed(() => {
     const route = location.pathname
@@ -189,18 +182,16 @@ export const BaseLayout: Component<Props> = (props) => {
       ></WindowEventListener>
       <div class="flex flex-col h-full max-h-full relative">
         <div class="bg-tranparent pointer-events-none absolute inset-x-0 top-0 z-10 grid place-content-center p-6">
-          <Motion.div
+          <div
             class="bg-purple relative z-10 rounded-full p-2"
-            initial={false}
-            animate={{
+            style={{
               transform: `translateY(${
                 offset() - 200
               }%) rotate(${offset()}deg)`,
             }}
-            transition={down() ? { duration: 0 } : { easing: spring() }}
           >
             <div text="3xl" class="i-mdi-refresh"></div>
-          </Motion.div>
+          </div>
         </div>
         <Show when={!isOnline()}>
           <div
