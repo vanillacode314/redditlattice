@@ -79,8 +79,6 @@ export const BaseLayout: Component<Props> = (props) => {
     on(
       () => appState.scrollElement,
       (scroller) => {
-        return
-        let stopInertialScroll: (() => void) | undefined
         if (!scroller) return
         const gesture = new Gesture(
           scroller,
@@ -96,8 +94,6 @@ export const BaseLayout: Component<Props> = (props) => {
             }) => {
               if (!isTouch()) return
               if (tap) return
-              stopInertialScroll?.()
-              stopInertialScroll = undefined
               setDown(down)
               const _offset = Math.min(movement[1] - memo, 300)
               if (!down) {
@@ -105,10 +101,6 @@ export const BaseLayout: Component<Props> = (props) => {
                   refresh()()
                 }
                 setOffset(0)
-                stopInertialScroll = inertialScroll(
-                  scroller,
-                  velocity[1] * direction[1]
-                )
                 return movement[1]
               }
               const scrollPos = getScrollTop(scroller)
@@ -127,6 +119,7 @@ export const BaseLayout: Component<Props> = (props) => {
               axis: 'y',
               from: () => [0, -scroller.scrollTop],
               filterTaps: true,
+              preventDefault: false,
             },
           }
         )

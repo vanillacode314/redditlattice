@@ -92,10 +92,11 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
       class={clsx('overflow-hidden group', props.class)}
       immediate={hasHeight()}
       options={{
-        stiffness: 0.2,
-        damping: 0.3,
+        stiffness: 0.1,
+        damping: 0.2,
       }}
       height={height()}
+      width={props.width}
       {...others}
     >
       <Show when={!hasHeight() && tries() > 1}>

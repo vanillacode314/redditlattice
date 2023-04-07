@@ -173,7 +173,14 @@ export default function Subreddit() {
         getInitialHeight={(_, width) => width}
       >
         {({ width, data: image, lastHeight, updateHeight, y }) => (
-          <Animate class="absolute" y={y()}>
+          <Animate
+            class="absolute"
+            y={y()}
+            options={{
+              stiffness: 0.1,
+              damping: 0.2,
+            }}
+          >
             <ImageCard
               width={width()}
               height={lastHeight()}

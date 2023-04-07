@@ -1,6 +1,5 @@
 import { Motion } from '@motionone/solid'
 import { throttle } from 'lodash-es'
-import { spring } from 'motion'
 import {
   batch,
   Component,
@@ -9,7 +8,6 @@ import {
   For,
   on,
   onCleanup,
-  onMount,
 } from 'solid-js'
 import { useAppState } from '~/stores'
 
@@ -34,11 +32,12 @@ const Fab: Component<Props> = (props) => {
     const el = e.currentTarget as HTMLElement
     if (!el) return
     const dy = scrollStart - lastKnownScrollPos
+    const scrollTop = el.scrollTop
     const newScrollDirection =
-      el.scrollTop - lastKnownScrollPos > 0 ? 'down' : 'up'
-    lastKnownScrollPos = el.scrollTop
+      scrollTop - lastKnownScrollPos > 0 ? 'down' : 'up'
+    lastKnownScrollPos = scrollTop
     if (newScrollDirection !== lastScrollDirection) {
-      scrollStart = el.scrollTop
+      scrollStart = scrollTop
       lastScrollDirection = newScrollDirection
     }
     batch(() => {

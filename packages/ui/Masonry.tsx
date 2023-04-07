@@ -142,16 +142,16 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
     const [columnIndex, rowIndex] = gridMap.get(item.id)!
     const height = state.heights[columnIndex][rowIndex]
     batch(() => {
-      setState('heights', columnIndex, (rows) =>
-        rows.slice(0, rowIndex).concat(rows.slice(rowIndex + 1))
+      setState('heights', columnIndex, (row) =>
+        row.slice(0, rowIndex).concat(row.slice(rowIndex + 1))
       )
-      setState('topOffsets', columnIndex, (rows) =>
-        rows
+      setState('topOffsets', columnIndex, (row) =>
+        row
           .slice(0, rowIndex)
-          .concat(rows.slice(rowIndex + 1).map((row) => row - height))
+          .concat(row.slice(rowIndex + 1).map((row) => row - height))
       )
       setState('columns', columnIndex, (row) =>
-        row.filter(($item) => item.id !== $item.id)
+        row.slice(0, rowIndex).concat(row.slice(rowIndex + 1))
       )
     })
   }
