@@ -130,7 +130,7 @@ export const ImageCard: Component<Props> = (props) => {
         fallback={
           <div
             style={{ height: `${props.width}px` }}
-            class={clsx('grid place-content-center gap-5', props.class)}
+            class={clsx('w-full grid place-content-center gap-5', props.class)}
           >
             <Button
               class="bg-purple-800 hover:bg-purple-700"
