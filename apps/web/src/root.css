@@ -16,9 +16,6 @@ html {
   font-family: 'Roboto', sans-serif;
   height: 100%;
 }
-#__nuxt {
-  height: 100%;
-}
 
 .noscroll {
   overscroll-behavior-y: none;
