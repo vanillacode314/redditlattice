@@ -129,8 +129,14 @@ export const ImageCard: Component<Props> = (props) => {
         when={!error()}
         fallback={
           <div
-            style={{ height: `${props.width}px` }}
-            class={clsx('w-full grid place-content-center gap-5', props.class)}
+            style={{
+              height: `${props.width}px`,
+              'border-radius': `${userState.borderRadius}px`,
+            }}
+            class={clsx(
+              'bg-neutral-900/10 grid place-content-center gap-5',
+              props.class
+            )}
           >
             <Button
               class="bg-purple-800 hover:bg-purple-700"
@@ -138,7 +144,9 @@ export const ImageCard: Component<Props> = (props) => {
             >
               Retry
             </Button>
-            <span class="text-sm font-bold uppercase">{errorMsg()}</span>
+            <span class="text-center text-sm font-bold uppercase">
+              {errorMsg()}
+            </span>
           </div>
         }
       >

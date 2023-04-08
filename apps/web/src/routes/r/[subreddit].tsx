@@ -216,6 +216,7 @@ export default function SubredditPage() {
           <Animate
             class="absolute"
             y={y()}
+            width={width()}
             options={{
               stiffness: 0.1,
               damping: 0.2,
