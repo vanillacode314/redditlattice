@@ -3,7 +3,7 @@ import { MetaProvider } from '@solidjs/meta'
 import '@unocss/reset/tailwind.css'
 import * as devalue from 'devalue'
 import { delMany, entries } from 'idb-keyval'
-import { Component, onMount } from 'solid-js'
+import { Component, onMount, Show } from 'solid-js'
 import {
   Body,
   FileRoutes,
