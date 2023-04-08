@@ -137,7 +137,7 @@ export default function Subreddit() {
         JSON.stringify({
           code,
           data: {
-            quer: query(),
+            query: query(),
             sessionId,
           },
         })
