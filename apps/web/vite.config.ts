@@ -20,8 +20,6 @@ export default defineConfig({
     alias: {
       '~': path.resolve(__dirname, 'src'),
       '@ui': path.resolve(__dirname, '../../packages/ui'),
-      '@api': path.resolve(__dirname, '../../apps/api/src'),
-      '@image-server': path.resolve(__dirname, '../../apps/image-server/src'),
     },
   },
   plugins: [

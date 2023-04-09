@@ -1,15 +1,6 @@
-import { TRPCClientError } from '@trpc/client'
+import { createInfiniteQuery, createQuery } from '@tanstack/solid-query'
 import { minBy } from 'lodash-es'
-import {
-  createEffect,
-  createMemo,
-  getOwner,
-  Match,
-  onCleanup,
-  onMount,
-  runWithOwner,
-  Switch,
-} from 'solid-js'
+import { createEffect, createMemo, Match, onMount, Switch } from 'solid-js'
 import { useLocation, useParams } from 'solid-start'
 import {
   Animate,
@@ -19,7 +10,6 @@ import {
   Masonry,
   Spinner,
 } from 'ui'
-import { trpc } from '~/client'
 import Fab from '~/components/Fab'
 import ImageCard from '~/components/ImageCard'
 import { useRefresh } from '~/layouts/Base'
@@ -27,13 +17,9 @@ import { startScroll } from '~/modals/AutoScrollModal'
 import { useAppState, useUserState } from '~/stores'
 import { actionSchema } from '~/types'
 import { parseSchema } from '~/utils'
+import { queryClient, trpc } from '~/utils/trpc'
 
 const [appState, setAppState] = useAppState()
-
-export const CACHE: Map<
-  string /* key */,
-  Omit<TAppState['images'], 'key'> & { completed: boolean }
-> = new Map()
 
 const fabActions = actionSchema.array().parse([
   {
@@ -51,8 +37,6 @@ const fabActions = actionSchema.array().parse([
 ])
 
 export default function SubredditPage() {
-  const componentOwner = getOwner()!
-
   const location = useLocation()
   const params = useParams()
 
@@ -74,29 +58,19 @@ export default function SubredditPage() {
       (current) =>
         new Map([...current.set(subreddits().sort().join('+'), sort)])
     )
-
   onMount(() => setSort(sort()))
 
-  const resetState = () => {
-    setAppState({
-      title:
-        q().length > 0
-          ? `${q().join('+')} - /r/${subreddits().join('+')}`
-          : `/r/${subreddits()}`,
-      images: {
-        key: key(),
-        after: '',
-        data: new Set(),
-      },
-    })
-  }
+  const resetState = () => queryClient.invalidateQueries({ queryKey: [key()] })
+  setRefresh(() => resetState)
 
-  setRefresh(() => () => {
-    CACHE.delete(key())
-    resetState()
-  })
-
-  createEffect(() => appState.images.key !== key() && resetState())
+  createEffect(() =>
+    setAppState(
+      'title',
+      q().length > 0
+        ? `${q().join('+')} - /r/${subreddits().join('+')}`
+        : `/r/${subreddits()}`
+    )
+  )
 
   createEffect(() => {
     if (subreddits().length > 1) return
@@ -131,67 +105,35 @@ export default function SubredditPage() {
     })
   })
 
-  const onInfinite: InfiniteHandler = async (setState, firstload) => {
-    if (firstload && CACHE.has(key())) {
-      const { after, completed, data } = CACHE.get(key())!
-      setAppState('images', (images) => ({
-        ...images,
-        after,
-        data,
-      }))
-      setState(completed ? 'completed' : 'idle')
-      return
-    }
-    try {
-      const ac = new AbortController()
-      runWithOwner(componentOwner, () => onCleanup(() => ac.abort()))
-      const { newImages, after } = await trpc.getImages
-        .query(
-          {
-            q: q(),
-            after: appState.images.after,
-            subreddits: subreddits(),
-            sort: userState.subredditSort.get(subreddits().sort().join('+')),
-            nsfw: !userState.hideNSFW,
-          },
-          {
-            signal: ac.signal,
-          }
-        )
+  const items = createInfiniteQuery(() => [key()], {
+    queryFn: ({ pageParam = undefined }) =>
+      trpc.getImages
+        .query({
+          q: q(),
+          after: pageParam,
+          subreddits: subreddits(),
+          sort: userState.subredditSort.get(subreddits().sort().join('+'))!,
+          nsfw: !userState.hideNSFW,
+        })
         .then(({ schema, images, after }) => ({
-          newImages: parseSchema<{ name: string; title: string; url: string }>(
+          images: parseSchema<{ name: string; title: string; url: string }>(
             schema,
             images
           ),
-          after,
-        }))
+          after: after ?? undefined,
+        })),
+    getNextPageParam: (lastPage) => lastPage.after,
+  })
 
-      setAppState('images', 'data', (data) => new Set([...data, ...newImages]))
-
-      CACHE.set(key(), {
-        after,
-        data: new Set([...appState.images.data, ...newImages]),
-        completed: !after,
-      })
-
-      if (after) {
-        setAppState('images', { after })
-        setTimeout(() => {
-          setState('idle')
-          if (appState.autoScrolling) startScroll()
-        }, 1000)
-        return
-      }
-      setState('completed')
-    } catch (error) {
-      if (
-        error instanceof TRPCClientError &&
-        error.cause?.name === 'ObservableAbortError'
-      )
-        return
-      setState('error')
-      throw error
-    }
+  const onInfinite: InfiniteHandler = async (setState, firstload) => {
+    const newItems = await items.fetchNextPage()
+    const newState = !newItems.hasNextPage
+      ? 'completed'
+      : newItems.isError
+      ? 'error'
+      : 'idle'
+    setState(newState)
+    if (newState !== 'error' && appState.autoScrolling) startScroll()
   }
 
   return (
@@ -201,10 +143,12 @@ export default function SubredditPage() {
       style={{ padding: `${userState.gap}px` }}
     >
       <Masonry
-        items={[...appState.images.data].map((image) => ({
-          id: image.name,
-          data: image,
-        }))}
+        items={(items.data?.pages ?? [])
+          .flatMap(({ images }) => images)
+          .map((image) => ({
+            id: image.name,
+            data: image,
+          }))}
         maxWidth={userState.columnMaxWidth}
         maxColumns={userState.maxColumns}
         align="center"
@@ -250,7 +194,9 @@ export default function SubredditPage() {
               </Match>
               <Match when={state === 'completed'}>
                 <span uppercase font-bold>
-                  {appState.images.data.size > 0 ? 'END' : 'NO IMAGES FOUND'}
+                  {(items.data?.pages.flat() ?? []).length > 0
+                    ? 'END'
+                    : 'NO IMAGES FOUND'}
                 </span>
               </Match>
               <Match when={state === 'error'}>

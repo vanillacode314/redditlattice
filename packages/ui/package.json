@@ -33,6 +33,7 @@
     "@solid-primitives/scroll": "^2.0.13",
     "@solid-primitives/set": "^0.4.3",
     "@solid-primitives/static-store": "^0.0.2",
+    "@tanstack/solid-query": "^4.27.0",
     "@use-gesture/vanilla": "^10.2.25",
     "clsx": "^1.2.1",
     "lethargy": "^1.0.9",

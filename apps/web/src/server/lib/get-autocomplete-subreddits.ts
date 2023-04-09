@@ -1,8 +1,8 @@
+import z from 'zod'
 import {
   remoteSubredditAutocompleteDataSchema,
   subredditSchema,
-} from '@api/types'
-import z from 'zod'
+} from '~/server/types'
 
 const fetchAutocompleteResults = z
   .function()

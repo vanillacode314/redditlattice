@@ -1,12 +1,17 @@
 {
-  "extends": "tsconfig/solid-start.json",
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"],
   "compilerOptions": {
-    "types": ["vite/client"],
-    "baseUrl": ".",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "jsxImportSource": "solid-js",
+    "jsx": "preserve",
+    "types": ["solid-start/env"],
+    "baseUrl": "./",
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": ["./src/*"]
     }
   }
 }

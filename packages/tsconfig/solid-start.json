@@ -3,19 +3,19 @@
   "display": "Solid-Start",
   "extends": "./base.json",
   "compilerOptions": {
-    "target": "esnext",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "incremental": true,
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "strict": true,
+    "target": "ESNext",
     "module": "ESNext",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    "moduleResolution": "node",
     "jsxImportSource": "solid-js",
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "types": ["solid-start/env"],
+    "baseUrl": "./",
+    "paths": {
+      "~/*": ["./src/*"]
+    }
   },
   "include": ["src", "solid-env.d.ts"],
   "exclude": ["node_modules"]

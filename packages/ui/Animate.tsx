@@ -57,7 +57,6 @@ export const Animate: ParentComponent<Props> = (props) => {
     'height',
   ])
 
-  // createEffect(() => console.log(props.height, props.y))
   return (
     <Dynamic
       component={merged.tag}

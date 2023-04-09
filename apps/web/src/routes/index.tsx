@@ -1,3 +1,8 @@
+import {
+  createInfiniteQuery,
+  createQuery,
+  QueryFunction,
+} from '@tanstack/solid-query'
 import { TRPCClientError } from '@trpc/client'
 import clsx from 'clsx'
 import {
@@ -9,12 +14,12 @@ import {
   Suspense,
   untrack,
 } from 'solid-js'
-import { useNavigate } from 'solid-start'
+import { useNavigate, useRoutes } from 'solid-start'
 import { AsyncList, List, ListItem, Spinner, Tab, Tabs } from 'ui'
-import { trpc } from '~/client'
 import SearchInput from '~/components/SearchInput'
 import { useAppState, useSessionState, useUserState } from '~/stores'
 import { parseSchema } from '~/utils'
+import { client, trpc } from '~/utils/trpc'
 
 export default function Home() {
   let inputElement!: HTMLInputElement
@@ -54,28 +59,6 @@ export default function Home() {
     }
 
     setQuery(subreddit + '?')
-  }
-
-  const autoCompleteFetcher = async (
-    [_, query]: [string, string],
-    ac: AbortController
-  ) => {
-    if (!query) return []
-    try {
-      const { schema, subreddits } =
-        // @ts-ignore
-        await trpc.subredditAutocomplete.query(query, {
-          signal: ac.signal,
-        })
-      return parseSchema<{ id: string; name: string }>(schema, subreddits)
-    } catch (err) {
-      if (err instanceof TRPCClientError) {
-        err.cause?.name !== 'ObservableAbortError' && console.error(err)
-      } else {
-        throw err
-      }
-    }
-    return []
   }
 
   const searchTerm = () => query().split('?')[1] ?? ''
@@ -120,6 +103,26 @@ export default function Home() {
     })
   }
 
+  const autoCompleteFetcher: QueryFunction<
+    { id: string; name: string }[],
+    [string, string]
+  > = async ({ queryKey: [_, query] }) => {
+    if (!query) return [] as { id: string; name: string }[]
+    try {
+      const { subreddits, schema } = await trpc.subredditAutocomplete.query(
+        query
+      )
+      return parseSchema<{ id: string; name: string }>(schema, subreddits)
+    } catch (err) {
+      if (err instanceof TRPCClientError) {
+        err.cause?.name !== 'ObservableAbortError' && console.error(err)
+      } else {
+        throw err
+      }
+    }
+    return [] as { id: string; name: string }[]
+  }
+
   return (
     <main class="pb-5 h-full flex flex-col-reverse overflow-hidden gap-3 max-w-xl mx-auto w-full">
       <SearchInput
@@ -158,7 +161,7 @@ export default function Home() {
                 reverse
                 title="subreddits"
                 fetcher={autoCompleteFetcher}
-                key={() => ['sr-autocomplete', query()] as const}
+                key={['sr-autocomplete', query()]}
               >
                 {({ id, name }, stale) => (
                   <ListItem

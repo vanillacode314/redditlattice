@@ -1,6 +1,6 @@
-import { IMAGE_EXTENSION_LIST } from '@api/consts'
-import { postSchema, remotePostsDataSchema } from '@api/types'
 import z from 'zod'
+import { IMAGE_EXTENSION_LIST } from '~/server/consts'
+import { postSchema, remotePostsDataSchema } from '~/server/types'
 
 const expandGallery = z
   .function()

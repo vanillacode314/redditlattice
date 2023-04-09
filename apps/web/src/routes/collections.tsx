@@ -1,3 +1,4 @@
+import { type QueryFunction } from '@tanstack/solid-query'
 import { TRPCClientError } from '@trpc/client'
 import clsx from 'clsx'
 import {
@@ -11,10 +12,10 @@ import {
 } from 'solid-js'
 import { useNavigate } from 'solid-start'
 import { AsyncList, List, ListItem, Spinner } from 'ui'
-import { trpc } from '~/client'
 import SearchInput from '~/components/SearchInput'
 import { useAppState, useSessionState, useUserState } from '~/stores'
 import { parseSchema } from '~/utils'
+import { trpc } from '~/utils/trpc'
 
 const getSubredditsAndSearchTerms = (
   query: string
@@ -62,17 +63,14 @@ export default function Home() {
   const [flashing, setFlashing] = createSignal<boolean>(false)
   const flashSearchInput = () => setFlashing(true)
 
-  async function autoCompleteFetcher(
-    [_, query]: [string, string],
-    ac: AbortController
-  ) {
-    if (!query) return []
+  const autoCompleteFetcher: QueryFunction<
+    { id: string; name: string }[],
+    [string, string]
+  > = async ({ queryKey: [_, query] }) => {
+    if (!query) return [] as { id: string; name: string }[]
     try {
-      const { schema, subreddits } = await trpc.subredditAutocomplete.query(
-        query,
-        {
-          signal: ac.signal,
-        }
+      const { subreddits, schema } = await trpc.subredditAutocomplete.query(
+        query
       )
       return parseSchema<{ id: string; name: string }>(schema, subreddits)
     } catch (err) {
@@ -82,7 +80,7 @@ export default function Home() {
         throw err
       }
     }
-    return []
+    return [] as { id: string; name: string }[]
   }
   const navigate = useNavigate()
 
@@ -160,9 +158,7 @@ export default function Home() {
                 reverse
                 title="subreddits"
                 fetcher={autoCompleteFetcher}
-                key={() =>
-                  ['sr-autocomplete', query().split('+').at(-1)!] as const
-                }
+                key={['sr-autocomplete', query().split('+').at(-1)!]}
               >
                 {({ id, name }, stale) => (
                   <ListItem

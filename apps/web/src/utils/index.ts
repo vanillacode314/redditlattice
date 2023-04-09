@@ -39,8 +39,8 @@ export function blobToDataURL(blob: Blob): Promise<string> {
 }
 
 export function parseSchema<R extends {}, S extends keyof R = keyof R>(
-  schema: readonly S[],
-  data: readonly R[S][][]
+  schema: S[],
+  data: R[S][][]
 ): R[] {
   return data.map((item) =>
     schema.reduce<R>(
