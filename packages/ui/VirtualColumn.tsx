@@ -128,21 +128,21 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
     })
   }
 
-  createEffect<Promise<Item<T>[]>>(async (lastPromise) => {
+  createEffect<Item<T>[]>((prev) => {
     const newItems = [...props.items]
     if (props.heights) return newItems
-    const oldItems = await lastPromise
+    const oldItems = prev
     const addedItems = differenceBy(newItems, oldItems, (item) => item.id)
     const removedItems = differenceBy(oldItems, newItems, (item) => item.id)
 
-    return await untrack(() =>
-      batch(async () => {
+    return untrack(() =>
+      batch(() => {
         removedItems.forEach(removeItem)
         addedItems.forEach((item, i) => addItem(item, oldItems.length + i))
         return newItems
       })
     )
-  }, Promise.resolve([]))
+  }, [])
 
   return (
     <main

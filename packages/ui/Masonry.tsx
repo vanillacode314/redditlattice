@@ -1,4 +1,5 @@
 import { createElementSize } from '@solid-primitives/resize-observer'
+import { createWorker } from '@solid-primitives/workers'
 import { differenceBy } from 'lodash-es'
 import {
   Accessor,
@@ -159,45 +160,48 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
     })
   }
 
-  createEffect<Promise<[Item<T>[], number]>>(async (lastPromise) => {
-    const newItems = props.items
-    const currentNumberOfColumns = numberOfColumns()
-    const [oldItems, lastNumberOfColumns] = await lastPromise
-    let addedItems: Item<T>[], removedItems: Item<T>[]
-    if (currentNumberOfColumns !== lastNumberOfColumns) {
-      gridMap.clear()
-      batch(() => {
-        setState('heights', get2DArray(currentNumberOfColumns, 1))
-        setState('topOffsets', get2DArray(currentNumberOfColumns, 1))
-        setState('columns', get2DArray(currentNumberOfColumns, 1))
-      })
-      removedItems = []
-      addedItems = newItems
-    } else {
-      addedItems = differenceBy(newItems, oldItems, (item) => item.id)
-      removedItems = differenceBy(oldItems, newItems, (item) => item.id)
-    }
+  createEffect<[Item<T>[], number]>(
+    (prev) => {
+      const newItems = props.items
+      const currentNumberOfColumns = numberOfColumns()
+      const [oldItems, lastNumberOfColumns] = prev
+      let addedItems: Item<T>[], removedItems: Item<T>[]
+      if (currentNumberOfColumns !== lastNumberOfColumns) {
+        gridMap.clear()
+        batch(() => {
+          setState('heights', get2DArray(currentNumberOfColumns, 1))
+          setState('topOffsets', get2DArray(currentNumberOfColumns, 1))
+          setState('columns', get2DArray(currentNumberOfColumns, 1))
+        })
+        removedItems = []
+        addedItems = newItems
+      } else {
+        addedItems = differenceBy(newItems, oldItems, (item) => item.id)
+        removedItems = differenceBy(oldItems, newItems, (item) => item.id)
+      }
 
-    for (
-      let columnIndex = 0;
-      columnIndex < currentNumberOfColumns;
-      columnIndex++
-    ) {
-      batch(() => {
-        setState('heights', columnIndex, (value) => value ?? [])
-        setState('topOffsets', columnIndex, (value) => value ?? [])
-        setState('columns', columnIndex, (value) => value ?? [])
-      })
-    }
+      for (
+        let columnIndex = 0;
+        columnIndex < currentNumberOfColumns;
+        columnIndex++
+      ) {
+        batch(() => {
+          setState('heights', columnIndex, (value) => value ?? [])
+          setState('topOffsets', columnIndex, (value) => value ?? [])
+          setState('columns', columnIndex, (value) => value ?? [])
+        })
+      }
 
-    return await untrack(() =>
-      batch(async () => {
-        removedItems.forEach(removeItem)
-        addedItems.forEach(addItem)
-        return [newItems, currentNumberOfColumns]
-      })
-    )
-  }, Promise.resolve([[], numberOfColumns()]))
+      return untrack(() =>
+        batch(() => {
+          removedItems.forEach(removeItem)
+          addedItems.forEach(addItem)
+          return [newItems, currentNumberOfColumns]
+        })
+      )
+    },
+    [[], numberOfColumns()]
+  )
 
   function updateHeight(height: number, columnIndex: number, rowIndex: number) {
     if (!state.columns[columnIndex]?.[rowIndex]) return
