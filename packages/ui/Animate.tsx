@@ -1,3 +1,4 @@
+import { createMediaQuery } from '@solid-primitives/media'
 import {
   createContext,
   createRenderEffect,
@@ -33,27 +34,30 @@ interface AnimateProps extends JSX.HTMLAttributes<HTMLDivElement> {
 
 export const Animate: ParentComponent<AnimateProps> = (props) => {
   let el!: HTMLElement
+  const prefersReducedMotion = createMediaQuery(
+    '(prefers-reduced-motion: reduce)'
+  )
   const [animation] = useAnimation()
   const merged = mergeProps({ tag: 'div' }, props)
   const x = createDerivedSpring(
     () => animation.x,
-    () => !!animation.immediate,
+    () => !!animation.immediate || prefersReducedMotion(),
     () => animation.options
   )
 
   const y = createDerivedSpring(
     () => animation.y,
-    () => !!animation.immediate,
+    () => !!animation.immediate || prefersReducedMotion(),
     () => animation.options
   )
   const width = createDerivedSpring(
     () => animation.width,
-    () => !!animation.immediate,
+    () => !!animation.immediate || prefersReducedMotion(),
     () => animation.options
   )
   const height = createDerivedSpring(
     () => animation.height,
-    () => !!animation.immediate,
+    () => !!animation.immediate || prefersReducedMotion(),
     () => animation.options
   )
 
