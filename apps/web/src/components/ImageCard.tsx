@@ -251,49 +251,48 @@ export const ImageCard: Component<Props> = (props) => {
         </Portal>
       </Show>
       <Show when={menu()}>
-        <ul
-          class="fixed z-10 flex flex-col rounded-lg bg-gray-900 p-2"
-          style={{
-            left: menuPos.x + 'px',
-            top: menuPos.y + 'px',
-          }}
-          ref={(el) => {
-            const dispose = outsideclick(el, () => setMenu(false))
-            onCleanup(dispose)
-          }}
-        >
-          <For
-            each={[
-              {
-                title: 'Open in New Tab',
-                handler: () => window.open(props.image.url, '_blank'),
-              },
-              {
-                title: 'Download',
-                handler: () => downloadImage(),
-              },
-              {
-                title: 'Invalidate Cache',
-                handler: () => removeFromCache(),
-              },
-            ]}
+        <Portal mount={document.documentElement}>
+          <ul
+            class="fixed z-10 flex flex-col rounded-lg bg-gray-900 p-2"
+            style={{
+              left: menuPos.x + 'px',
+              top: menuPos.y + 'px',
+            }}
+            ref={(el) => onCleanup(outsideclick(el, () => setMenu(false)))}
           >
-            {({ title, handler }) => (
-              <li class="contents">
-                <button
-                  type="button"
-                  onClick={() => {
-                    handler()
-                    setMenu(false)
-                  }}
-                  class="rounded px-2 py-1 text-left text-xs font-bold uppercase hover:bg-gray-800"
-                >
-                  {title}
-                </button>
-              </li>
-            )}
-          </For>
-        </ul>
+            <For
+              each={[
+                {
+                  title: 'Open in New Tab',
+                  handler: () => window.open(props.image.url, '_blank'),
+                },
+                {
+                  title: 'Download',
+                  handler: () => downloadImage(),
+                },
+                {
+                  title: 'Invalidate Cache',
+                  handler: () => removeFromCache(),
+                },
+              ]}
+            >
+              {({ title, handler }) => (
+                <li class="contents">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handler()
+                      setMenu(false)
+                    }}
+                    class="rounded px-2 py-1 text-left text-xs font-bold uppercase hover:bg-gray-800"
+                  >
+                    {title}
+                  </button>
+                </li>
+              )}
+            </For>
+          </ul>
+        </Portal>
       </Show>
     </>
   )
