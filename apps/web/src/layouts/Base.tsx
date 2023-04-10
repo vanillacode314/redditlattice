@@ -1,9 +1,9 @@
+import { createActiveElement } from '@solid-primitives/active-element'
 import { createConnectivitySignal } from '@solid-primitives/connectivity'
-import {
-  createEventListener,
-  WindowEventListener,
-} from '@solid-primitives/event-listener'
+import { createEventListener } from '@solid-primitives/event-listener'
+import { createShortcut } from '@solid-primitives/keyboard'
 import { createMediaQuery } from '@solid-primitives/media'
+import screenfull from 'screenfull'
 import {
   batch,
   createComputed,
@@ -13,7 +13,7 @@ import {
   Show,
   Suspense,
 } from 'solid-js'
-import { ErrorBoundary, useLocation } from 'solid-start'
+import { ErrorBoundary, useLocation, useNavigate } from 'solid-start'
 import { Spinner } from 'ui'
 import { createSpring } from 'ui/utils/spring'
 import Drawer from '~/components/Drawer'
@@ -28,12 +28,10 @@ export const BaseLayout: ParentComponent = (props) => {
   const isOnline = createConnectivitySignal()
   const location = useLocation()
 
-  createComputed(
-    on(
-      () => location.pathname,
-      () => setRefresh(() => () => {})
-    )
-  )
+  createComputed(() => {
+    location.pathname
+    setRefresh(() => () => {})
+  })
   createComputed(
     on(
       () => `${location.pathname}${location.search}`,
@@ -133,100 +131,106 @@ export const BaseLayout: ParentComponent = (props) => {
     { passive: true }
   )
 
+  const navigate = useNavigate()
+  const activeEl = createActiveElement()
+  // createShortcut(
+  //   ['Shift', 'h'],
+  //   (e) => {
+  //     if (activeEl() instanceof HTMLInputElement) return
+  //     e.preventDefault()
+  //     history.back()
+  //   },
+  //   { preventDefault: false }
+  // )
+  // createShortcut(
+  //   ['Shift', 'l'],
+  //   (e) => {
+  //     if (activeEl() instanceof HTMLInputElement) return
+  //     e.preventDefault()
+  //     history.forward()
+  //   },
+  //   { preventDefault: false }
+  // )
+  createShortcut(
+    ['f'],
+    (e) => {
+      if (activeEl() instanceof HTMLInputElement) return
+      e.preventDefault()
+      screenfull.toggle()
+    },
+    { preventDefault: false }
+  )
+  createShortcut(
+    ['Escape'],
+    (e) => {
+      setAppState({ isSearching: false })
+      ;(activeEl() as HTMLElement)?.blur()
+    },
+    { preventDefault: false }
+  )
+  createShortcut(
+    ['/'],
+    (e) => {
+      if (activeEl() instanceof HTMLInputElement) return
+      e.preventDefault()
+      if (
+        location.pathname.startsWith('/r/') ||
+        location.pathname.startsWith('/p/')
+      ) {
+        setAppState({ isSearching: true })
+      } else {
+        const input = document.getElementById('search')
+        input?.focus()
+      }
+    },
+    { preventDefault: false }
+  )
+
   return (
-    <>
-      <WindowEventListener
-        onKeydown={(e) => {
-          if (e.shiftKey) {
-            switch (e.key.toLowerCase()) {
-              case 'h':
-                e.preventDefault()
-                history.back()
-                break
-              case 'l':
-                e.preventDefault()
-                history.forward()
-                break
-            }
-          } else if (e.ctrlKey) {
-            switch (e.key.toLowerCase()) {
-              case 'f':
-            }
-          } else {
-            switch (e.key.toLowerCase()) {
-              case '/':
-                if (
-                  location.pathname.startsWith('/r/') ||
-                  location.pathname.startsWith('/p/')
-                ) {
-                  e.preventDefault()
-                  setAppState({ isSearching: true })
-                } else {
-                  e.preventDefault()
-                  const input = document.getElementById(
-                    'search'
-                  ) as HTMLInputElement
-                  input?.focus()
-                }
-                break
-              case 'Escape':
-                setAppState({ isSearching: false })
-                const input = document.getElementById(
-                  'search'
-                ) as HTMLInputElement
-                input?.blur()
-                break
-            }
-          }
-        }}
-      ></WindowEventListener>
-      <div class="flex flex-col h-full max-h-full relative">
-        <div class="bg-tranparent pointer-events-none absolute inset-x-0 top-0 z-10 grid place-content-center p-6">
-          <div
-            class="bg-purple relative z-10 rounded-full p-2"
-            style={{
-              transform: `translateY(${
-                offset() - 200
-              }%) rotate(${offset()}deg)`,
-            }}
-          >
-            <div text="3xl" class="i-mdi-refresh"></div>
-          </div>
-        </div>
-        <Show when={!isOnline()}>
-          <div
-            bg="gray-800"
-            px-5
-            py-2
-            text="sm"
-            font="bold"
-            tracking-wide
-            uppercase
-          >
-            Not Online
-          </div>
-        </Show>
-        <Suspense
-          fallback={
-            <div class="grid place-items-center p-5">
-              <Spinner></Spinner>
-            </div>
-          }
+    <div class="flex flex-col h-full max-h-full relative">
+      <div class="bg-tranparent pointer-events-none absolute inset-x-0 top-0 z-10 grid place-content-center p-6">
+        <div
+          class="bg-purple relative z-10 rounded-full p-2"
+          style={{
+            transform: `translateY(${offset() - 200}%) rotate(${offset()}deg)`,
+          }}
         >
-          <ErrorBoundary>
-            <div class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] grow overflow-hidden">
-              <div class="col-start-2 col-end-3 grid">
-                <Navbar />
-              </div>
-              <div class="row-start-1 row-end-3 col-span-1 grid">
-                <Drawer />
-              </div>
-              {props.children}
-            </div>
-          </ErrorBoundary>
-        </Suspense>
+          <div text="3xl" class="i-mdi-refresh"></div>
+        </div>
       </div>
-    </>
+      <Show when={!isOnline()}>
+        <div
+          bg="gray-800"
+          px-5
+          py-2
+          text="sm"
+          font="bold"
+          tracking-wide
+          uppercase
+        >
+          Not Online
+        </div>
+      </Show>
+      <Suspense
+        fallback={
+          <div class="grid place-items-center p-5">
+            <Spinner></Spinner>
+          </div>
+        }
+      >
+        <ErrorBoundary>
+          <div class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] grow overflow-hidden">
+            <div class="col-start-2 col-end-3 grid">
+              <Navbar />
+            </div>
+            <div class="row-start-1 row-end-3 col-span-1 grid">
+              <Drawer />
+            </div>
+            {props.children}
+          </div>
+        </ErrorBoundary>
+      </Suspense>
+    </div>
   )
 }
 
