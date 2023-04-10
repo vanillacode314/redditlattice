@@ -1,6 +1,7 @@
 import { createMediaQuery } from '@solid-primitives/media'
 import {
   createContext,
+  createMemo,
   createRenderEffect,
   JSX,
   mergeProps,
@@ -28,40 +29,30 @@ const AnimationContext = createContext(
   createStore<AnimationConfig>({ options: {} })
 )
 interface AnimateProps extends JSX.HTMLAttributes<HTMLDivElement> {
+  respectPrefersReducedMotion: boolean
   style?: JSX.CSSProperties
   tag?: string
 }
 
 export const Animate: ParentComponent<AnimateProps> = (props) => {
-  let el!: HTMLElement
+  const merged = mergeProps(
+    { respectPrefersReducedMotion: true, tag: 'div' },
+    props
+  )
+  const [local, others] = splitProps(props, ['style', 'tag'])
+
   const prefersReducedMotion = createMediaQuery(
     '(prefers-reduced-motion: reduce)'
   )
   const [animation] = useAnimation()
-  const merged = mergeProps({ tag: 'div' }, props)
-  const x = createDerivedSpring(
-    () => animation.x,
-    () => !!animation.immediate || prefersReducedMotion(),
-    () => animation.options
-  )
-
-  const y = createDerivedSpring(
-    () => animation.y,
-    () => !!animation.immediate || prefersReducedMotion(),
-    () => animation.options
-  )
-  const width = createDerivedSpring(
-    () => animation.width,
-    () => !!animation.immediate || prefersReducedMotion(),
-    () => animation.options
-  )
-  const height = createDerivedSpring(
-    () => animation.height,
-    () => !!animation.immediate || prefersReducedMotion(),
-    () => animation.options
-  )
-
-  const [local, others] = splitProps(props, ['style', 'tag'])
+  const immediate = () =>
+    animation.immediate ||
+    (merged.respectPrefersReducedMotion && prefersReducedMotion())
+  const options = () => animation.options
+  const x = createDerivedSpring(() => animation.x, immediate, options)
+  const y = createDerivedSpring(() => animation.y, immediate, options)
+  const width = createDerivedSpring(() => animation.width, immediate, options)
+  const height = createDerivedSpring(() => animation.height, immediate, options)
 
   return (
     <Dynamic
@@ -73,7 +64,6 @@ export const Animate: ParentComponent<AnimateProps> = (props) => {
         height: height() ? `${height()}px` : undefined,
         ...local.style,
       }}
-      ref={el}
       {...others}
     >
       {props.children}
