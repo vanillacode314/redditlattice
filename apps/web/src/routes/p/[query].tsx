@@ -8,10 +8,12 @@ import {
   onMount,
   runWithOwner,
   Switch,
+  untrack,
 } from 'solid-js'
 import { useParams } from 'solid-start'
 import {
   Animate,
+  AnimationProvider,
   Button,
   InfiniteHandler,
   InfiniteLoading,
@@ -25,6 +27,7 @@ import { useRefresh } from '~/layouts/Base'
 import { useAppState, useUserState } from '~/stores'
 import { parseSchema } from '~/utils'
 
+const heightMap = new Map<string, number>()
 const [appState, setAppState] = useAppState()
 
 export function messageSchema<TSchema extends z.ZodTypeAny>(
@@ -55,14 +58,15 @@ export default function Subreddit() {
   const query = () => decodeURIComponent(params.query).toLowerCase()
   const key = createMemo(() => `pinterest-${query()}`)
 
+  createEffect(() => {
+    setAppState({ title: `/p/${query()}` })
+  })
   const resetState = () => {
-    setAppState({
-      title: `/p/${query()}`,
-      images: {
-        key: key(),
-        after: '',
-        data: new Set(),
-      },
+    heightMap.clear()
+    setAppState('images', {
+      key: key(),
+      after: '',
+      data: new Set<any>(),
     })
   }
 
@@ -74,8 +78,6 @@ export default function Subreddit() {
       return new Set($pinterestQueries)
     })
   })
-
-  createEffect(() => appState.images.key !== key() && resetState())
 
   function parseResponse(schema: any, images: any) {
     const newImages = parseSchema<Record<'name' | 'url' | 'title', string>>(
@@ -170,25 +172,37 @@ export default function Subreddit() {
         align="center"
         gap={userState.gap}
         scrollingElement={appState.scrollElement}
-        getInitialHeight={(_, width) => width}
+        getInitialHeight={(id, width) => heightMap.get(id) ?? width}
       >
-        {({ width, data: image, lastHeight, updateHeight, y }) => (
-          <Animate
-            class="absolute"
-            y={y()}
-            width={width()}
-            options={{
-              stiffness: 0.1,
-              damping: 0.2,
+        {({ id, width, data: image, lastHeight, updateHeight, y }) => (
+          <AnimationProvider
+            config={{
+              width: width(),
+              height: lastHeight(),
+              y: y(),
+              options: {
+                stiffness: 0.1,
+                damping: 0.2,
+              },
             }}
           >
-            <ImageCard
-              width={width()}
-              height={lastHeight()}
-              image={image()}
-              onHasHeight={updateHeight}
-            />
-          </Animate>
+            <Animate
+              style={{
+                'border-radius': userState.borderRadius + 'px',
+              }}
+              class="absolute overflow-hidden"
+            >
+              <ImageCard
+                width={width()}
+                height={lastHeight()}
+                image={image()}
+                onHasHeight={(height) => {
+                  heightMap.set(untrack(id), height)
+                  updateHeight(height)
+                }}
+              />
+            </Animate>
+          </AnimationProvider>
         )}
       </Masonry>
       <InfiniteLoading
