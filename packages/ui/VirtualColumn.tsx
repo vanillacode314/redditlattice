@@ -43,7 +43,7 @@ export interface VirtualColumnProps<T> {
     y: Accessor<number>
     lastHeight: Accessor<number | undefined>
     updateHeight: (height: number) => void
-  }) => Exclude<JSXElement, JSX.ArrayElement>
+  }) => JSXElement
 }
 
 export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {

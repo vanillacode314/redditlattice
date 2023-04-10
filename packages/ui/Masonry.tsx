@@ -37,7 +37,7 @@ export interface MasonryProps<T> {
     y: Accessor<number>
     lastHeight: Accessor<number | undefined>
     updateHeight: (height: number) => void
-  }) => Exclude<JSXElement, JSX.ArrayElement>
+  }) => JSXElement
 }
 
 interface State<T> {
@@ -75,7 +75,7 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
     const gaps = merged.gap * (cols - 1)
     const width = masonrySize.width
     return Math.min(
-      Math.floor(width ? (width - gaps) / cols : 0),
+      width ? Math.floor((width - gaps) / cols) : 0,
       merged.maxWidth
     )
   })
@@ -162,6 +162,7 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
 
   createEffect<[Item<T>[], number]>(
     (prev) => {
+      if (!masonrySize.width) return prev
       const newItems = props.items
       const currentNumberOfColumns = numberOfColumns()
       const [oldItems, lastNumberOfColumns] = prev

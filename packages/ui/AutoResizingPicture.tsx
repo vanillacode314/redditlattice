@@ -13,12 +13,11 @@ import {
   Show,
   splitProps,
 } from 'solid-js'
-import Animate from './Animate'
+import { useAnimation } from './Animate'
 
 interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   width: number
   fallbackHeight: number
-  y?: number
   alt?: string
   src?: string
   srcSets?: Map<string, string>
@@ -50,12 +49,14 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
     },
     local
   )
-  const { onHasHeight, onLoad, onError } = local
 
+  const { onHasHeight, onLoad, onError } = local
   const [hasHeight, setHasHeight] = createSignal<boolean>(false)
-  const [height, setHeight] = createSignal(props.fallbackHeight)
   const [error, setError] = createSignal<boolean>(false)
   const [tries, setTries] = createSignal(0)
+  const [_, setAnimation] = useAnimation()
+
+  createRenderEffect(() => setAnimation('immediate', tries() <= 1))
 
   const checkHeight = throttle(
     () =>
@@ -70,7 +71,6 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
         const height =
           (imgRef.naturalHeight / imgRef.naturalWidth) * props.width
         onHasHeight?.(height)
-        setHeight(height)
         setHasHeight(true)
       }),
     500
@@ -88,17 +88,7 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
   )
 
   return (
-    <Animate
-      class={clsx('overflow-hidden group', props.class)}
-      immediate={hasHeight()}
-      options={{
-        stiffness: 0.1,
-        damping: 0.2,
-      }}
-      height={height()}
-      width={props.width}
-      {...others}
-    >
+    <div class={clsx('group', props.class)} {...others}>
       <Show when={!hasHeight() && tries() > 1}>
         <div class="absolute inset-0">{props.fallback}</div>
       </Show>
@@ -126,7 +116,7 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
         />
       </picture>
       {props.children}
-    </Animate>
+    </div>
   )
 }
 

@@ -26,7 +26,6 @@ import { outsideclick } from '~/utils/use-outsideclick'
 interface Props {
   width: number
   height?: number
-  y?: number
   image: TImage
   onLoad?: () => void
   onHasHeight?: (height: number) => void
@@ -151,7 +150,6 @@ export const ImageCard: Component<Props> = (props) => {
         }
       >
         <AutoResizingPicture
-          y={props.y}
           style={{
             'border-radius': `${userState.borderRadius}px`,
           }}

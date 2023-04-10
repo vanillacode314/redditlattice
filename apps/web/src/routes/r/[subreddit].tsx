@@ -1,9 +1,17 @@
 import { createInfiniteQuery, createQuery } from '@tanstack/solid-query'
 import { minBy } from 'lodash-es'
-import { createEffect, createMemo, Match, onMount, Switch } from 'solid-js'
+import {
+  createEffect,
+  createMemo,
+  Match,
+  onMount,
+  Switch,
+  untrack,
+} from 'solid-js'
 import { useLocation, useParams } from 'solid-start'
 import {
   Animate,
+  AnimationProvider,
   Button,
   InfiniteHandler,
   InfiniteLoading,
@@ -36,6 +44,7 @@ const fabActions = actionSchema.array().parse([
   },
 ])
 
+const heightMap = new Map<string, number>()
 export default function SubredditPage() {
   const location = useLocation()
   const params = useParams()
@@ -60,7 +69,10 @@ export default function SubredditPage() {
     )
   onMount(() => setSort(sort()))
 
-  const resetState = () => queryClient.invalidateQueries({ queryKey: [key()] })
+  const resetState = () => {
+    heightMap.clear()
+    queryClient.invalidateQueries({ queryKey: [key()] })
+  }
   setRefresh(() => resetState)
 
   createEffect(() =>
@@ -154,27 +166,40 @@ export default function SubredditPage() {
         align="center"
         gap={userState.gap}
         scrollingElement={appState.scrollElement}
-        getInitialHeight={(_, width) => width}
+        getInitialHeight={(id, width) => heightMap.get(id) ?? width}
       >
-        {({ width, data: image, lastHeight, updateHeight, y }) => (
-          <Animate
-            class="absolute"
-            y={y()}
-            width={width()}
-            options={{
-              stiffness: 0.1,
-              damping: 0.2,
+        {({ id, width, data: image, lastHeight, updateHeight, y }) => (
+          <AnimationProvider
+            config={{
+              width: width(),
+              height: lastHeight(),
+              y: y(),
+              options: {
+                stiffness: 0.1,
+                damping: 0.2,
+              },
             }}
           >
-            <ImageCard
-              width={width()}
-              height={lastHeight()}
-              image={image()}
-              onHasHeight={updateHeight}
-            />
-          </Animate>
+            <Animate
+              style={{
+                'border-radius': userState.borderRadius + 'px',
+              }}
+              class="absolute overflow-hidden"
+            >
+              <ImageCard
+                width={width()}
+                height={lastHeight()}
+                image={image()}
+                onHasHeight={(height) => {
+                  heightMap.set(untrack(id), height)
+                  updateHeight(height)
+                }}
+              />
+            </Animate>
+          </AnimationProvider>
         )}
       </Masonry>
+
       <InfiniteLoading
         onInfinite={onInfinite}
         target={appState.scrollElement}

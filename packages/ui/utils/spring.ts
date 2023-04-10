@@ -1,11 +1,4 @@
-import {
-  Accessor,
-  createComputed,
-  createEffect,
-  from,
-  Setter,
-  untrack,
-} from 'solid-js'
+import { Accessor, createMemo, createRenderEffect, from } from 'solid-js'
 import { spring } from 'svelte/motion'
 
 interface SpringOpts {
@@ -23,18 +16,28 @@ interface SpringOpts {
 export function createSpring(
   initialValue: number,
   immediate: Accessor<boolean> = () => false,
-  options: SpringOpts = {}
-): [Accessor<number>, Setter<number>] {
-  const store = spring(initialValue, options)
+  options: Accessor<SpringOpts> = () => ({})
+): [
+  Accessor<number>,
+  (value: number | ((prev: number) => number), immediate?: boolean) => void
+] {
+  const store = spring(initialValue, options())
   const signal = from<number>(store.subscribe)
+  createRenderEffect(() => {
+    store.damping = options().damping ?? store.damping
+    store.stiffness = options().stiffness ?? store.stiffness
+    store.precision = options().precision ?? store.precision
+  })
   return [
     () => signal() ?? initialValue,
-    (value) => {
+    (value, im) => {
       typeof value === 'number'
         ? store.set(value, {
-            hard: immediate(),
+            hard: im ?? immediate(),
           })
-        : store.update(value)
+        : store.update(value, {
+            hard: im ?? immediate(),
+          })
       return typeof value === 'number' ? value : value(signal()!)
     },
   ]
@@ -47,16 +50,48 @@ export function createSpring(
  * @returns an accessor containing the derived value
  */
 export function createDerivedSpring(
-  deps: Accessor<number | undefined | false | null>,
+  deps: Accessor<number | undefined>,
   immediate: Accessor<boolean> = () => false,
-  options: SpringOpts = {}
+  options: Accessor<SpringOpts> = () => ({})
 ): Accessor<number | undefined> {
-  const store = spring(deps(), options)
-  const signal = from<number>(store.subscribe)
-  createComputed(() => {
-    const v = deps()
-    if (!v) return
-    untrack(() => store.set(v, { hard: immediate() }))
-  })
-  return () => signal() ?? (deps() || undefined)
+  const [s, set] = createSpring(deps() ?? 0, immediate, options)
+  createRenderEffect((prev: number | undefined) => {
+    const value = deps()
+    if (prev === undefined) {
+      if (value) set(value, true)
+    }
+    if (value) set(value)
+    return value
+  }, deps())
+  return createMemo(() => (deps() === undefined ? undefined : s()))
 }
+
+// export function springEasing(
+//   from: number,
+//   to: number,
+//   {
+//     stiffness = 0.1,
+//     damping = 0.2,
+//     precision = 0.01,
+//   }: Partial<{
+//     stiffness: number
+//     damping: number
+//     precision: number
+//   }> = {}
+// ): number[] {
+//   const fps = 60
+//   const secondsPerFrame = 1 / fps
+//   let velocity = 0
+//   let distances = [] as number[]
+//   while (velocity + from < to) {
+//     break
+//     const dx = (to - from) / fps
+//     const Fm = stiffness * dx
+//     const Fv = -damping * velocity
+//     const F = Fm + Fv
+//     console.log(Fm, Fv, F)
+//     velocity += F
+//     distances.push(velocity + from)
+//   }
+//   return distances
+// }
