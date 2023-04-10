@@ -73,6 +73,10 @@ export const Root: Component = () => {
             content="width=device-width, initial-scale=1, viewport-fit=cover"
           />
           <Meta name="color-scheme" content="dark" />
+          <Meta
+            name="description"
+            content="A user friendly web application to browse image based subreddits from reddit.com"
+          />
           <script
             async
             src="https://www.googletagmanager.com/gtag/js?id=G-XDR9E19TGZ"
