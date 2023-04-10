@@ -1,5 +1,4 @@
 import { createElementSize } from '@solid-primitives/resize-observer'
-import { createWorker } from '@solid-primitives/workers'
 import { differenceBy } from 'lodash-es'
 import {
   Accessor,
