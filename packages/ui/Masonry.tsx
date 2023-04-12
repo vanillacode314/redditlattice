@@ -7,7 +7,6 @@ import {
   createMemo,
   createSignal,
   Index,
-  JSX,
   JSXElement,
   mergeProps,
   untrack,
@@ -145,14 +144,14 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
       setState(
         'heights',
         columnIndex,
-        produce((row) => row.splice(0, rowIndex))
+        produce((row) => row.splice(rowIndex, 1))
       )
       setState(
         'topOffsets',
         columnIndex,
-        produce((rows) => {
-          rows.splice(rowIndex, 1)
-          for (let i = rowIndex; i < rows.length; i++) rows[i] -= height
+        produce((row) => {
+          row.splice(rowIndex, 1)
+          for (let i = rowIndex; i < row.length; i++) row[i] -= height
         })
       )
       setState('columns', columnIndex, (row) => row.splice(rowIndex, 1))
@@ -165,40 +164,34 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
       const newItems = props.items
       const currentNumberOfColumns = numberOfColumns()
       const [oldItems, lastNumberOfColumns] = prev
-      let addedItems: Item<T>[], removedItems: Item<T>[]
-      if (currentNumberOfColumns !== lastNumberOfColumns) {
-        gridMap.clear()
-        batch(() => {
-          setState('heights', get2DArray(currentNumberOfColumns, 1))
-          setState('topOffsets', get2DArray(currentNumberOfColumns, 1))
-          setState('columns', get2DArray(currentNumberOfColumns, 1))
-        })
-        removedItems = []
-        addedItems = newItems
-      } else {
-        addedItems = differenceBy(newItems, oldItems, (item) => item.id)
-        removedItems = differenceBy(oldItems, newItems, (item) => item.id)
-      }
+      // let addedItems: Item<T>[], removedItems: Item<T>[]
+      // if (currentNumberOfColumns !== lastNumberOfColumns) {
+      gridMap.clear()
+      setState('heights', get2DArray(currentNumberOfColumns, 1))
+      setState('topOffsets', get2DArray(currentNumberOfColumns, 1))
+      setState('columns', get2DArray(currentNumberOfColumns, 1))
+      // removedItems = []
+      // addedItems = newItems
+      // } else {
+      // addedItems = differenceBy(newItems, oldItems, (item) => `${item.id}-${}`)
+      // removedItems = differenceBy(oldItems, newItems, (item) => item.id)
+      // }
 
       for (
         let columnIndex = 0;
         columnIndex < currentNumberOfColumns;
         columnIndex++
       ) {
-        batch(() => {
-          setState('heights', columnIndex, (value) => value ?? [])
-          setState('topOffsets', columnIndex, (value) => value ?? [])
-          setState('columns', columnIndex, (value) => value ?? [])
-        })
+        setState('heights', columnIndex, (value) => value ?? [])
+        setState('topOffsets', columnIndex, (value) => value ?? [])
+        setState('columns', columnIndex, (value) => value ?? [])
       }
 
-      return untrack(() =>
-        batch(() => {
-          removedItems.forEach(removeItem)
-          addedItems.forEach(addItem)
-          return [newItems, currentNumberOfColumns]
-        })
-      )
+      return untrack(() => {
+        // oldItems.forEach(removeItem)
+        requestAnimationFrame(() => newItems.forEach(addItem))
+        return [newItems, currentNumberOfColumns]
+      })
     },
     [[], numberOfColumns()]
   )

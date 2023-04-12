@@ -5,6 +5,7 @@ import {
   createMemo,
   Match,
   onMount,
+  Suspense,
   Switch,
   untrack,
 } from 'solid-js'
@@ -154,91 +155,98 @@ export default function SubredditPage() {
       ref={(el) => setAppState('scrollElement', el)}
       style={{ padding: `${userState.gap}px` }}
     >
-      <Masonry
-        items={(items.data?.pages ?? [])
-          .flatMap(({ images }) => images)
-          .map((image) => ({
-            id: image.name,
-            data: image,
-          }))}
-        maxWidth={userState.columnMaxWidth}
-        maxColumns={userState.maxColumns}
-        align="center"
-        gap={userState.gap}
-        scrollingElement={appState.scrollElement}
-        getInitialHeight={(id, width) => heightMap.get(id) ?? width}
-      >
-        {({ id, width, data: image, lastHeight, updateHeight, y }) => (
-          <AnimationProvider
-            config={{
-              width: width(),
-              height: lastHeight(),
-              y: y(),
-              options: {
-                stiffness: 0.1,
-                damping: 0.2,
-              },
-            }}
-          >
-            <Animate
-              style={{
-                'border-radius': userState.borderRadius + 'px',
-              }}
-              class="absolute overflow-hidden"
-            >
-              <ImageCard
-                width={width()}
-                height={lastHeight()}
-                image={image()}
-                onHasHeight={(height) => {
-                  heightMap.set(untrack(id), height)
-                  updateHeight(height)
-                }}
-              />
-            </Animate>
-          </AnimationProvider>
-        )}
-      </Masonry>
-
-      <InfiniteLoading
-        onInfinite={onInfinite}
-        target={appState.scrollElement}
-        distance={1280}
-        key={appState.images.key}
-      >
-        {(state, load) => (
-          <div class="grid place-content-center p-5">
-            <Switch>
-              <Match when={state === 'idle'}>
-                <Button
-                  class="bg-purple-800 hover:bg-purple-700"
-                  onClick={() => load()}
-                >
-                  Load More
-                </Button>
-              </Match>
-              <Match when={state === 'completed'}>
-                <span uppercase font-bold>
-                  {(items.data?.pages.flat() ?? []).length > 0
-                    ? 'END'
-                    : 'NO IMAGES FOUND'}
-                </span>
-              </Match>
-              <Match when={state === 'error'}>
-                <Button
-                  onClick={() => load()}
-                  class="bg-red-800 hover:bg-red-700"
-                >
-                  Retry
-                </Button>
-              </Match>
-              <Match when={state === 'loading'}>
-                <Spinner />
-              </Match>
-            </Switch>
+      <Suspense
+        fallback={
+          <div class="grid place-items-center p-5">
+            <Spinner />
           </div>
-        )}
-      </InfiniteLoading>
+        }
+      >
+        <Masonry
+          items={(items.data?.pages ?? [])
+            .flatMap(({ images }) => images)
+            .map((image) => ({
+              id: image.name,
+              data: image,
+            }))}
+          maxWidth={userState.columnMaxWidth}
+          maxColumns={userState.maxColumns}
+          align="center"
+          gap={userState.gap}
+          scrollingElement={appState.scrollElement}
+          getInitialHeight={(id, width) => heightMap.get(id) ?? width}
+        >
+          {({ id, width, data: image, lastHeight, updateHeight, y }) => (
+            <AnimationProvider
+              config={{
+                width: width(),
+                height: lastHeight(),
+                y: y(),
+                options: {
+                  stiffness: 0.1,
+                  damping: 0.2,
+                },
+              }}
+            >
+              <Animate
+                style={{
+                  'border-radius': userState.borderRadius + 'px',
+                }}
+                class="absolute overflow-hidden"
+              >
+                <ImageCard
+                  width={width()}
+                  height={lastHeight()}
+                  image={image()}
+                  onHasHeight={(height) => {
+                    heightMap.set(untrack(id), height)
+                    updateHeight(height)
+                  }}
+                />
+              </Animate>
+            </AnimationProvider>
+          )}
+        </Masonry>
+        <InfiniteLoading
+          onInfinite={onInfinite}
+          target={appState.scrollElement}
+          distance={1280}
+          key={appState.images.key}
+        >
+          {(state, load) => (
+            <div class="grid place-content-center p-5">
+              <Switch>
+                <Match when={state === 'idle'}>
+                  <Button
+                    class="bg-purple-800 hover:bg-purple-700"
+                    onClick={() => load()}
+                  >
+                    Load More
+                  </Button>
+                </Match>
+                <Match when={state === 'completed'}>
+                  <span uppercase font-bold>
+                    {(items.data?.pages.flat() ?? []).length > 0
+                      ? 'END'
+                      : 'NO IMAGES FOUND'}
+                  </span>
+                </Match>
+                <Match when={state === 'error'}>
+                  <Button
+                    onClick={() => load()}
+                    class="bg-red-800 hover:bg-red-700"
+                  >
+                    Retry
+                  </Button>
+                </Match>
+                <Match when={state === 'loading'}>
+                  <Spinner />
+                </Match>
+              </Switch>
+            </div>
+          )}
+        </InfiniteLoading>
+      </Suspense>
       <Fab
         icon="i-mdi-sort"
         actions={fabActions}

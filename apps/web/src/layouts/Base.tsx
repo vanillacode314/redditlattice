@@ -214,7 +214,7 @@ export const BaseLayout: ParentComponent = (props) => {
       <Suspense
         fallback={
           <div class="grid place-items-center p-5">
-            <Spinner></Spinner>
+            <Spinner />
           </div>
         }
       >

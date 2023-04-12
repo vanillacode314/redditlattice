@@ -29,7 +29,7 @@ const AnimationContext = createContext(
   createStore<AnimationConfig>({ options: {} })
 )
 interface AnimateProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  respectPrefersReducedMotion: boolean
+  respectPrefersReducedMotion?: boolean
   style?: JSX.CSSProperties
   tag?: string
 }

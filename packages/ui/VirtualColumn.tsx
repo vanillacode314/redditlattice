@@ -9,7 +9,6 @@ import {
   createComputed,
   createEffect,
   createMemo,
-  JSX,
   JSXElement,
   mergeProps,
   onCleanup,
@@ -87,7 +86,6 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
       entries.forEach((entry) =>
         visible.set(entry.target, entry.isIntersecting)
       ),
-
     {
       threshold: 0,
       root: scrollElement(),
@@ -130,7 +128,7 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
 
   createEffect<Item<T>[]>((prev) => {
     const newItems = [...props.items]
-    if (props.heights) return newItems
+    if (props.heights !== undefined) return newItems
     const oldItems = prev
     const addedItems = differenceBy(newItems, oldItems, (item) => item.id)
     const removedItems = differenceBy(oldItems, newItems, (item) => item.id)
@@ -159,11 +157,11 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
       {/*   )} */}
       {/* > */}
       <Key each={props.items} by="id">
-        {(_, index) => {
+        {(data, index) => {
           // const index = () => firstVisibleIndex() + i
-          const data = createMemo(() => props.items[index()], undefined, {
-            equals: (a, b) => a.id === b.id,
-          })
+          // const data = createMemo(() => props.items[index()], undefined, {
+          //   equals: (a, b) => a.id === b.id,
+          // })
           const height = createMemo(() => heights()[index()])
           const topOffset = createMemo(
             () => topOffsets()[index()] + merged.gap * index()
@@ -190,7 +188,6 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
                   }),
           })
           const el = children(() => resolved)
-
           setEls(index(), el() as HTMLElement)
           onCleanup(() => setEls(produce((els) => els.splice(index(), 1))))
           return (
