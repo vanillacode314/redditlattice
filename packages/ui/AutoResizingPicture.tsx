@@ -13,7 +13,6 @@ import {
   Show,
   splitProps,
 } from 'solid-js'
-import { useAnimation } from './Animate'
 
 interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
   width: number
@@ -54,9 +53,6 @@ export const AutoResizingPicture: ParentComponent<Props> = (props) => {
   const [hasHeight, setHasHeight] = createSignal<boolean>(false)
   const [error, setError] = createSignal<boolean>(false)
   const [tries, setTries] = createSignal(0)
-  const [_, setAnimation] = useAnimation()
-
-  createRenderEffect(() => setAnimation('immediate', tries() <= 1))
 
   const checkHeight = throttle(
     () =>

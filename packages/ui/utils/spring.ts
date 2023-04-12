@@ -57,41 +57,8 @@ export function createDerivedSpring(
   const [s, set] = createSpring(deps() ?? 0, immediate, options)
   createRenderEffect((prev: number | undefined) => {
     const value = deps()
-    if (prev === undefined) {
-      if (value) set(value, true)
-    }
-    if (value) set(value)
+    value && set(value, prev === undefined)
     return value
   }, deps())
   return createMemo(() => (deps() === undefined ? undefined : s()))
 }
-
-// export function springEasing(
-//   from: number,
-//   to: number,
-//   {
-//     stiffness = 0.1,
-//     damping = 0.2,
-//     precision = 0.01,
-//   }: Partial<{
-//     stiffness: number
-//     damping: number
-//     precision: number
-//   }> = {}
-// ): number[] {
-//   const fps = 60
-//   const secondsPerFrame = 1 / fps
-//   let velocity = 0
-//   let distances = [] as number[]
-//   while (velocity + from < to) {
-//     break
-//     const dx = (to - from) / fps
-//     const Fm = stiffness * dx
-//     const Fv = -damping * velocity
-//     const F = Fm + Fv
-//     console.log(Fm, Fv, F)
-//     velocity += F
-//     distances.push(velocity + from)
-//   }
-//   return distances
-// }
