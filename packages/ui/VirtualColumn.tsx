@@ -79,20 +79,23 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
     }
   )
 
-  const [els, setEls] = createStore([] as HTMLElement[])
+  const visible = new ReactiveWeakMap<Element, boolean>()
+
+  const [els, setEls] = createStore<HTMLElement[]>([])
   createIntersectionObserver(
     () => els,
-    (entries) =>
+    (entries) => {
+      console.log(entries.map((entry) => entry.target))
       entries.forEach((entry) =>
         visible.set(entry.target, entry.isIntersecting)
-      ),
+      )
+    },
     {
       threshold: 0,
       root: scrollElement(),
       rootMargin: `${VIRTUAL_MARGIN}px 0px ${VIRTUAL_MARGIN}px 0px`,
     }
   )
-  const visible = new ReactiveWeakMap<Element, boolean>()
 
   // const firstVisibleIndex = createMemo(() => Math.max(0, visible.indexOf(true)))
   // const numberOfVisibleItems = createMemo(() => visible.filter(Boolean).length)
@@ -133,13 +136,11 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
     const addedItems = differenceBy(newItems, oldItems, (item) => item.id)
     const removedItems = differenceBy(oldItems, newItems, (item) => item.id)
 
-    return untrack(() =>
-      batch(() => {
-        removedItems.forEach(removeItem)
-        addedItems.forEach((item, i) => addItem(item, oldItems.length + i))
-        return newItems
-      })
-    )
+    return untrack(() => {
+      removedItems.forEach(removeItem)
+      addedItems.forEach((item, i) => addItem(item, oldItems.length + i))
+      return newItems
+    })
   }, [])
 
   return (
@@ -189,7 +190,9 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
           })
           const el = children(() => resolved)
           setEls(index(), el() as HTMLElement)
-          onCleanup(() => setEls(produce((els) => els.splice(index(), 1))))
+          onCleanup(() =>
+            setEls(produce((els) => els.filter(($el) => $el !== el())))
+          )
           return (
             <div
               style={{

@@ -110,8 +110,7 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
       columnIndex < state.numberOfColumns;
       columnIndex++
     ) {
-      const columnHeight = state.topOffsets[columnIndex].at(-1) ?? 0
-      if (columnHeight === undefined) return columnIndex
+      const columnHeight = sum(state.heights[columnIndex])
       if (columnHeight >= shortestColumnHeight) continue
       shortestColumnIndex = columnIndex
       shortestColumnHeight = columnHeight
@@ -159,23 +158,22 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
   }
 
   createEffect<[Item<T>[], number]>(
-    (prev) => {
-      if (!masonrySize.width) return prev
-      const newItems = props.items
+    ([oldItems, lastNumberOfColumns]) => {
+      if (!masonrySize.width) return [oldItems, lastNumberOfColumns]
+      const newItems = [...props.items]
       const currentNumberOfColumns = numberOfColumns()
-      const [oldItems, lastNumberOfColumns] = prev
-      // let addedItems: Item<T>[], removedItems: Item<T>[]
-      // if (currentNumberOfColumns !== lastNumberOfColumns) {
-      gridMap.clear()
-      setState('heights', get2DArray(currentNumberOfColumns, 1))
-      setState('topOffsets', get2DArray(currentNumberOfColumns, 1))
-      setState('columns', get2DArray(currentNumberOfColumns, 1))
-      // removedItems = []
-      // addedItems = newItems
-      // } else {
-      // addedItems = differenceBy(newItems, oldItems, (item) => `${item.id}-${}`)
-      // removedItems = differenceBy(oldItems, newItems, (item) => item.id)
-      // }
+      let addedItems: Item<T>[], removedItems: Item<T>[]
+      if (currentNumberOfColumns !== lastNumberOfColumns) {
+        gridMap.clear()
+        setState('heights', get2DArray(currentNumberOfColumns, 1))
+        setState('topOffsets', get2DArray(currentNumberOfColumns, 1))
+        setState('columns', get2DArray(currentNumberOfColumns, 1))
+        removedItems = []
+        addedItems = newItems
+      } else {
+        addedItems = differenceBy(newItems, oldItems, (item) => item.id)
+        removedItems = differenceBy(oldItems, newItems, (item) => item.id)
+      }
 
       for (
         let columnIndex = 0;
@@ -188,8 +186,8 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
       }
 
       return untrack(() => {
-        // oldItems.forEach(removeItem)
-        requestAnimationFrame(() => newItems.forEach(addItem))
+        removedItems.forEach(removeItem)
+        addedItems.forEach(addItem)
         return [newItems, currentNumberOfColumns]
       })
     },
