@@ -85,7 +85,6 @@ export function VirtualColumn<T>(props: VirtualColumnProps<T>): JSXElement {
   createIntersectionObserver(
     () => els,
     (entries) => {
-      console.log(entries.map((entry) => entry.target))
       entries.forEach((entry) =>
         visible.set(entry.target, entry.isIntersecting)
       )
