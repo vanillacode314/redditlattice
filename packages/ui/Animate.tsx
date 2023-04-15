@@ -1,5 +1,8 @@
 import { createMediaQuery } from '@solid-primitives/media'
+import clsx from 'clsx'
+import { isObject } from 'lodash-es'
 import {
+  Accessor,
   createContext,
   createMemo,
   createRenderEffect,
@@ -13,16 +16,26 @@ import { createStore } from 'solid-js/store'
 import { Dynamic } from 'solid-js/web'
 import { createDerivedSpring } from './utils/spring'
 
+type TAnimationValue<T> =
+  | (T | undefined)
+  | { value: T | undefined; immediate: boolean }
+const parseValue = <T,>(value: TAnimationValue<T>) =>
+  isObject(value) ? value : { value, immediate: false }
+
 interface AnimationConfig {
-  x?: number
-  y?: number
-  width?: number
-  height?: number
+  x?: TAnimationValue<number>
+  y?: TAnimationValue<number>
+  width?: TAnimationValue<number>
+  height?: TAnimationValue<number>
   immediate?: boolean
-  options: {
+  options?: {
     stiffness?: number
     damping?: number
     precision?: number
+  }
+  transition?: {
+    durationMs: number
+    easing: 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out' | (string & {})
   }
 }
 const AnimationContext = createContext(
@@ -45,14 +58,41 @@ export const Animate: ParentComponent<AnimateProps> = (props) => {
     '(prefers-reduced-motion: reduce)'
   )
   const [animation] = useAnimation()
-  const immediate = () =>
+  const immediate = (parsedValue: Accessor<{ immediate: boolean }>) =>
+    parsedValue().immediate ||
+    animation.transition !== undefined ||
     animation.immediate ||
     (merged.respectPrefersReducedMotion && prefersReducedMotion())
-  const options = () => animation.options
-  const x = createDerivedSpring(() => animation.x, immediate, options)
-  const y = createDerivedSpring(() => animation.y, immediate, options)
-  const width = createDerivedSpring(() => animation.width, immediate, options)
-  const height = createDerivedSpring(() => animation.height, immediate, options)
+  const options = () => animation.options ?? {}
+  const parsedX = () => parseValue(animation.x)
+  const parsedY = () => parseValue(animation.y)
+  const parsedWidth = () => parseValue(animation.width)
+  const parsedHeight = () => parseValue(animation.height)
+  console.log(immediate(parsedHeight))
+  const x = createDerivedSpring(
+    () => parsedX().value,
+    () => immediate(parsedX),
+    options
+  )
+  const y = createDerivedSpring(
+    () => parsedY().value,
+    () => immediate(parsedY),
+    options
+  )
+  const width = createDerivedSpring(
+    () => parsedWidth().value,
+    () => immediate(parsedWidth),
+    options
+  )
+  const height = createDerivedSpring(
+    () => parsedHeight().value,
+    () => immediate(parsedHeight),
+    options
+  )
+  // const x = createMemo(() => animation.x)
+  // const y = createMemo(() => animation.y)
+  // const width = createMemo(() => animation.width)
+  // const height = createMemo(() => animation.height)
 
   return (
     <Dynamic
@@ -62,6 +102,19 @@ export const Animate: ParentComponent<AnimateProps> = (props) => {
         transform: `translate(${x() ?? 0}px, ${y() ?? 0}px)`,
         width: width() ? `${width()}px` : undefined,
         height: height() ? `${height()}px` : undefined,
+        'transition-property': animation.transition
+          ? clsx(
+              (x() !== undefined || y() !== undefined) && 'transform',
+              width() !== undefined && !parsedWidth().immediate && 'width',
+              height() !== undefined && !parsedHeight().immediate && 'height'
+            )
+              .split(' ')
+              .join(',')
+          : undefined,
+        'transition-duration': animation.transition?.durationMs
+          ? `${animation.transition.durationMs}ms`
+          : undefined,
+        'transition-timing-function': animation.transition?.easing,
         ...local.style,
       }}
       {...others}
