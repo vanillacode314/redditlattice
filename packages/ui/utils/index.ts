@@ -9,3 +9,8 @@ export const sum = (arr: number[]) => {
   }
   return sum
 }
+
+export const isObject = <T extends Record<string, unknown>>(
+  input: unknown
+): input is T =>
+  typeof input === 'object' && input !== null && !Array.isArray(input)
