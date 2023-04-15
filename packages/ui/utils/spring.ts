@@ -33,10 +33,10 @@ export function createSpring(
     (value, im) => {
       typeof value === 'number'
         ? store.set(value, {
-            hard: im ?? immediate(),
+            hard: im || immediate(),
           })
         : store.update(value, {
-            hard: im ?? immediate(),
+            hard: im || immediate(),
           })
       return typeof value === 'number' ? value : value(signal()!)
     },
