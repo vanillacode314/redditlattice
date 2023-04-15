@@ -63,7 +63,11 @@ export function Masonry<T>(props: MasonryProps<T>): JSXElement {
 
   const numberOfColumns = createMemo(() =>
     Math.min(
-      masonrySize.width ? Math.ceil(masonrySize.width / props.maxWidth) : 1,
+      masonrySize.width
+        ? Math.ceil(
+            (masonrySize.width - merged.gap) / (props.maxWidth + merged.gap)
+          )
+        : 1,
       merged.maxColumns
     )
   )
