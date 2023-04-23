@@ -68,7 +68,6 @@ export const Animate: ParentComponent<AnimateProps> = (props) => {
   const parsedY = () => parseValue(animation.y)
   const parsedWidth = () => parseValue(animation.width)
   const parsedHeight = () => parseValue(animation.height)
-  console.log(immediate(parsedHeight))
   const x = createDerivedSpring(
     () => parsedX().value,
     () => immediate(parsedX),
