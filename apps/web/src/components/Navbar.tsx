@@ -58,7 +58,7 @@ export const Navbar: Component = () => {
 
   const toggleDrawer = () => setSessionState('drawerVisible', (_) => !_)
 
-  const navVisible = () => appState.navVisible
+  const navVisible = () => appState.navVisible && !fullscreen()
   const setNavVisible = (val: boolean) => {
     setAppState({
       navVisible: val,
@@ -89,6 +89,7 @@ export const Navbar: Component = () => {
           scroller,
           {
             onScroll: ({ delta }) => {
+              if (fullscreen()) return
               setDown(true)
               setAppState('navOffset', (value) =>
                 clamp(value + delta[1], 0, height())
@@ -111,156 +112,154 @@ export const Navbar: Component = () => {
   )
 
   return (
-    <>
-      <div class="relative z-20 overflow-hidden bg-black">
-        <div style={{ 'margin-bottom': -appState.navOffset + 'px' }} />
-        <nav
-          ref={(el) => {
-            requestAnimationFrame(function handler() {
-              const h = parseFloat(getComputedStyle(el).height)
-              if (!h) {
-                requestAnimationFrame(handler)
-                return
-              }
-              setHeight(h)
-            })
-          }}
-          class="relative z-20 flex items-center gap-5 px-5 py-3 text-white md:border-b border-neutral-800"
-        >
-          <Show
-            when={!appState.isSearching}
-            fallback={
-              <form
-                class="contents"
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  if (location.pathname.startsWith('/p/')) {
-                    navigate(`/p/${query()}`)
-                  }
-                  if (location.pathname.startsWith('/r/')) {
-                    setSearchParams({ q: query() })
-                  }
-                  setQuery('')
-                  setAppState({ isSearching: false })
-                }}
-              >
-                <button
-                  aria-label="search"
-                  type="button"
-                  onClick={() => setAppState({ isSearching: false })}
-                >
-                  <span text="2xl" class="i-mdi-arrow-left"></span>
-                </button>
-                <input
-                  id="search"
-                  ref={(el) => requestAnimationFrame(() => el.focus())}
-                  value={query()}
-                  onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
-                  onBlur={() => setAppState({ isSearching: false })}
-                  required
-                  text="xl"
-                  grow
-                  bg="black"
-                  outline-none
-                />
-                <div grid class="[&_*]:grid-area-[1/-1]">
-                  <Show when={query()}>
-                    <button
-                      aria-label="clear"
-                      type="button"
-                      onClick={() => setQuery('')}
-                      onFocus={(e) => e.relatedTarget?.focus()}
-                    >
-                      <span text="2xl" class="i-mdi-close-circle"></span>
-                    </button>
-                  </Show>
-                </div>
-              </form>
+    <div class="relative z-20 overflow-hidden bg-black">
+      <div style={{ 'margin-bottom': -appState.navOffset + 'px' }} />
+      <nav
+        ref={(el) => {
+          requestAnimationFrame(function handler() {
+            const h = parseFloat(getComputedStyle(el).height)
+            if (!h) {
+              requestAnimationFrame(handler)
+              return
             }
-          >
-            <button
-              aria-label={showBack() ? 'back' : 'menu'}
-              classList={{
-                hidden: appState.drawerDocked,
-              }}
-              type="button"
-              onClick={() => {
-                if (showBack()) {
-                  navigate(appState.lastPage.at(-1) ?? '/')
-                  setAppState('lastPage', appState.lastPage.slice(0, -1))
-                } else {
-                  toggleDrawer()
+            setHeight(h)
+          })
+        }}
+        class="relative z-20 flex items-center gap-5 px-5 py-3 text-white md:border-b border-neutral-800"
+      >
+        <Show
+          when={!appState.isSearching}
+          fallback={
+            <form
+              class="contents"
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (location.pathname.startsWith('/p/')) {
+                  navigate(`/p/${query()}`)
                 }
+                if (location.pathname.startsWith('/r/')) {
+                  setSearchParams({ q: query() })
+                }
+                setQuery('')
+                setAppState({ isSearching: false })
               }}
+            >
+              <button
+                aria-label="search"
+                type="button"
+                onClick={() => setAppState({ isSearching: false })}
+              >
+                <span text="2xl" class="i-mdi-arrow-left"></span>
+              </button>
+              <input
+                id="search"
+                ref={(el) => requestAnimationFrame(() => el.focus())}
+                value={query()}
+                onInput={(e) => setQuery(e.currentTarget.value.toLowerCase())}
+                onBlur={() => setAppState({ isSearching: false })}
+                required
+                text="xl"
+                grow
+                bg="black"
+                outline-none
+              />
+              <div grid class="[&_*]:grid-area-[1/-1]">
+                <Show when={query()}>
+                  <button
+                    aria-label="clear"
+                    type="button"
+                    onClick={() => setQuery('')}
+                    onFocus={(e) => e.relatedTarget?.focus()}
+                  >
+                    <span text="2xl" class="i-mdi-close-circle"></span>
+                  </button>
+                </Show>
+              </div>
+            </form>
+          }
+        >
+          <button
+            aria-label={showBack() ? 'back' : 'menu'}
+            classList={{
+              hidden: appState.drawerDocked,
+            }}
+            type="button"
+            onClick={() => {
+              if (showBack()) {
+                navigate(appState.lastPage.at(-1) ?? '/')
+                setAppState('lastPage', appState.lastPage.slice(0, -1))
+              } else {
+                toggleDrawer()
+              }
+            }}
+          >
+            <span
+              text="2xl"
+              classList={{
+                'i-mdi-menu': !showBack(),
+                'i-mdi-arrow-left': showBack(),
+              }}
+            ></span>
+          </button>
+          <span class="text-semibold truncate font-semibold">
+            {appState.title || 'RedditLattice'}
+          </span>
+          <span class="grow" />
+          <Show when={showBack()}>
+            <button
+              aria-label="search"
+              type="button"
+              title="search"
+              onClick={() => setAppState({ isSearching: true })}
+            >
+              <span text="2xl" class="i-mdi-magnify"></span>
+            </button>
+            <AutoScrollModal onClose={(success) => setScrolling(success)} />
+            <button
+              aria-label="autoscroll"
+              type="button"
+              title="autoscroll"
+              onClick={toggleScroll}
             >
               <span
                 text="2xl"
                 classList={{
-                  'i-mdi-menu': !showBack(),
-                  'i-mdi-arrow-left': showBack(),
+                  'i-mdi-play': !scrolling(),
+                  'i-mdi-pause': scrolling(),
                 }}
               ></span>
             </button>
-            <span class="text-semibold truncate font-semibold">
-              {appState.title || 'RedditLattice'}
-            </span>
-            <span class="grow" />
-            <Show when={showBack()}>
-              <button
-                aria-label="search"
-                type="button"
-                title="search"
-                onClick={() => setAppState({ isSearching: true })}
-              >
-                <span text="2xl" class="i-mdi-magnify"></span>
-              </button>
-              <AutoScrollModal onClose={(success) => setScrolling(success)} />
-              <button
-                aria-label="autoscroll"
-                type="button"
-                title="autoscroll"
-                onClick={toggleScroll}
-              >
-                <span
-                  text="2xl"
-                  classList={{
-                    'i-mdi-play': !scrolling(),
-                    'i-mdi-pause': scrolling(),
-                  }}
-                ></span>
-              </button>
-              <button
-                aria-label="fullscreen"
-                title="fullscreen"
-                type="button"
-                onClick={() => setFullscreen((_) => !_)}
-              >
-                <span
-                  text="2xl"
-                  classList={{
-                    'i-mdi-fullscreen': !fullscreen(),
-                    'i-mdi-fullscreen-exit': fullscreen(),
-                  }}
-                ></span>
-              </button>
-              <button
-                aria-label="scroll to top"
-                type="button"
-                title="scroll to top"
-                onClick={() => {
-                  appState.scrollElement?.scrollTo({
-                    top: 0,
-                    behavior: 'smooth',
-                  })
+            <button
+              aria-label="fullscreen"
+              title="fullscreen"
+              type="button"
+              onClick={() => setFullscreen((_) => !_)}
+            >
+              <span
+                text="2xl"
+                classList={{
+                  'i-mdi-fullscreen': !fullscreen(),
+                  'i-mdi-fullscreen-exit': fullscreen(),
                 }}
-              >
-                <span text="2xl" class="i-mdi-arrow-up"></span>
-              </button>
-            </Show>
+              ></span>
+            </button>
+            <button
+              aria-label="scroll to top"
+              type="button"
+              title="scroll to top"
+              onClick={() => {
+                appState.scrollElement?.scrollTo({
+                  top: 0,
+                  behavior: 'smooth',
+                })
+              }}
+            >
+              <span text="2xl" class="i-mdi-arrow-up"></span>
+            </button>
           </Show>
-        </nav>
-      </div>
-    </>
+        </Show>
+      </nav>
+    </div>
   )
 }
 
