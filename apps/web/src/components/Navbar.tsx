@@ -1,4 +1,4 @@
-import { Gesture } from '@use-gesture/vanilla'
+import { ScrollGesture } from '@use-gesture/vanilla'
 import screenfull from 'screenfull'
 import {
   Component,
@@ -85,25 +85,23 @@ export const Navbar: Component = () => {
       (scroller) => {
         if (!scroller) return
         const originalPaddingTop = +scroller.style.paddingTop.replace('px', '')
-        const gesture = new Gesture(
+        const gesture = new ScrollGesture(
           scroller,
-          {
-            onScroll: ({ delta }) => {
-              if (fullscreen()) return
-              setDown(true)
-              setAppState('navOffset', (value) =>
-                clamp(value + delta[1], 0, height())
-              )
-              scroller.style.paddingTop = `${
-                appState.navOffset + originalPaddingTop
-              }px`
-            },
+          ({ delta: [_, dy] }) => {
+            if (fullscreen()) return
+            setDown(true)
+            setAppState('navOffset', (value) => clamp(value + dy, 0, height()))
+            console.log(dy)
+            scroller.style.paddingTop = `${
+              appState.navOffset + originalPaddingTop
+            }px`
           },
           {
-            drag: {
-              axis: 'y',
-              from: () => [0, -scroller.scrollTop],
+            axis: 'y',
+            eventOptions: {
+              passive: true,
             },
+            preventDefault: false,
           }
         )
         onCleanup(() => gesture.destroy())
@@ -113,7 +111,12 @@ export const Navbar: Component = () => {
 
   return (
     <div class="relative z-20 overflow-hidden bg-black">
-      <div style={{ 'margin-bottom': -appState.navOffset + 'px' }} />
+      <div
+        style={{
+          'margin-bottom': -appState.navOffset + 'px',
+          transition: 'margin-bottom 500ms',
+        }}
+      />
       <nav
         ref={(el) => {
           requestAnimationFrame(function handler() {
