@@ -1,4 +1,5 @@
 import { Motion } from '@motionone/solid'
+import { ScrollGesture } from '@use-gesture/vanilla'
 import { throttle } from 'lodash-es'
 import {
   batch,
@@ -10,6 +11,7 @@ import {
   onCleanup,
 } from 'solid-js'
 import { useAppState } from '~/stores'
+import { getScrollTop } from '~/utils'
 
 interface Props {
   icon: string
@@ -18,48 +20,41 @@ interface Props {
   onSelect: (id: TAction['id']) => void
 }
 
+const thresholdPixels = 0
 const Fab: Component<Props> = (props) => {
   const [appState, setAppState] = useAppState()
   const [width, setWidth] = createSignal<number>(0)
   const [open, setOpen] = createSignal<boolean>(false)
   const [hidden, setHidden] = createSignal<boolean>(false)
 
-  let scrollStart = 0
-  let lastKnownScrollPos = 0
-  let lastScrollDirection: 'up' | 'down' = 'down'
-  const threshold = 100 // in pixels
-  const onScroll = throttle((e: Event) => {
-    const el = e.currentTarget as HTMLElement
-    if (!el) return
-    const dy = scrollStart - lastKnownScrollPos
-    const scrollTop = el.scrollTop
-    const newScrollDirection =
-      scrollTop - lastKnownScrollPos > 0 ? 'down' : 'up'
-    lastKnownScrollPos = scrollTop
-    if (newScrollDirection !== lastScrollDirection) {
-      scrollStart = scrollTop
-      lastScrollDirection = newScrollDirection
-    }
-    batch(() => {
-      setOpen(false)
-      setHidden(dy < 0 && Math.abs(dy) > threshold)
-    })
-  }, 100)
-
   createEffect(
     on(
       () => appState.scrollElement,
       (scroller) => {
         if (!scroller) return
-        scroller.addEventListener('scroll', onScroll, { passive: true })
-        onCleanup(() => scroller.removeEventListener('scroll', onScroll))
+        const gesture = new ScrollGesture(
+          scroller,
+          ({ delta: [_, dy] }) =>
+            batch(() => {
+              if (dy === 0) return
+              setOpen(false)
+              setHidden(dy > 0 && Math.abs(dy) >= thresholdPixels)
+            }),
+          {
+            preventDefault: false,
+            eventOptions: {
+              passive: true,
+            },
+          }
+        )
+        onCleanup(() => gesture.destroy())
       }
     )
   )
 
   return (
     <Motion.div
-      animate={{ transform: hidden() ? 'scale(0)' : 'scale(1)' }}
+      animate={{ transform: `scale(${hidden() ? 0 : 1})` }}
       class="flex fixed bottom-0 right-0 overflow-hidden"
     >
       <div class="p-5 grid gap-3">
