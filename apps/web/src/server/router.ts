@@ -1,7 +1,26 @@
+import dotenv from 'dotenv'
+import Redis from 'ioredis'
 import { z } from 'zod'
 import { getAutocompleteSubreddits } from '~/server/lib/get-autocomplete-subreddits'
 import { getImages } from '~/server/lib/get-images'
 import { procedure, router } from './app'
+dotenv.config()
+const redis = new Redis(process.env.REDIS_URL!)
+
+async function cachedOrElse<T>(
+  key: string,
+  cb: () => T,
+  ttl: number = 300
+): Promise<T> {
+  const cached = await redis.get(key)
+  if (cached) return JSON.parse(cached) as T
+  const data = await cb()
+  await Promise.all([
+    redis.set(key, JSON.stringify(data)),
+    redis.expire(key, ttl),
+  ])
+  return data
+}
 
 export const appRouter = router({
   getImages: procedure
@@ -15,27 +34,29 @@ export const appRouter = router({
       })
     )
     .query(async ({ input }) => {
-      const { images, after } = await getImages(input)
-      const schema = ['name', 'url', 'title'] as const
-      return {
-        schema,
-        images: buildFromSchema(images, schema),
-        after,
-      }
+      const key = JSON.stringify(input)
+      return cachedOrElse(key, async () => {
+        const { images, after } = await getImages(input)
+        const schema = ['name', 'url', 'title'] as const
+        return {
+          schema,
+          images: buildFromSchema(images, schema),
+          after,
+        }
+      })
     }),
   subredditAutocomplete: procedure
     .input(z.string())
     .query(async ({ input }) => {
-      const { subreddits } = await getAutocompleteSubreddits(input)
-      const schema = ['id', 'name'] as const
-      type Z = Schema<
-        (typeof subreddits)[number],
-        ['allowedPostTypes', 'id', 'name']
-      >
-      return {
-        schema,
-        subreddits: buildFromSchema(subreddits, schema),
-      }
+      const key = JSON.stringify(input)
+      return cachedOrElse(key, async () => {
+        const { subreddits } = await getAutocompleteSubreddits(input)
+        const schema = ['id', 'name'] as const
+        return {
+          schema,
+          subreddits: buildFromSchema(subreddits, schema),
+        }
+      })
     }),
 })
 

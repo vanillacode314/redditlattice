@@ -35,3 +35,4 @@ yarn-error.log*
 apps/image-server-v2/target
 # Local Netlify folder
 .netlify
+apps/web/.env

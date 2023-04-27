@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "1.18.8",
+  "version": "1.18.9",
   "private": true,
   "type": "module",
   "scripts": {
@@ -32,7 +32,9 @@
     "@use-gesture/vanilla": "^10.2.26",
     "clsx": "^1.2.1",
     "devalue": "^4.3.0",
+    "dotenv": "^16.0.3",
     "idb-keyval": "^6.2.0",
+    "ioredis": "^5.3.2",
     "motion": "^10.15.5",
     "screenfull": "^6.0.2",
     "solid-js": "1.7.2",
