@@ -126,8 +126,9 @@ export default function Subreddit() {
 
       runWithOwner(componentOwner, () =>
         onCleanup(() => {
-          socket?.removeEventListener('message', onMessage)
-          socket?.removeEventListener('error', onError)
+          if (!socket) return
+          socket.removeEventListener('message', onMessage)
+          socket.removeEventListener('error', onError)
         })
       )
     }
