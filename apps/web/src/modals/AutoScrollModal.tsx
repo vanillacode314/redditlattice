@@ -32,6 +32,16 @@ export const showAutoScrollModal = async () => {
   return () => cancelScroll()
 }
 
+export async function toggleScroll() {
+  if (appState.autoScrolling) {
+    cancelScroll?.()
+    setAppState('autoScrolling', false)
+    return
+  }
+  await showAutoScrollModal()
+  setAppState('autoScrolling', true)
+}
+
 interface Props {
   onClose?: (success: boolean) => void
 }
@@ -39,57 +49,44 @@ interface Props {
 export const AutoScrollModal: Component<Props> = (props) => {
   const { onClose } = props
 
-  return () => (
-    <>
-      <dialog
-        ref={el}
-        class="mx-auto w-full max-w-[30rem] bg-transparent px-5 backdrop:bg-white/10 backdrop:backdrop-blur-sm"
-        onClick={(e) => {
-          if (e.target !== e.currentTarget) return
+  return (
+    <dialog
+      ref={el}
+      class="mx-auto w-full max-w-[30rem] bg-transparent px-5 backdrop:bg-white/10 backdrop:backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target !== e.currentTarget) return
 
-          el.close()
-          onClose?.(false)
-          submitReject?.()
-        }}
-      >
-        <form
-          onSubmit={() => {
-            submitResolve?.()
-            startScroll()
-            const scroller = appState.scrollElement
-            if (!scroller) return
-            let lastScrollTop = scroller.scrollTop
+        el.close()
+        onClose?.(false)
+        submitReject?.()
+      }}
+    >
+      <form
+        onSubmit={() => {
+          submitResolve?.()
+          startScroll()
+          const scroller = appState.scrollElement
+          if (!scroller) return
+          let lastScrollTop = scroller.scrollTop
+          scroller.addEventListener(
+            'scroll',
+            function handler() {
+              const currentScrollTop = scroller.scrollTop
+              const delta = currentScrollTop - lastScrollTop
+              if (delta < 0) {
+                scroller.removeEventListener('scroll', handler)
+                setAppState('autoScrolling', false)
+                cancelScroll?.()
+                return
+              }
+              lastScrollTop = currentScrollTop
+            },
+            { passive: true }
+          )
+          for (const eventType of ['touchstart', 'mousedown']) {
             scroller.addEventListener(
-              'scroll',
-              function handler() {
-                const currentScrollTop = scroller.scrollTop
-                const delta = currentScrollTop - lastScrollTop
-                if (delta < 0) {
-                  scroller.removeEventListener('scroll', handler)
-                  setAppState('autoScrolling', false)
-                  cancelScroll?.()
-                  return
-                }
-                lastScrollTop = currentScrollTop
-              },
-              { passive: true }
-            )
-            for (const eventType of ['touchstart', 'mousedown']) {
-              scroller.addEventListener(
-                eventType,
-                () => {
-                  setAppState('autoScrolling', false)
-                  cancelScroll?.()
-                },
-                {
-                  once: true,
-                }
-              )
-            }
-            window.addEventListener(
-              'keydown',
-              (e) => {
-                if (e.key !== 'Escape') return
+              eventType,
+              () => {
                 setAppState('autoScrolling', false)
                 cancelScroll?.()
               },
@@ -97,33 +94,44 @@ export const AutoScrollModal: Component<Props> = (props) => {
                 once: true,
               }
             )
-            onClose?.(true)
-          }}
-          method="dialog"
-          class="flex flex-col gap-3 rounded-lg bg-black p-5 text-white shadow"
+          }
+          window.addEventListener(
+            'keydown',
+            (e) => {
+              if (e.key !== 'Escape') return
+              setAppState('autoScrolling', false)
+              cancelScroll?.()
+            },
+            {
+              once: true,
+            }
+          )
+          onClose?.(true)
+        }}
+        method="dialog"
+        class="flex flex-col gap-3 rounded-lg bg-black p-5 text-white shadow"
+      >
+        <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
+          <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
+            AutoScroll Speed (in pixels per second)
+          </span>
+          <input
+            class="bg-black outline-none"
+            min="0"
+            step="10"
+            type="number"
+            value={speed()}
+            onChange={(e) => setSpeed(+e.currentTarget.value)}
+          />
+        </label>
+        <Button
+          type="submit"
+          class="self-end bg-pink-800 outline-none transition-colors hover:bg-pink-700 focus:bg-pink-700"
         >
-          <label class="relative grid rounded-lg border-2 border-purple-800 bg-black px-5 py-3 transition-colors focus-within:border-purple-700">
-            <span class="absolute top-0 left-5 -translate-y-1/2 bg-black text-xs font-bold uppercase tracking-wide text-gray-300">
-              AutoScroll Speed (in pixels per second)
-            </span>
-            <input
-              class="bg-black outline-none"
-              min="0"
-              step="10"
-              type="number"
-              value={speed()}
-              onChange={(e) => setSpeed(+e.currentTarget.value)}
-            />
-          </label>
-          <Button
-            type="submit"
-            class="self-end bg-pink-800 outline-none transition-colors hover:bg-pink-700 focus:bg-pink-700"
-          >
-            Start
-          </Button>
-        </form>
-      </dialog>
-    </>
+          Start
+        </Button>
+      </form>
+    </dialog>
   )
 }
 

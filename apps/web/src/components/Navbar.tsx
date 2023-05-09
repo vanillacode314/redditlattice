@@ -10,7 +10,10 @@ import {
   Show,
 } from 'solid-js'
 import { useLocation, useNavigate, useSearchParams } from 'solid-start'
-import AutoScrollModal, { showAutoScrollModal } from '~/modals/AutoScrollModal'
+import AutoScrollModal, {
+  showAutoScrollModal,
+  toggleScroll,
+} from '~/modals/AutoScrollModal'
 import { useAppState, useSessionState } from '~/stores'
 import { clamp } from '~/utils'
 
@@ -26,17 +29,6 @@ export const Navbar: Component = () => {
 
   const setScrolling = (val: boolean) => setAppState('autoScrolling', val)
   const scrolling = () => appState.autoScrolling
-
-  let cancelScroll: () => void
-  async function toggleScroll() {
-    if (scrolling()) {
-      cancelScroll?.()
-      setScrolling(false)
-      return
-    }
-    cancelScroll = await showAutoScrollModal()
-    setScrolling(true)
-  }
 
   createEffect(() => {
     if (!screenfull.isEnabled) return
@@ -91,7 +83,6 @@ export const Navbar: Component = () => {
             if (fullscreen()) return
             setDown(true)
             setAppState('navOffset', (value) => clamp(value + dy, 0, height()))
-            console.log(dy)
             scroller.style.paddingTop = `${
               appState.navOffset + originalPaddingTop
             }px`

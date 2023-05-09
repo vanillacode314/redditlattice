@@ -18,6 +18,7 @@ import { Spinner } from 'ui'
 import { createSpring } from 'ui/utils/spring'
 import Drawer from '~/components/Drawer'
 import Navbar from '~/components/Navbar'
+import { toggleScroll } from '~/modals/AutoScrollModal'
 import { useAppState, useSessionState } from '~/stores'
 import { getScrollTop } from '~/utils'
 
@@ -157,6 +158,15 @@ export const BaseLayout: ParentComponent = (props) => {
       if (activeEl() instanceof HTMLInputElement) return
       e.preventDefault()
       screenfull.toggle()
+    },
+    { preventDefault: false }
+  )
+  createShortcut(
+    ['a'],
+    (e) => {
+      if (activeEl() instanceof HTMLInputElement) return
+      e.preventDefault()
+      toggleScroll()
     },
     { preventDefault: false }
   )
