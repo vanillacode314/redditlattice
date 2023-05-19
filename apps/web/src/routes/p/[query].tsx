@@ -178,12 +178,16 @@ export default function Subreddit() {
         {({ id, width, data: image, lastHeight, updateHeight, y }) => (
           <AnimationProvider
             config={{
-              width: width(),
+              width: { value: width(), immediate: true },
               height: lastHeight(),
               y: y(),
               options: {
                 stiffness: 0.1,
                 damping: 0.2,
+              },
+              transition: {
+                durationMs: 200,
+                easing: 'ease-out',
               },
             }}
           >
